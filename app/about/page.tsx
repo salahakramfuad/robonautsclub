@@ -42,7 +42,7 @@ export default function AboutPage() {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       {/* Hero Header */}
-      <section className="relative bg-gradient-to-br from-indigo-900 via-blue-900 to-blue-600 text-white py-24 px-6 overflow-hidden">
+      <section className="relative bg-gradient-to-br from-indigo-400 via-blue-400 to-blue-500 text-white py-24 px-6 overflow-hidden">
         {/* Background decoration */}
         <div className="absolute inset-0 opacity-20">
           <div className="absolute top-0 right-0 w-96 h-96 bg-blue-300 rounded-full blur-3xl transform translate-x-1/2 -translate-y-1/2" />
@@ -79,7 +79,7 @@ export default function AboutPage() {
                 </h2>
                 <div className="space-y-4 text-gray-600 leading-relaxed">
                   <p>
-                    Founded in 2022, <strong className="text-indigo-600">Robonauts Club</strong> delivers engaging
+                    Founded in 2022, <strong className="text-indigo-500">Robonauts Club</strong> delivers engaging
                     STEM education through real-world projects.
                   </p>
                   <p>
@@ -90,7 +90,7 @@ export default function AboutPage() {
                 </div>
               </div>
 
-              <div className="h-80 bg-gradient-to-br from-indigo-500 via-blue-500 to-purple-500 rounded-2xl flex items-center justify-center border-2 border-gray-200">
+              <div className="h-80 bg-gradient-to-br from-indigo-400 via-blue-400 to-purple-400 rounded-2xl flex items-center justify-center border-2 border-gray-200">
                 <div className="text-white/80 text-center">
                   <div className="text-6xl mb-3">🤖</div>
                   <p className="text-sm font-medium">Workshop Image</p>
@@ -131,7 +131,7 @@ export default function AboutPage() {
                     className="p-6 rounded-2xl border border-gray-200 bg-gray-50 hover:bg-white hover:shadow-md transition-all"
                   >
                     <div className="w-12 h-12 rounded-xl bg-indigo-100 flex items-center justify-center mb-4">
-                      <Icon className="w-6 h-6 text-indigo-600" />
+                      <Icon className="w-6 h-6 text-indigo-500" />
                     </div>
                     <h3 className="text-xl font-bold text-gray-900 mb-2">
                       {value.title}
@@ -214,10 +214,10 @@ export default function AboutPage() {
               ].map((stat, index) => {
                 const Icon = stat.icon;
                 const colors = [
-                  "text-indigo-600",
-                  "text-blue-600",
-                  "text-purple-600",
-                  "text-indigo-600",
+                  "text-indigo-500",
+                  "text-blue-500",
+                  "text-purple-500",
+                  "text-indigo-500",
                 ];
                 return (
                   <div
@@ -314,12 +314,12 @@ export default function AboutPage() {
                 ].map((member, index) => {
                   const Icon = member.icon;
                   const iconColors = [
-                    "text-indigo-600",
-                    "text-blue-600",
-                    "text-purple-600",
-                    "text-indigo-600",
-                    "text-blue-600",
-                    "text-purple-600",
+                    "text-indigo-500",
+                    "text-blue-500",
+                    "text-purple-500",
+                    "text-indigo-500",
+                    "text-blue-500",
+                    "text-purple-500",
                   ];
                   const bgColors = [
                     "bg-indigo-100",
@@ -364,15 +364,15 @@ export default function AboutPage() {
                 <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
                   <div className="space-y-4">
                     <div className="flex items-start gap-3">
-                      <MapPin className="w-5 h-5 text-indigo-600 shrink-0 mt-0.5" />
+                      <MapPin className="w-5 h-5 text-indigo-500 shrink-0 mt-0.5" />
                       <p className="text-gray-700">Uttara, Dhaka</p>
                     </div>
                     <div className="flex items-start gap-3">
-                      <Phone className="w-5 h-5 text-blue-600 shrink-0 mt-0.5" />
+                      <Phone className="w-5 h-5 text-blue-500 shrink-0 mt-0.5" />
                       <p className="text-gray-700">01824-863366</p>
                     </div>
                     <div className="flex items-start gap-3">
-                      <Mail className="w-5 h-5 text-indigo-600 shrink-0 mt-0.5" />
+                      <Mail className="w-5 h-5 text-indigo-500 shrink-0 mt-0.5" />
                       <p className="text-gray-700">info@robonautsclub.com</p>
                     </div>
                   </div>

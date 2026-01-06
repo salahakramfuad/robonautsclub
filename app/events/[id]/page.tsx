@@ -96,7 +96,7 @@ const BookingForm = ({ event }: { event: Event }) => {
             onChange={(e) =>
               setFormData({ ...formData, name: e.target.value })
             }
-            className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
+            className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400 ${
               errors.name ? 'border-red-500' : 'border-gray-300'
             }`}
           />
@@ -118,7 +118,7 @@ const BookingForm = ({ event }: { event: Event }) => {
             onChange={(e) =>
               setFormData({ ...formData, school: e.target.value })
             }
-            className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
+            className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400 ${
               errors.school ? 'border-red-500' : 'border-gray-300'
             }`}
           />
@@ -140,7 +140,7 @@ const BookingForm = ({ event }: { event: Event }) => {
             onChange={(e) =>
               setFormData({ ...formData, email: e.target.value })
             }
-            className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
+            className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400 ${
               errors.email ? 'border-red-500' : 'border-gray-300'
             }`}
           />
@@ -162,7 +162,7 @@ const BookingForm = ({ event }: { event: Event }) => {
             onChange={(e) =>
               setFormData({ ...formData, information: e.target.value })
             }
-            className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
+            className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400 ${
               errors.information ? 'border-red-500' : 'border-gray-300'
             }`}
             placeholder="Tell us about your interest in this event..."
@@ -173,7 +173,7 @@ const BookingForm = ({ event }: { event: Event }) => {
         </div>
         <button
           type="submit"
-          className="w-full py-3 px-6 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg transition-colors"
+          className="w-full py-3 px-6 bg-indigo-500 hover:bg-indigo-600 text-white font-semibold rounded-lg transition-colors"
         >
           Book This Event
         </button>
@@ -199,7 +199,7 @@ const EventPassedMessage = ({ event }: { event: Event }) => {
         </p>
         <Link
           href="/events"
-          className="inline-block py-2 px-6 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg transition-colors"
+          className="inline-block py-2 px-6 bg-indigo-500 hover:bg-indigo-600 text-white font-semibold rounded-lg transition-colors"
         >
           View Upcoming Events
         </Link>
@@ -229,7 +229,7 @@ export default function EventDetailPage() {
           </h1>
           <Link
             href="/events"
-            className="inline-block py-2 px-6 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg transition-colors"
+            className="inline-block py-2 px-6 bg-indigo-500 hover:bg-indigo-600 text-white font-semibold rounded-lg transition-colors"
           >
             Back to Events
           </Link>
@@ -244,7 +244,7 @@ export default function EventDetailPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero Header */}
-      <section className="relative bg-gradient-to-br from-indigo-900 via-blue-900 to-blue-600 text-white py-16 px-6">
+      <section className="relative bg-gradient-to-br from-indigo-400 via-blue-400 to-blue-500 text-white py-16 px-6">
         <div className="max-w-7xl mx-auto">
           <Link
             href="/events"
@@ -269,17 +269,17 @@ export default function EventDetailPage() {
                 {/* Event Info */}
                 <div className="space-y-4 mb-8">
                   <div className="flex items-center gap-2 text-gray-600">
-                    <Calendar className="w-5 h-5 text-indigo-600" />
+                    <Calendar className="w-5 h-5 text-indigo-500" />
                     <span className="font-semibold">Date:</span>
                     <span>{format(eventDate, 'MMMM d, yyyy')}</span>
                   </div>
                   <div className="flex items-center gap-2 text-gray-600">
-                    <Clock className="w-5 h-5 text-indigo-600" />
+                    <Clock className="w-5 h-5 text-indigo-500" />
                     <span className="font-semibold">Time:</span>
                     <span>{event.time}</span>
                   </div>
                   <div className="flex items-center gap-2 text-gray-600">
-                    <MapPin className="w-5 h-5 text-indigo-600" />
+                    <MapPin className="w-5 h-5 text-indigo-500" />
                     <span className="font-semibold">Venue:</span>
                     <span>{event.venue || event.location}</span>
                   </div>

@@ -114,13 +114,13 @@ export default function Nav() {
       className={classNames(
         inter.variable,
         poppins.variable,
-        'sticky top-0 z-70 bg-sky-100 backdrop-blur  border-black/10 border-b'
+        'sticky top-0 z-70 bg-blue-100 backdrop-blur  border-black/10 border-b'
       )}
       style={{ borderColor: 'rgba(17,24,39,0.12)' }}
     >
       <a
         href='#main'
-        className='sr-only focus:not-sr-only focus:absolute focus:inset-x-0 focus:top-2 mx-auto w-max rounded-lg bg-indigo-600 px-3 py-2 text-white'
+        className='sr-only focus:not-sr-only focus:absolute focus:inset-x-0 focus:top-2 mx-auto w-max rounded-lg bg-indigo-500 px-3 py-2 text-white'
       >
         Skip to content
       </a>
@@ -173,9 +173,9 @@ export default function Nav() {
                         className={classNames(
                           'flex items-center gap-2 py-2 px-3 rounded-lg transition-colors',
                           sectionActive
-                            ? 'text-indigo-800 bg-indigo-500'
-                            : 'text-gray-700 hover:text-indigo-800 hover:bg-blue-200',
-                          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-300'
+                            ? 'text-indigo-700 bg-indigo-400'
+                            : 'text-gray-700 hover:text-indigo-700 hover:bg-blue-200',
+                          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-200'
                         )}
                       >
                         <span className='font-medium'>Courses</span>
@@ -212,8 +212,8 @@ export default function Nav() {
                                     className={classNames(
                                       'block px-4 py-2 rounded-md transition-colors no-underline hover:no-underline focus:no-underline',
                                       subActive
-                                        ? 'text-indigo-800 bg-sky-100'
-                                        : 'hover:bg-sky-100 hover:text-indigo-800'
+                                        ? 'text-indigo-700 bg-sky-100'
+                                        : 'hover:bg-sky-100 hover:text-indigo-700'
                                     )}
                                     onClick={() => setDropdownOpenIdx(null)}
                                   >
@@ -236,8 +236,8 @@ export default function Nav() {
                       className={classNames(
                         'py-2 px-3 font-medium rounded-lg transition-colors no-underline hover:no-underline focus:no-underline',
                         active
-                          ? 'text-indigo-800 bg-blue-200'
-                          : 'text-gray-700 hover:text-indigo-800 hover:bg-sky-200'
+                          ? 'text-indigo-700 bg-blue-200'
+                          : 'text-gray-700 hover:text-indigo-700 hover:bg-sky-200'
                       )}
                       aria-current={active ? 'page' : undefined}
                     >
@@ -254,7 +254,7 @@ export default function Nav() {
           {/* Mobile burger */}
           <button
             onClick={() => setIsDrawerOpen(true)}
-            className='lg:hidden inline-flex items-center justify-center w-11 h-11 rounded-lg text-gray-700 hover:bg-indigo-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-300'
+            className='lg:hidden inline-flex items-center justify-center w-11 h-11 rounded-lg text-gray-700 hover:bg-indigo-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-200'
             aria-controls='mobile-drawer'
             aria-expanded={isDrawerOpen}
             aria-label='Open main menu'
@@ -378,9 +378,9 @@ export default function Nav() {
                                   href={sub.href}
                                   onClick={() => setIsDrawerOpen(false)}
                                   className={classNames(
-                                    'block p-2 text-sm rounded-md no-underline hover:no-underline focus:no-underline text-indigo-800',
+                                    'block p-2 text-sm rounded-md no-underline hover:no-underline focus:no-underline text-indigo-700',
                                     activeSub
-                                      ? 'text-indigo-800 bg-indigo-50'
+                                      ? 'text-indigo-700 bg-indigo-50'
                                       : 'hover:bg-indigo-50 text-gray-800'
                                   )}
                                   aria-current={activeSub ? 'page' : undefined}
@@ -398,7 +398,7 @@ export default function Nav() {
                           className={classNames(
                             'block p-2 text-sm font-medium rounded-lg no-underline hover:no-underline focus:no-underline',
                             isActive(item.href, pathname)
-                              ? 'text-indigo-800 bg-indigo-50'
+                              ? 'text-indigo-700 bg-indigo-50'
                               : 'hover:bg-indigo-50 text-gray-900'
                           )}
                           aria-current={

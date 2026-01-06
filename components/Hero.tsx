@@ -22,7 +22,7 @@ export default function Hero() {
               <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold text-gray-900 leading-tight tracking-tight">
                 <span className="block">Build Skills.</span>
                 <span className="block">Break Barriers.</span>
-                <span className="block text-transparent bg-clip-text bg-linear-to-r from-indigo-600 to-blue-600">
+                <span className="block text-transparent bg-clip-text bg-linear-to-r from-indigo-500 to-blue-500">
                   Go Global.
                 </span>
               </h1>
@@ -35,14 +35,14 @@ export default function Hero() {
             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start pt-4">
               <Link
                 href="/events"
-                className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-indigo-600 text-white rounded-lg font-semibold hover:bg-indigo-700 transition-colors shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-indigo-500 text-white rounded-lg font-semibold hover:bg-indigo-600 transition-colors shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
               >
                 Explore Events
                 <ArrowRight className="w-5 h-5" />
               </Link>
               <Link
                 href="/about"
-                className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white text-indigo-600 rounded-lg font-semibold border-2 border-indigo-200 hover:border-indigo-300 hover:bg-indigo-50 transition-colors"
+                className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white text-indigo-500 rounded-lg font-semibold border-2 border-indigo-100 hover:border-indigo-200 hover:bg-indigo-50 transition-colors"
               >
                 Learn More
               </Link>

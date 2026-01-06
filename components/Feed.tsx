@@ -159,7 +159,7 @@ const Feed = () => {
                   className="p-6 rounded-2xl border border-gray-200 bg-gray-50 hover:bg-white hover:shadow-md transition-all"
                 >
                   <div className="w-12 h-12 rounded-xl bg-indigo-100 flex items-center justify-center mb-4">
-                    <Icon className="w-6 h-6 text-indigo-600" />
+                    <Icon className="w-6 h-6 text-indigo-500" />
                   </div>
                   <h3 className="text-xl font-bold text-gray-900 mb-2">
                     {feature.title}
@@ -182,7 +182,7 @@ const Feed = () => {
           <div className="grid md:grid-cols-2 gap-8">
             <div className="bg-white p-8 rounded-2xl border border-gray-200 shadow-sm">
               <div className="flex items-center gap-3 mb-4">
-                <Target className="w-8 h-8 text-indigo-600" />
+                <Target className="w-8 h-8 text-indigo-500" />
                 <h3 className="text-2xl font-bold text-gray-900">Mission</h3>
               </div>
               <p className="text-gray-600 leading-relaxed">
@@ -194,14 +194,11 @@ const Feed = () => {
             </div>
             <div className="bg-white p-8 rounded-2xl border border-gray-200 shadow-sm">
               <div className="flex items-center gap-3 mb-4">
-                <Eye className="w-8 h-8 text-blue-600" />
+                <Eye className="w-8 h-8 text-blue-500" />
                 <h3 className="text-2xl font-bold text-gray-900">Vision</h3>
               </div>
               <p className="text-gray-600 leading-relaxed">
-                To become Bangladesh&apos;s leading robotics education center,
-                inspiring the next generation of engineers, scientists, and
-                innovators. We envision a future where every student has access
-                to quality STEM education and the tools to shape tomorrow.
+                To help the students shine on the world stage—sending young innovators abroad to compete, collaborate, and stand out like stars. We want every learner to have the opportunity and confidence to bring their talents global and make a meaningful mark through STEM and robotics education.
               </p>
             </div>
           </div>
@@ -218,7 +215,7 @@ const Feed = () => {
           <div className="bg-gradient-to-br from-indigo-50 to-blue-50 rounded-3xl p-8 md:p-12 border border-indigo-100">
             <div className="mb-8">
               <div className="flex items-center gap-3 mb-6">
-                <Award className="w-10 h-10 text-indigo-600" />
+                <Award className="w-10 h-10 text-indigo-500" />
                 <h3 className="text-2xl font-bold text-gray-900">
                   Olympiads We&apos;ve Competed In
                 </h3>
@@ -279,7 +276,7 @@ const Feed = () => {
             </div>
             <div className="grid grid-cols-2 gap-4 mt-8">
               <div className="bg-white p-6 rounded-xl border border-gray-200 text-center">
-                <div className="text-3xl font-bold text-indigo-600 mb-2">
+                <div className="text-3xl font-bold text-indigo-500 mb-2">
                   50+
                 </div>
                 <div className="text-sm text-gray-600">
@@ -287,13 +284,13 @@ const Feed = () => {
                 </div>
               </div>
               <div className="bg-white p-6 rounded-xl border border-gray-200 text-center">
-                <div className="text-3xl font-bold text-blue-600 mb-2">
+                <div className="text-3xl font-bold text-blue-500 mb-2">
                   15+
                 </div>
                 <div className="text-sm text-gray-600">Awards Won</div>
               </div>
               <div className="bg-white p-6 rounded-xl border border-gray-200 text-center col-span-2">
-                <div className="text-3xl font-bold text-purple-600 mb-2">
+                <div className="text-3xl font-bold text-purple-500 mb-2">
                   100%
                 </div>
                 <div className="text-sm text-gray-600">
@@ -332,7 +329,7 @@ const Feed = () => {
       </section>
 
       {/* Optional CTA Section */}
-      <section className="py-20 bg-gradient-to-br from-indigo-600 to-blue-600 text-white">
+      <section className="py-20 bg-gradient-to-br from-indigo-400 to-blue-500 text-white">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <Sparkles className="w-12 h-12 mx-auto mb-6 text-indigo-200" />
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
@@ -345,14 +342,14 @@ const Feed = () => {
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
               href="/events"
-              className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white text-indigo-600 rounded-lg font-semibold hover:bg-gray-100 transition-colors shadow-lg hover:shadow-xl"
+              className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white text-indigo-500 rounded-lg font-semibold hover:bg-gray-100 transition-colors shadow-lg hover:shadow-xl"
             >
               Explore Events
               <ArrowRight className="w-5 h-5" />
             </Link>
             <Link
               href="/about"
-              className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-indigo-700 text-white rounded-lg font-semibold border-2 border-indigo-500 hover:bg-indigo-800 transition-colors"
+              className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-indigo-500 text-white rounded-lg font-semibold border-2 border-indigo-400 hover:bg-indigo-600 transition-colors"
             >
               Learn More About Us
             </Link>

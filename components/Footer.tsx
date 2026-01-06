@@ -81,7 +81,7 @@ export default function Footer() {
                   border border-brand-blue/20
                   bg-white text-brand-blue
                   shadow-sm transition
-                  hover:bg-blue-400 hover:text-white hover:border-brand-blue
+                  hover:bg-blue-300 hover:text-white hover:border-brand-blue
                   focus:outline-none focus:ring-2 focus:ring-brand-blue/30
                 "
               >

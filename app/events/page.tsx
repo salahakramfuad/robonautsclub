@@ -34,8 +34,8 @@ const SectionHeader = ({
       </div>
       {count !== undefined && (
         <div className="hidden md:flex items-center gap-2 px-4 py-2 bg-indigo-100 rounded-full">
-          <Sparkles className="w-5 h-5 text-indigo-600" />
-          <span className="text-lg font-bold text-indigo-900">{count}</span>
+          <Sparkles className="w-5 h-5 text-indigo-500" />
+          <span className="text-lg font-bold text-indigo-700">{count}</span>
           <span className="text-sm text-indigo-700">Events</span>
         </div>
       )}
@@ -71,14 +71,14 @@ const EventCard = ({ event }: { event: Event }) => {
         </div>
 
         {/* Image/Visual Section */}
-        <div className="relative h-48 bg-gradient-to-br from-indigo-500 via-blue-500 to-purple-500 overflow-hidden">
+        <div className="relative h-48 bg-gradient-to-br from-indigo-400 via-blue-400 to-purple-400 overflow-hidden">
           <div className="absolute inset-0 bg-black/10 group-hover:bg-black/20 transition-colors" />
           <div className="absolute inset-0 flex items-center justify-center">
             <Calendar className="w-20 h-20 text-white/80" />
           </div>
           {isUpcoming && daysUntil !== null && daysUntil >= 0 && (
             <div className="absolute bottom-4 left-4 bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-lg">
-              <span className="text-sm font-bold text-indigo-900">
+              <span className="text-sm font-bold text-indigo-700">
                 {daysUntil === 0
                   ? 'Today!'
                   : daysUntil === 1
@@ -91,24 +91,24 @@ const EventCard = ({ event }: { event: Event }) => {
 
         {/* Content Section */}
         <div className="p-6 flex flex-col flex-1">
-          <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-indigo-600 transition-colors line-clamp-2">
+          <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-indigo-500 transition-colors line-clamp-2">
             {event.title}
           </h3>
 
           {/* Event Details */}
           <div className="space-y-2 mb-4">
             <div className="flex items-center gap-2 text-sm text-gray-600">
-              <Calendar className="w-4 h-4 text-indigo-600 shrink-0" />
+              <Calendar className="w-4 h-4 text-indigo-500 shrink-0" />
               <span className="font-medium">
                 {format(eventDate, 'EEEE, MMMM d, yyyy')}
               </span>
             </div>
             <div className="flex items-center gap-2 text-sm text-gray-600">
-              <Clock className="w-4 h-4 text-indigo-600 shrink-0" />
+              <Clock className="w-4 h-4 text-indigo-500 shrink-0" />
               <span>{event.time}</span>
             </div>
             <div className="flex items-center gap-2 text-sm text-gray-600">
-              <MapPin className="w-4 h-4 text-indigo-600 shrink-0" />
+              <MapPin className="w-4 h-4 text-indigo-500 shrink-0" />
               <span className="line-clamp-1">{event.location}</span>
             </div>
           </div>
@@ -120,7 +120,7 @@ const EventCard = ({ event }: { event: Event }) => {
 
           {/* CTA Button */}
           <div className="mt-auto pt-4 border-t border-gray-100">
-            <div className="flex items-center gap-2 text-indigo-600 font-semibold group-hover:text-indigo-700 transition-colors">
+            <div className="flex items-center gap-2 text-indigo-500 font-semibold group-hover:text-indigo-700 transition-colors">
               <span>View Details</span>
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </div>
@@ -172,7 +172,7 @@ export default function EventsPage() {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       {/* Hero Header */}
-      <section className="relative bg-gradient-to-br from-indigo-900 via-blue-900 to-blue-600 text-white py-24 px-6 overflow-hidden">
+      <section className="relative bg-gradient-to-br from-indigo-400 via-blue-400 to-blue-500 text-white py-24 px-6 overflow-hidden">
         {/* Background decoration */}
         <div className="absolute inset-0 opacity-20">
           <div className="absolute top-0 right-0 w-96 h-96 bg-blue-300 rounded-full blur-3xl transform translate-x-1/2 -translate-y-1/2" />
@@ -253,7 +253,7 @@ export default function EventsPage() {
                 </p>
                 <a
                   href="mailto:info@robonautsclub.com"
-                  className="inline-block py-2 px-6 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg transition-colors"
+                  className="inline-block py-2 px-6 bg-indigo-500 hover:bg-indigo-600 text-white font-semibold rounded-lg transition-colors"
                 >
                   Contact Us
                 </a>
@@ -278,7 +278,7 @@ export default function EventsPage() {
           )}
 
           {/* Call to action */}
-          <div className="mt-20 bg-gradient-to-br from-indigo-600 to-blue-600 rounded-3xl p-12 text-center text-white">
+          <div className="mt-20 bg-gradient-to-br from-indigo-400 to-blue-500 rounded-3xl p-12 text-center text-white">
             <Sparkles className="w-12 h-12 mx-auto mb-4 text-indigo-200" />
             <h3 className="text-3xl font-bold mb-4">
               Want to Organize an Event?
@@ -289,7 +289,7 @@ export default function EventsPage() {
             </p>
             <a
               href="mailto:info@robonautsclub.com"
-              className="inline-flex items-center gap-2 px-8 py-4 bg-white text-indigo-600 rounded-lg font-semibold hover:bg-gray-100 transition-colors shadow-lg"
+              className="inline-flex items-center gap-2 px-8 py-4 bg-white text-indigo-500 rounded-lg font-semibold hover:bg-gray-100 transition-colors shadow-lg"
             >
               Contact Us
               <ArrowRight className="w-5 h-5" />

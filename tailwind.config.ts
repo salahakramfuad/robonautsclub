@@ -11,10 +11,10 @@ const config: Config = {
     extend: {
       colors: {
         brand: {
-          blue: '#003B73',  // The Navy from the letters
-          red: '#D61C4E',   // The Red from the rocket
-          dark: '#2C2C2C',  // The Grey from the ring/star
-          light: '#F3F6F9', // A very light blue-grey for page backgrounds (easier on eyes than pure white)
+          blue: '#60A5FA',  // Soft blue (robotics/STEM appropriate)
+          red: '#F472B6',   // Soft pink/coral (lighter, less saturated)
+          dark: '#64748B',  // Lighter gray (improved readability)
+          light: '#F8FAFC', // Slightly lighter blue-grey for backgrounds
         },
       },
     },
