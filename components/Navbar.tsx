@@ -39,7 +39,7 @@ export default function Nav() {
 
   const menuItems: MenuItem[] = [
     { title: 'Home', href: '/' },
-    { title: 'Event', href: '/event' },
+    { title: 'Events', href: '/events' },
     { title: 'About', href: '/about' },
   ]
 

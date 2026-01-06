@@ -46,17 +46,15 @@ export default function Footer() {
         <div className="flex flex-col gap-8 md:flex-row md:items-center md:justify-between">
           {/* Brand */}
           <div className="flex items-start gap-4">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl  text-xl font-bold text-white overflow-hidden">
-              <span className="w-10 h-10 block">
-                <Image
-                  src="/robologo.jpg"
-                  alt="Robonauts Club Logo"
-                  width={40}
-                  height={40}
-                  className="object-contain w-10 h-10"
-                  priority
-                />
-              </span>
+            <div>
+              <Image
+                src="/robologo.jpg"
+                alt="Robonauts Club Logo"
+                width={72}
+                height={72}
+                className="object-contain w-14 h-14"
+                priority
+              />
             </div>
             <div>
               <h2 className="text-xl font-semibold text-slate-900">
