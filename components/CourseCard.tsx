@@ -35,26 +35,26 @@ export default function CourseCard({
 
   return (
     <Link href={href}>
-      <div className="group relative bg-white rounded-2xl border-2 border-gray-200 hover:border-indigo-200 overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 h-full flex flex-col">
+      <div className="group relative bg-white rounded-2xl border-2 border-gray-200 hover:border-indigo-300 overflow-hidden shadow-md hover:shadow-2xl transition-all duration-500 h-full flex flex-col transform hover:-translate-y-2">
         {/* Image Section */}
-        <div className="relative h-48 bg-gradient-to-br from-indigo-400 via-blue-400 to-purple-400 overflow-hidden">
+        <div className="relative h-52 bg-linear-to-br from-indigo-400 via-blue-400 to-purple-400 overflow-hidden">
           {img ? (
             <>
               <Image
                 src={img}
                 alt={title}
                 fill
-                className="object-cover group-hover:scale-105 transition-transform duration-300"
+                className="object-cover group-hover:scale-110 transition-transform duration-700 ease-out"
               />
-              <div className="absolute inset-0 bg-black/10 group-hover:bg-black/20 transition-colors" />
+              <div className="absolute inset-0 bg-linear-to-t from-black/20 via-transparent to-transparent group-hover:from-black/30 transition-all duration-300" />
             </>
           ) : (
-            <div className="absolute inset-0 bg-black/10 group-hover:bg-black/20 transition-colors" />
+            <div className="absolute inset-0 bg-linear-to-t from-black/20 via-transparent to-transparent group-hover:from-black/30 transition-all duration-300" />
           )}
           {/* Level Badge */}
-          <div className="absolute top-4 right-4 z-10">
+          <div className="absolute top-4 right-4 z-10 transform group-hover:scale-110 transition-transform duration-300">
             <span
-              className={`px-3 py-1.5 rounded-full text-xs font-bold shadow-sm border ${getLevelColor(level)}`}
+              className={`px-4 py-2 rounded-full text-xs font-bold shadow-lg border backdrop-blur-sm ${getLevelColor(level)}`}
             >
               {level}
             </span>
@@ -62,17 +62,17 @@ export default function CourseCard({
         </div>
 
         {/* Content Section */}
-        <div className="p-6 flex flex-col flex-1">
-          <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-indigo-500 transition-colors line-clamp-2">
+        <div className="p-7 flex flex-col flex-1 bg-white">
+          <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-indigo-600 transition-colors duration-300 line-clamp-2 leading-tight">
             {title}
           </h3>
-          <p className="text-gray-600 mb-4 flex-1 line-clamp-3">{blurb}</p>
+          <p className="text-gray-600 mb-5 flex-1 line-clamp-3 leading-relaxed text-sm">{blurb}</p>
 
           {/* CTA Button */}
-          <div className="mt-auto pt-4 border-t border-gray-100">
+          <div className="mt-auto pt-5 border-t border-gray-100 group-hover:border-indigo-100 transition-colors">
             <div className="flex items-center gap-2 text-indigo-500 font-semibold group-hover:text-indigo-600 transition-colors">
               <span>Learn More</span>
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              <ArrowRight className="w-4 h-4 group-hover:translate-x-2 transition-transform duration-300" />
             </div>
           </div>
         </div>
