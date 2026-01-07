@@ -97,7 +97,7 @@ export default async function EventDetailPage({
   const isOnline = event.location.toLowerCase().includes('online') || event.venue?.toLowerCase().includes('online')
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-sky-50 via-blue-50 to-indigo-50">
+    <div className="min-h-screen bg-linear-to-br from-sky-50 via-blue-50 to-indigo-50">
       {/* Compact Header Section */}
       <section className="relative overflow-hidden">
         {/* Background decoration */}

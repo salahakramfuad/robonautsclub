@@ -38,7 +38,7 @@ export default function DeleteConfirmation({
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
       <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full animate-in zoom-in-95 duration-200">
         {/* Header */}
-        <div className="bg-gradient-to-r from-red-500 to-red-600 px-6 py-5 flex justify-between items-center rounded-t-2xl">
+        <div className="bg-linear-to-r from-red-500 to-red-600 px-6 py-5 flex justify-between items-center rounded-t-2xl">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-lg bg-white/20 backdrop-blur-sm flex items-center justify-center">
               <AlertTriangle className="w-5 h-5 text-white" />

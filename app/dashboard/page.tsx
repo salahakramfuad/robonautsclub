@@ -29,7 +29,7 @@ export default async function DashboardPage() {
   return (
     <div className="max-w-7xl space-y-6">
       {/* Welcome Section */}
-      <div className="bg-gradient-to-r from-indigo-500 to-blue-600 rounded-2xl shadow-lg p-8 text-white">
+      <div className="bg-linear-to-r from-indigo-500 to-blue-600 rounded-2xl shadow-lg p-8 text-white">
         <h1 className="text-3xl font-bold mb-2">Welcome back, {session.name.split(' ')[0]}!</h1>
         <p className="text-indigo-100">Here&apos;s what&apos;s happening with your events today.</p>
       </div>

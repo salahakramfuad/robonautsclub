@@ -71,7 +71,7 @@ const EventCard = ({ event }: { event: Event }) => {
         </div>
 
         {/* Image/Visual Section */}
-        <div className="relative h-48 bg-gradient-to-br from-indigo-400 via-blue-400 to-purple-400 overflow-hidden">
+        <div className="relative h-48 bg-linear-to-br from-indigo-400 via-blue-400 to-purple-400 overflow-hidden">
           <div className="absolute inset-0 bg-black/10 group-hover:bg-black/20 transition-colors" />
           <div className="absolute inset-0 flex items-center justify-center">
             <Calendar className="w-20 h-20 text-white/80" />
@@ -288,7 +288,7 @@ export default async function EventsPage() {
           )}
 
           {/* Call to action */}
-          <div className="mt-20 bg-gradient-to-br from-indigo-400 to-blue-500 rounded-3xl p-12 text-center text-white">
+          <div className="mt-20 bg-linear-to-br from-indigo-400 to-blue-500 rounded-3xl p-12 text-center text-white">
             <Sparkles className="w-12 h-12 mx-auto mb-4 text-indigo-200" />
             <h3 className="text-3xl font-bold mb-4">
               Want to Organize an Event?

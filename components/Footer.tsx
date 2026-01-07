@@ -96,7 +96,7 @@ export default function Footer() {
           className="mt-8 mb-6 h-px w-full"
           style={{
             background:
-              "linear-gradient(to right, transparent, rgba(17,24,39,0.12), transparent)",
+              "linear-linear(to right, transparent, rgba(17,24,39,0.12), transparent)",
           }}
         />
 
@@ -160,12 +160,12 @@ export default function Footer() {
         </div>
       </div>
 
-      {/* Bottom gradient bar */}
+      {/* Bottom linear bar */}
       <div
           className="mt-4 h-px w-full"
           style={{
             background:
-              "linear-gradient(to right, transparent, rgba(17,24,39,0.12), transparent)",
+              "linear-linear(to right, transparent, rgba(17,24,39,0.12), transparent)",
           }}
         />
 

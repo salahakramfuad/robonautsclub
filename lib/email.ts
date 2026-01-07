@@ -54,7 +54,7 @@ export async function sendBookingConfirmationEmail({
         <table role="presentation" style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
           <!-- Header -->
           <tr>
-            <td style="padding: 40px 30px 30px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 12px 12px 0 0; text-align: center;">
+            <td style="padding: 40px 30px 30px; background: linear-linear(135deg, #667eea 0%, #764ba2 100%); border-radius: 12px 12px 0 0; text-align: center;">
               <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: 700;">Booking Confirmed!</h1>
               <p style="margin: 10px 0 0; color: #e0e7ff; font-size: 16px;">Thank you for registering</p>
             </td>

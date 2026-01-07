@@ -52,7 +52,7 @@ export default function Hero() {
           {/* Right Column - Visual */}
           <div className="relative">
             <div className="relative aspect-square max-w-lg mx-auto">
-              {/* Main image container with gradient border */}
+              {/* Main image container with linear border */}
               <div className="absolute inset-0 bg-linear-to-br from-indigo-400 to-blue-500 rounded-3xl transform rotate-6 opacity-20 blur-xl" />
               <div className="relative bg-white rounded-3xl shadow-2xl border border-gray-100">
                 <div className="aspect-square relative rounded-3xl overflow-hidden bg-linear-to-br from-sky-100 to-indigo-100">
