@@ -79,19 +79,19 @@ export default function BookingForm({ event }: { event: Event }) {
 
   if (isSubmitted) {
     return (
-      <div className="bg-white rounded-2xl p-8 border-2 border-green-200 shadow-lg">
+      <div className="bg-white rounded-xl sm:rounded-2xl p-6 sm:p-8 border-2 border-green-200 shadow-lg">
         <div className="text-center">
-          <div className="w-20 h-20 rounded-full bg-green-50 flex items-center justify-center mx-auto mb-4">
-            <CheckCircle className="w-12 h-12 text-green-500" />
+          <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-green-50 flex items-center justify-center mx-auto mb-3 sm:mb-4">
+            <CheckCircle className="w-10 h-10 sm:w-12 sm:h-12 text-green-500" />
           </div>
-          <h3 className="text-2xl font-bold text-gray-900 mb-3">
+          <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2 sm:mb-3">
             Booking Successful!
           </h3>
-          <p className="text-gray-600 mb-2">
+          <p className="text-sm sm:text-base text-gray-600 mb-2">
             Your booking for <strong className="text-indigo-600">{event.title}</strong> has been
             confirmed!
           </p>
-          <p className="text-sm text-gray-500">
+          <p className="text-xs sm:text-sm text-gray-500">
             A confirmation email with event details has been sent to your email address.
           </p>
         </div>
@@ -100,10 +100,10 @@ export default function BookingForm({ event }: { event: Event }) {
   }
 
   return (
-    <div className="bg-white rounded-2xl p-7 border-2 border-gray-200 shadow-lg hover:shadow-xl transition-shadow duration-300">
-      <div className="mb-6">
-        <h3 className="text-2xl font-bold text-gray-900 mb-2">Book Your Spot</h3>
-        <p className="text-sm text-gray-500">{event.title}</p>
+    <div className="bg-white rounded-xl sm:rounded-2xl p-5 sm:p-7 border-2 border-gray-200 shadow-lg hover:shadow-xl transition-shadow duration-300">
+      <div className="mb-4 sm:mb-6">
+        <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-1 sm:mb-2">Book Your Spot</h3>
+        <p className="text-xs sm:text-sm text-gray-500">{event.title}</p>
       </div>
       <form onSubmit={handleSubmit} className="space-y-5">
         {errors.submit && (
@@ -208,7 +208,7 @@ export default function BookingForm({ event }: { event: Event }) {
         <button
           type="submit"
           disabled={isLoading || isSubmitted}
-          className="w-full py-3.5 px-6 bg-indigo-500 hover:bg-indigo-600 text-white font-semibold rounded-lg transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+          className="w-full py-3 sm:py-3.5 px-4 sm:px-6 bg-indigo-500 hover:bg-indigo-600 text-white font-semibold rounded-lg transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none text-sm sm:text-base"
         >
           {isLoading ? 'Submitting...' : isSubmitted ? 'Submitted' : 'Submit'}
         </button>

@@ -22,21 +22,21 @@ export default async function DashboardLayout({
       <TokenExpirationChecker />
       {/* Top Navigation Bar */}
       <nav className="bg-white border-b border-gray-200 shadow-sm sticky top-0 z-10">
-        <div className="px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-lg bg-linear-to-br from-indigo-500 to-blue-600 flex items-center justify-center">
-                <Sparkles className="w-5 h-5 text-white" />
+        <div className="px-3 sm:px-4 lg:px-6 xl:px-8">
+          <div className="flex justify-between items-center h-14 sm:h-16">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-linear-to-br from-indigo-500 to-blue-600 flex items-center justify-center">
+                <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
               </div>
               <div>
-                <h1 className="text-lg font-bold text-gray-900">Admin Dashboard</h1>
-                <p className="text-xs text-gray-500">Robonauts Club</p>
+                <h1 className="text-base sm:text-lg font-bold text-gray-900">Admin Dashboard</h1>
+                <p className="text-xs text-gray-500 hidden sm:block">Robonauts Club</p>
               </div>
             </div>
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 sm:gap-4">
               <div className="hidden sm:block text-right">
-                <p className="text-sm font-medium text-gray-900">{session.name}</p>
-                <p className="text-xs text-gray-500 truncate max-w-[200px]">{session.email}</p>
+                <p className="text-xs sm:text-sm font-medium text-gray-900 truncate max-w-[120px] sm:max-w-[200px]">{session.name}</p>
+                <p className="text-xs text-gray-500 truncate max-w-[120px] sm:max-w-[200px]">{session.email}</p>
               </div>
               <LogoutButton />
             </div>
@@ -44,12 +44,12 @@ export default async function DashboardLayout({
         </div>
       </nav>
 
-      <div className="flex">
+      <div className="flex flex-col lg:flex-row">
         {/* Sidebar */}
         <Sidebar />
 
         {/* Main Content */}
-        <main className="flex-1 p-6 lg:p-8">
+        <main className="flex-1 p-4 sm:p-6 lg:p-8 min-w-0">
           {children}
         </main>
       </div>

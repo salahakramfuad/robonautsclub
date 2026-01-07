@@ -153,12 +153,12 @@ const SectionHeader = ({
   title: string;
   subtitle?: string;
 }) => (
-  <div className="text-center mb-12">
-    <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+  <div className="text-center mb-8 sm:mb-10 md:mb-12">
+    <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-3 sm:mb-4">
       {title}
     </h2>
     {subtitle && (
-      <p className="text-lg text-gray-600 max-w-2xl mx-auto">{subtitle}</p>
+      <p className="text-sm sm:text-base md:text-lg text-gray-600 max-w-2xl mx-auto px-2">{subtitle}</p>
     )}
   </div>
 );
@@ -168,7 +168,7 @@ export default function AboutPage() {
     <div className="min-h-screen bg-gray-50 flex flex-col">
       {/* Hero Header */}
       <section
-        className="relative text-white py-24 px-6 overflow-hidden"
+        className="relative text-white py-16 sm:py-20 md:py-24 px-4 sm:px-6 overflow-hidden"
         style={{
           backgroundImage: "url('/roboclass.jpg')",
           backgroundSize: 'cover',
@@ -182,15 +182,15 @@ export default function AboutPage() {
         </div>
 
         <div className="max-w-7xl mx-auto relative z-10">
-          <div className="text-center mb-8">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm mb-6">
-              <Sparkles className="w-4 h-4" />
-              <span className="text-sm font-medium">About Robonauts Club</span>
+          <div className="text-center mb-6 sm:mb-8">
+            <div className="inline-flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-white/10 backdrop-blur-sm mb-4 sm:mb-6">
+              <Sparkles className="w-3 h-3 sm:w-4 sm:h-4" />
+              <span className="text-xs sm:text-sm font-medium">About Robonauts Club</span>
             </div>
-            <h1 className="text-4xl md:text-6xl font-extrabold mb-6 tracking-tight">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold mb-4 sm:mb-6 tracking-tight px-2">
               Where Innovation Meets Curiosity
             </h1>
-            <p className="text-lg md:text-xl text-blue-100 max-w-3xl mx-auto leading-relaxed">
+            <p className="text-base sm:text-lg md:text-xl text-blue-100 max-w-3xl mx-auto leading-relaxed px-2">
               Empowering young minds through hands-on STEM education in Dhaka.
               Join us in exploring the exciting world of robotics, automation,
               and innovation.
@@ -200,17 +200,17 @@ export default function AboutPage() {
       </section>
 
       {/* Main Content */}
-      <main className="flex-1 py-16 px-6">
+      <main className="flex-1 py-12 sm:py-16 px-4 sm:px-6">
         <div className="max-w-7xl mx-auto">
           
              {/* Who We Are Section */}
-          <section className="mb-20">
-            <div className="grid md:grid-cols-2 gap-12 items-center">
+          <section className="mb-12 sm:mb-16 md:mb-20">
+            <div className="grid md:grid-cols-2 gap-6 sm:gap-8 md:gap-12 items-center">
               <div>
-                <h2 className="text-3xl md:text-4xl font-bold mb-6 text-gray-900">
+                <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 sm:mb-6 text-gray-900">
                   Who We Are
                 </h2>
-                <div className="space-y-4 text-gray-600 leading-relaxed">
+                <div className="space-y-3 sm:space-y-4 text-sm sm:text-base text-gray-600 leading-relaxed">
                   <p>
                     Founded in 2022, <strong className="text-indigo-500">Robonauts Club</strong> delivers engaging
                     STEM education through real-world projects.
@@ -223,7 +223,7 @@ export default function AboutPage() {
                 </div>
               </div>
 
-              <div className="h-80 bg-linear-to-br from-indigo-400 via-blue-400 to-purple-400 rounded-2xl flex items-center justify-center border-2 border-gray-200 overflow-hidden">
+              <div className="h-64 sm:h-80 bg-linear-to-br from-indigo-400 via-blue-400 to-purple-400 rounded-xl sm:rounded-2xl flex items-center justify-center border-2 border-gray-200 overflow-hidden">
                 <Image
                   src="/pocketcinema.jpg"
                   alt="Robonauts Workshop"
@@ -231,40 +231,41 @@ export default function AboutPage() {
                   priority
                   width={1000}
                   height={1000}
+                  className="object-cover w-full h-full"
                 />
               </div>
             </div>
           </section>
           {/* Achievements & Impact Section - Moved to Top */}
-          <section className="mb-20">
+          <section className="mb-12 sm:mb-16 md:mb-20">
             <SectionHeader
               title="Our Achievements & Impact"
               subtitle="Celebrating milestones and student success"
             />
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8 sm:mb-12">
               {STATS.map((stat, index) => {
                 const Icon = stat.icon;
                 return (
                   <div
                     key={index}
-                    className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm text-center hover:shadow-md transition-shadow"
+                    className="bg-white p-4 sm:p-6 rounded-xl sm:rounded-2xl border border-gray-200 shadow-sm text-center hover:shadow-md transition-shadow"
                   >
                     <Icon
-                      className={`w-8 h-8 ${STAT_ICON_COLORS[index]} mx-auto mb-3`}
+                      className={`w-6 h-6 sm:w-8 sm:h-8 ${STAT_ICON_COLORS[index]} mx-auto mb-2 sm:mb-3`}
                     />
-                    <div className="text-3xl font-bold text-gray-900 mb-1">
+                    <div className="text-2xl sm:text-3xl font-bold text-gray-900 mb-1">
                       {stat.value}
                     </div>
-                    <div className="text-sm text-gray-600">{stat.label}</div>
+                    <div className="text-xs sm:text-sm text-gray-600">{stat.label}</div>
                   </div>
                 );
               })}
             </div>
-            <div className="bg-linear-to-br from-indigo-50 to-blue-50 rounded-2xl p-8 md:p-12 border border-indigo-100">
-              <h3 className="text-2xl font-bold text-gray-900 mb-6">
+            <div className="bg-linear-to-br from-indigo-50 to-blue-50 rounded-xl sm:rounded-2xl p-6 sm:p-8 md:p-12 border border-indigo-100">
+              <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">
                 Making a Difference
               </h3>
-              <div className="grid md:grid-cols-2 gap-8">
+              <div className="grid md:grid-cols-2 gap-6 sm:gap-8">
                 <div>
                   <h4 className="font-semibold text-gray-900 mb-3">
                     Student Success Stories
@@ -294,27 +295,27 @@ export default function AboutPage() {
          
 
           {/* Core Values Section */}
-          <section className="mb-20">
+          <section className="mb-12 sm:mb-16 md:mb-20">
             <SectionHeader
               title="Our Core Values"
               subtitle="The principles that guide everything we do"
             />
 
-            <div className="grid md:grid-cols-3 gap-6">
+            <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
               {CORE_VALUES.map((value, index) => {
                 const Icon = value.icon;
                 return (
                   <div
                     key={index}
-                    className="p-6 rounded-2xl border border-gray-200 bg-gray-50 hover:bg-white hover:shadow-md transition-all"
+                    className="p-4 sm:p-6 rounded-xl sm:rounded-2xl border border-gray-200 bg-gray-50 hover:bg-white hover:shadow-md transition-all"
                   >
-                    <div className="w-12 h-12 rounded-xl bg-indigo-100 flex items-center justify-center mb-4">
-                      <Icon className="w-6 h-6 text-indigo-500" />
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-indigo-100 flex items-center justify-center mb-3 sm:mb-4">
+                      <Icon className="w-5 h-5 sm:w-6 sm:h-6 text-indigo-500" />
                     </div>
-                    <h3 className="text-xl font-bold text-gray-900 mb-2">
+                    <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-2">
                       {value.title}
                     </h3>
-                    <p className="text-gray-600">{value.description}</p>
+                    <p className="text-sm sm:text-base text-gray-600">{value.description}</p>
                   </div>
                 );
               })}
@@ -322,22 +323,22 @@ export default function AboutPage() {
           </section>
 
           {/* What We Do Section */}
-          <section className="mb-20 bg-white py-20 rounded-2xl">
+          <section className="mb-12 sm:mb-16 md:mb-20 bg-white py-12 sm:py-16 md:py-20 rounded-xl sm:rounded-2xl">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
               <SectionHeader
                 title="What We Do"
                 subtitle="Comprehensive robotics and STEM education programs"
               />
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                 {WHAT_WE_DO_ITEMS.map((item, index) => (
                   <div
                     key={index}
-                    className="p-6 rounded-2xl border border-gray-200 bg-gray-50 hover:bg-white hover:shadow-md transition-all"
+                    className="p-4 sm:p-6 rounded-xl sm:rounded-2xl border border-gray-200 bg-gray-50 hover:bg-white hover:shadow-md transition-all"
                   >
-                    <h3 className="text-lg font-bold text-gray-900 mb-2">
+                    <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-2">
                       {item.title}
                     </h3>
-                    <p className="text-gray-600 text-sm leading-relaxed">
+                    <p className="text-gray-600 text-xs sm:text-sm leading-relaxed">
                       {item.description}
                     </p>
                   </div>
@@ -347,32 +348,32 @@ export default function AboutPage() {
           </section>
 
           {/* Team / Mentors Section */}
-          <section className="mb-20 bg-white py-20 rounded-2xl">
+          <section className="mb-12 sm:mb-16 md:mb-20 bg-white py-12 sm:py-16 md:py-20 rounded-xl sm:rounded-2xl">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
               <SectionHeader
                 title="Our Team & Mentors"
                 subtitle="Meet the passionate educators guiding our students"
               />
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                 {TEAM_MEMBERS.map((member, index) => {
                   const Icon = member.icon;
                   return (
                     <div
                       key={index}
-                      className="p-6 rounded-2xl border border-gray-200 bg-gray-50 hover:bg-white hover:shadow-md transition-all"
+                      className="p-4 sm:p-6 rounded-xl sm:rounded-2xl border border-gray-200 bg-gray-50 hover:bg-white hover:shadow-md transition-all"
                     >
                       <div
-                        className={`w-12 h-12 rounded-xl ${TEAM_BG_COLORS[index]} flex items-center justify-center mb-4`}
+                        className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl ${TEAM_BG_COLORS[index]} flex items-center justify-center mb-3 sm:mb-4`}
                       >
-                        <Icon className={`w-6 h-6 ${TEAM_ICON_COLORS[index]}`} />
+                        <Icon className={`w-5 h-5 sm:w-6 sm:h-6 ${TEAM_ICON_COLORS[index]}`} />
                       </div>
-                      <h3 className="text-lg font-bold text-gray-900 mb-1">
+                      <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-1">
                         {member.name}
                       </h3>
-                      <p className={`text-sm font-semibold ${TEAM_ICON_COLORS[index]} mb-2`}>
+                      <p className={`text-xs sm:text-sm font-semibold ${TEAM_ICON_COLORS[index]} mb-2`}>
                         {member.role}
                       </p>
-                      <p className="text-sm text-gray-600 leading-relaxed">
+                      <p className="text-xs sm:text-sm text-gray-600 leading-relaxed">
                         {member.expertise}
                       </p>
                     </div>
@@ -382,14 +383,14 @@ export default function AboutPage() {
             </div>
           </section>
           {/* Contact Information & Location Section - Moved to Top */}
-          <section className="mb-20">
+          <section className="mb-12 sm:mb-16 md:mb-20">
             <SectionHeader title="Contact Information" subtitle="Get in touch with us" />
 
-            <div className="grid lg:grid-cols-3 gap-8 mb-12">
+            <div className="grid lg:grid-cols-3 gap-6 sm:gap-8 mb-8 sm:mb-12">
               <div>
-                <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
-                  <h3 className="text-xl font-bold text-gray-900 mb-6">Contact Details</h3>
-                  <div className="space-y-4">
+                <div className="bg-white p-4 sm:p-6 rounded-xl sm:rounded-2xl border border-gray-200 shadow-sm">
+                  <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-4 sm:mb-6">Contact Details</h3>
+                  <div className="space-y-3 sm:space-y-4">
                     <div className="flex items-start gap-3">
                       <MapPin className="w-5 h-5 text-indigo-500 shrink-0 mt-0.5" />
                       <div>
@@ -432,7 +433,7 @@ export default function AboutPage() {
               </div>
 
               <div className="lg:col-span-2">
-                <div className="rounded-2xl overflow-hidden border-2 border-gray-200 shadow-sm bg-white">
+                <div className="rounded-xl sm:rounded-2xl overflow-hidden border-2 border-gray-200 shadow-sm bg-white h-64 sm:h-80 lg:h-96">
                   <MapClient />
                 </div>
               </div>

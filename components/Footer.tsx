@@ -44,31 +44,31 @@ export default function Footer() {
       {/* Top accent strip */}
       <div className="h-2 w-full bg-linear-to-r from-blue-200 via-gray-200 to-red-200" />
 
-      <div className="mx-auto max-w-7xl px-6 py-12">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 py-8 sm:py-12">
         {/* Top Section */}
-        <div className="flex flex-col gap-8 md:flex-row md:items-center md:justify-between">
+        <div className="flex flex-col gap-6 sm:gap-8 md:flex-row md:items-center md:justify-between">
           {/* Brand */}
-          <div className="flex items-start gap-4">
+          <div className="flex items-start gap-3 sm:gap-4">
             <Image
               src="/robologo.jpg"
               alt="Robonauts Club Logo"
               width={72}
               height={72}
-              className="object-contain w-14 h-14"
+              className="object-contain w-12 h-12 sm:w-14 sm:h-14"
               priority
             />
             <div>
-              <h2 className="text-xl font-semibold text-brand-blue">
+              <h2 className="text-lg sm:text-xl font-semibold text-brand-blue">
                 {COMPANY.name}
               </h2>
-              <p className="mt-1 max-w-sm text-sm text-brand-dark/70">
+              <p className="mt-1 max-w-sm text-xs sm:text-sm text-brand-dark/70">
                 {COMPANY.tagline}
               </p>
             </div>
           </div>
 
           {/* Social Links */}
-          <div className="flex gap-3">
+          <div className="flex gap-2 sm:gap-3 flex-wrap">
             {SOCIAL_LINKS.map(({ icon: Icon, href, label }) => (
               <a
                 key={label}
@@ -101,13 +101,13 @@ export default function Footer() {
         />
 
         {/* Main Content */}
-        <div className="grid gap-10 sm:grid-cols-2 md:grid-cols-3">
+        <div className="grid gap-8 sm:gap-10 sm:grid-cols-2 md:grid-cols-3">
           {/* Navigation */}
           <div>
-            <h3 className="mb-4 text-sm font-semibold uppercase tracking-wide text-brand-blue">
+            <h3 className="mb-3 sm:mb-4 text-xs sm:text-sm font-semibold uppercase tracking-wide text-brand-blue">
               Quick Links
             </h3>
-            <ul className="space-y-3 text-sm">
+            <ul className="space-y-2 sm:space-y-3 text-xs sm:text-sm">
               {NAV_LINKS.map((link) => (
                 <li key={link}>
                   <a href="#" className="transition hover:text-brand-blue">
@@ -120,10 +120,10 @@ export default function Footer() {
 
           {/* Services */}
           <div>
-            <h3 className="mb-4 text-sm font-semibold uppercase tracking-wide text-brand-blue">
+            <h3 className="mb-3 sm:mb-4 text-xs sm:text-sm font-semibold uppercase tracking-wide text-brand-blue">
               Our Services
             </h3>
-            <ul className="space-y-3 text-sm">
+            <ul className="space-y-2 sm:space-y-3 text-xs sm:text-sm">
               {SERVICES.map((service) => (
                 <li key={service} className="text-brand-dark/70">
                   {service}
@@ -134,10 +134,10 @@ export default function Footer() {
 
           {/* Contact */}
           <div>
-            <h3 className="mb-4 text-sm font-semibold uppercase tracking-wide text-brand-blue">
+            <h3 className="mb-3 sm:mb-4 text-xs sm:text-sm font-semibold uppercase tracking-wide text-brand-blue">
               Contact
             </h3>
-            <div className="space-y-3 text-sm">
+            <div className="space-y-2 sm:space-y-3 text-xs sm:text-sm">
               <a
                 href={`mailto:${COMPANY.email}`}
                 className="flex items-center gap-2 transition hover:text-brand-blue"
@@ -170,8 +170,8 @@ export default function Footer() {
         />
 
       {/* Bottom text row */}
-      <div className="mx-auto max-w-7xl px-6 py-4">
-        <div className="flex flex-col gap-2 text-sm text-brand-dark/80 md:flex-row md:items-center md:justify-between">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 py-3 sm:py-4">
+        <div className="flex flex-col gap-2 text-xs sm:text-sm text-brand-dark/80 md:flex-row md:items-center md:justify-between text-center md:text-left">
           <span>
             © {new Date().getFullYear()} {COMPANY.name}. All rights reserved.
           </span>

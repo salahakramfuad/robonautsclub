@@ -30,58 +30,58 @@ export default async function DashboardPage() {
     .slice(0, 5)
 
   return (
-    <div className="max-w-7xl space-y-6">
+    <div className="max-w-7xl space-y-4 sm:space-y-6">
       {/* Welcome Section */}
-      <div className="bg-linear-to-r from-indigo-500 to-blue-600 rounded-2xl shadow-lg p-8 text-white">
-        <h1 className="text-3xl font-bold mb-2">Welcome back, {session.name.split(' ')[0]}!</h1>
-        <p className="text-indigo-100">Here&apos;s what&apos;s happening with your events today.</p>
+      <div className="bg-linear-to-r from-indigo-500 to-blue-600 rounded-xl sm:rounded-2xl shadow-lg p-6 sm:p-8 text-white">
+        <h1 className="text-2xl sm:text-3xl font-bold mb-2">Welcome back, {session.name.split(' ')[0]}!</h1>
+        <p className="text-sm sm:text-base text-indigo-100">Here&apos;s what&apos;s happening with your events today.</p>
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6 hover:shadow-md transition-shadow">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600 mb-1">Total Events</p>
-              <p className="text-3xl font-bold text-gray-900">{totalEvents}</p>
+              <p className="text-xs sm:text-sm font-medium text-gray-600 mb-1">Total Events</p>
+              <p className="text-2xl sm:text-3xl font-bold text-gray-900">{totalEvents}</p>
             </div>
-            <div className="w-12 h-12 rounded-lg bg-indigo-100 flex items-center justify-center">
-              <Calendar className="w-6 h-6 text-indigo-600" />
+            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-indigo-100 flex items-center justify-center">
+              <Calendar className="w-5 h-5 sm:w-6 sm:h-6 text-indigo-600" />
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6 hover:shadow-md transition-shadow">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600 mb-1">Upcoming Events</p>
-              <p className="text-3xl font-bold text-green-600">{upcomingEvents}</p>
+              <p className="text-xs sm:text-sm font-medium text-gray-600 mb-1">Upcoming Events</p>
+              <p className="text-2xl sm:text-3xl font-bold text-green-600">{upcomingEvents}</p>
             </div>
-            <div className="w-12 h-12 rounded-lg bg-green-100 flex items-center justify-center">
-              <TrendingUp className="w-6 h-6 text-green-600" />
+            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-green-100 flex items-center justify-center">
+              <TrendingUp className="w-5 h-5 sm:w-6 sm:h-6 text-green-600" />
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6 hover:shadow-md transition-shadow">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600 mb-1">Past Events</p>
-              <p className="text-3xl font-bold text-gray-600">{pastEvents}</p>
+              <p className="text-xs sm:text-sm font-medium text-gray-600 mb-1">Past Events</p>
+              <p className="text-2xl sm:text-3xl font-bold text-gray-600">{pastEvents}</p>
             </div>
-            <div className="w-12 h-12 rounded-lg bg-gray-100 flex items-center justify-center">
-              <Activity className="w-6 h-6 text-gray-600" />
+            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-gray-100 flex items-center justify-center">
+              <Activity className="w-5 h-5 sm:w-6 sm:h-6 text-gray-600" />
             </div>
           </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
         {/* User Information Card */}
         <div className="lg:col-span-1">
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-              <User className="w-5 h-5 text-indigo-600" />
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6">
+            <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4 flex items-center gap-2">
+              <User className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-600" />
               Account Information
             </h3>
             
@@ -121,15 +121,15 @@ export default async function DashboardPage() {
 
         {/* Recent Events */}
         <div className="lg:col-span-2">
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-                <Activity className="w-5 h-5 text-indigo-600" />
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6">
+            <div className="flex items-center justify-between mb-3 sm:mb-4">
+              <h3 className="text-base sm:text-lg font-semibold text-gray-900 flex items-center gap-2">
+                <Activity className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-600" />
                 Recent Events
               </h3>
               <Link
                 href="/dashboard/events"
-                className="text-sm text-indigo-600 hover:text-indigo-700 font-medium"
+                className="text-xs sm:text-sm text-indigo-600 hover:text-indigo-700 font-medium"
               >
                 View all →
               </Link>

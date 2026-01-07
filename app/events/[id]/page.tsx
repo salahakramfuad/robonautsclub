@@ -56,21 +56,21 @@ const getEventTags = (event: Event) => {
 // Event Passed Component
 const EventPassedMessage = () => {
   return (
-    <div className="bg-white rounded-2xl p-8 border border-gray-200 shadow-sm">
+    <div className="bg-white rounded-xl sm:rounded-2xl p-6 sm:p-8 border border-gray-200 shadow-sm">
       <div className="text-center">
-        <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-4">
-          <Calendar className="w-8 h-8 text-gray-400" />
+        <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-3 sm:mb-4">
+          <Calendar className="w-6 h-6 sm:w-8 sm:h-8 text-gray-400" />
         </div>
-        <h3 className="text-xl font-bold text-gray-900 mb-2">
+        <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-2">
           Event Has Passed
         </h3>
-        <p className="text-gray-600 mb-4">
+        <p className="text-sm sm:text-base text-gray-600 mb-4">
           This event has already taken place. Check out our upcoming events for
           new opportunities!
         </p>
         <Link
           href="/events"
-          className="inline-block py-2 px-6 bg-indigo-500 hover:bg-indigo-600 text-white font-semibold rounded-lg transition-colors"
+          className="inline-block py-2 px-6 bg-indigo-500 hover:bg-indigo-600 text-white font-semibold rounded-lg transition-colors text-sm sm:text-base"
         >
           View Upcoming Events
         </Link>
@@ -106,20 +106,20 @@ export default async function EventDetailPage({
           <div className="absolute bottom-0 left-0 h-96 bg-indigo-200 rounded-full blur-3xl transform -translate-x-1/2 translate-y-1/2" />
         </div>
 
-        <div className="relative max-w-7xl mx-auto px-6 pt-6 md:pt-8 pb-6">
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 pt-4 sm:pt-6 md:pt-8 pb-4 sm:pb-6">
           <Link
             href="/events"
-            className="inline-flex items-center gap-2 text-gray-700 hover:text-indigo-600 mb-4 transition-colors group"
+            className="inline-flex items-center gap-2 text-gray-700 hover:text-indigo-600 mb-3 sm:mb-4 transition-colors group text-sm sm:text-base"
           >
-            <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
+            <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5 group-hover:-translate-x-1 transition-transform" />
             <span className="font-medium">Back to Events</span>
           </Link>
           
           <div className="max-w-4xl">
-            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold text-gray-900 mb-3 leading-tight">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-extrabold text-gray-900 mb-2 sm:mb-3 leading-tight">
               {event.title}
             </h1>
-            <p className="text-base sm:text-lg md:text-xl text-gray-600 leading-relaxed">
+            <p className="text-sm sm:text-base md:text-lg lg:text-xl text-gray-600 leading-relaxed">
               {event.description}
             </p>
           </div>
@@ -127,12 +127,12 @@ export default async function EventDetailPage({
       </section>
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-6 pb-12">
-        <div className="grid lg:grid-cols-3 gap-6 lg:gap-8">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 pb-8 sm:pb-12">
+        <div className="grid lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
           {/* Left Column - Image and Content Sections */}
-          <div className="lg:col-span-2 space-y-5">
+          <div className="lg:col-span-2 space-y-4 sm:space-y-5">
             {/* Main Event Image */}
-            <div className="bg-white rounded-2xl overflow-hidden border-2 border-gray-200 shadow-lg">
+            <div className="bg-white rounded-xl sm:rounded-2xl overflow-hidden border-2 border-gray-200 shadow-lg">
               <EventImage
                 src={getEventImageUrl(event.image)}
                 alt={event.title}
@@ -141,75 +141,75 @@ export default async function EventDetailPage({
             </div>
 
             {/* Overview Section */}
-            <div className="bg-white rounded-2xl p-4 md:p-8 border-2 border-gray-200 shadow-lg">
-              <h3 className="text-2xl font-bold text-gray-900 mb-4">Overview</h3>
-              <p className="text-gray-700 leading-relaxed text-base md:text-lg">
+            <div className="bg-white rounded-xl sm:rounded-2xl p-4 sm:p-6 md:p-8 border-2 border-gray-200 shadow-lg">
+              <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-3 sm:mb-4">Overview</h3>
+              <p className="text-gray-700 leading-relaxed text-sm sm:text-base md:text-lg">
                 {event.fullDescription || event.description}
               </p>
             </div>
 
             {/* Event Details Section */}
-            <div className="bg-white rounded-2xl p-6 md:p-8 border-2 border-gray-200 shadow-lg">
-              <h3 className="text-2xl font-bold text-gray-900 mb-6">Event Details</h3>
-              <div className="space-y-4">
-                <div className="flex items-start gap-3 p-4 rounded-xl bg-indigo-50/50 border border-indigo-100">
-                  <div className="w-10 h-10 rounded-lg bg-indigo-100 flex items-center justify-center shrink-0">
-                    <Calendar className="w-5 h-5 text-indigo-500" />
+            <div className="bg-white rounded-xl sm:rounded-2xl p-4 sm:p-6 md:p-8 border-2 border-gray-200 shadow-lg">
+              <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">Event Details</h3>
+              <div className="space-y-3 sm:space-y-4">
+                <div className="flex items-start gap-2 sm:gap-3 p-3 sm:p-4 rounded-lg sm:rounded-xl bg-indigo-50/50 border border-indigo-100">
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-indigo-100 flex items-center justify-center shrink-0">
+                    <Calendar className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-500" />
                   </div>
-                  <div>
-                    <p className="text-sm font-medium text-gray-500 mb-1">Date</p>
-                    <p className="font-semibold text-gray-900">{format(eventDate, 'MMMM d, yyyy')}</p>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs sm:text-sm font-medium text-gray-500 mb-1">Date</p>
+                    <p className="text-sm sm:text-base font-semibold text-gray-900">{format(eventDate, 'MMMM d, yyyy')}</p>
                   </div>
                 </div>
                 {event.time && (
-                  <div className="flex items-start gap-3 p-4 rounded-xl bg-blue-50/50 border border-blue-100">
-                    <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center shrink-0">
-                      <Clock className="w-5 h-5 text-blue-500" />
+                  <div className="flex items-start gap-2 sm:gap-3 p-3 sm:p-4 rounded-lg sm:rounded-xl bg-blue-50/50 border border-blue-100">
+                    <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-blue-100 flex items-center justify-center shrink-0">
+                      <Clock className="w-4 h-4 sm:w-5 sm:h-5 text-blue-500" />
                     </div>
-                    <div>
-                      <p className="text-sm font-medium text-gray-500 mb-1">Time</p>
-                      <p className="font-semibold text-gray-900">{event.time}</p>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs sm:text-sm font-medium text-gray-500 mb-1">Time</p>
+                      <p className="text-sm sm:text-base font-semibold text-gray-900">{event.time}</p>
                     </div>
                   </div>
                 )}
-                <div className="flex items-start gap-3 p-4 rounded-xl bg-purple-50/50 border border-purple-100">
-                  <div className="w-10 h-10 rounded-lg bg-purple-100 flex items-center justify-center shrink-0">
-                    <MapPin className="w-5 h-5 text-purple-500" />
+                <div className="flex items-start gap-2 sm:gap-3 p-3 sm:p-4 rounded-lg sm:rounded-xl bg-purple-50/50 border border-purple-100">
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-purple-100 flex items-center justify-center shrink-0">
+                    <MapPin className="w-4 h-4 sm:w-5 sm:h-5 text-purple-500" />
                   </div>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium text-gray-500 mb-1">Venue</p>
-                    <p className="font-semibold text-gray-900">{event.venue || event.location}</p>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs sm:text-sm font-medium text-gray-500 mb-1">Venue</p>
+                    <p className="text-sm sm:text-base font-semibold text-gray-900 break-words">{event.venue || event.location}</p>
                   </div>
                 </div>
                 {isOnline ? (
-                  <div className="flex items-start gap-3 p-4 rounded-xl bg-cyan-50/50 border border-cyan-100">
-                    <div className="w-10 h-10 rounded-lg bg-cyan-100 flex items-center justify-center shrink-0">
-                      <Monitor className="w-5 h-5 text-cyan-500" />
+                  <div className="flex items-start gap-2 sm:gap-3 p-3 sm:p-4 rounded-lg sm:rounded-xl bg-cyan-50/50 border border-cyan-100">
+                    <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-cyan-100 flex items-center justify-center shrink-0">
+                      <Monitor className="w-4 h-4 sm:w-5 sm:h-5 text-cyan-500" />
                     </div>
-                    <div className="flex-1">
-                      <p className="text-sm font-medium text-gray-500 mb-1">Mode</p>
-                      <p className="font-semibold text-gray-900">Online Streaming</p>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs sm:text-sm font-medium text-gray-500 mb-1">Mode</p>
+                      <p className="text-sm sm:text-base font-semibold text-gray-900">Online Streaming</p>
                     </div>
                   </div>
                 ) : (
-                  <div className="flex items-start gap-3 p-4 rounded-xl bg-purple-50/50 border border-purple-100">
-                    <div className="w-10 h-10 rounded-lg bg-purple-100 flex items-center justify-center shrink-0">
-                      <Building2 className="w-5 h-5 text-purple-500" />
+                  <div className="flex items-start gap-2 sm:gap-3 p-3 sm:p-4 rounded-lg sm:rounded-xl bg-purple-50/50 border border-purple-100">
+                    <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-purple-100 flex items-center justify-center shrink-0">
+                      <Building2 className="w-4 h-4 sm:w-5 sm:h-5 text-purple-500" />
                     </div>
-                    <div className="flex-1">
-                      <p className="text-sm font-medium text-gray-500 mb-1">Mode</p>
-                      <p className="font-semibold text-gray-900">In-person</p>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs sm:text-sm font-medium text-gray-500 mb-1">Mode</p>
+                      <p className="text-sm sm:text-base font-semibold text-gray-900">In-person</p>
                     </div>
                   </div>
                 )}
                 {event.eligibility && (
-                  <div className="flex items-start gap-3 p-4 rounded-xl bg-green-50/50 border border-green-100">
-                    <div className="w-10 h-10 rounded-lg bg-green-100 flex items-center justify-center shrink-0">
-                      <Users className="w-5 h-5 text-green-500" />
+                  <div className="flex items-start gap-2 sm:gap-3 p-3 sm:p-4 rounded-lg sm:rounded-xl bg-green-50/50 border border-green-100">
+                    <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-green-100 flex items-center justify-center shrink-0">
+                      <Users className="w-4 h-4 sm:w-5 sm:h-5 text-green-500" />
                     </div>
-                    <div className="flex-1">
-                      <p className="text-sm font-medium text-gray-500 mb-1">Audience</p>
-                      <p className="font-semibold text-gray-900">{event.eligibility}</p>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs sm:text-sm font-medium text-gray-500 mb-1">Audience</p>
+                      <p className="text-sm sm:text-base font-semibold text-gray-900 break-words">{event.eligibility}</p>
                     </div>
                   </div>
                 )}
@@ -218,18 +218,18 @@ export default async function EventDetailPage({
 
             {/* Agenda Section */}
             {event.agenda && (
-              <div className="bg-white rounded-2xl p-6 md:p-8 border-2 border-gray-200 shadow-lg">
-                <h3 className="text-2xl font-bold text-gray-900 mb-6">Agenda</h3>
-                <div className="text-gray-700 leading-relaxed text-base md:text-lg whitespace-pre-line">
+              <div className="bg-white rounded-xl sm:rounded-2xl p-4 sm:p-6 md:p-8 border-2 border-gray-200 shadow-lg">
+                <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">Agenda</h3>
+                <div className="text-gray-700 leading-relaxed text-sm sm:text-base md:text-lg whitespace-pre-line">
                   {event.agenda}
                 </div>
               </div>
             )}
 
             {/* About the Organizer Section */}
-            <div className="bg-white rounded-2xl p-6 md:p-8 border-2 border-gray-200 shadow-lg">
-              <h3 className="text-2xl font-bold text-gray-900 mb-4">About the Organizer</h3>
-              <div className="space-y-4 text-gray-700 leading-relaxed text-base md:text-lg">
+            <div className="bg-white rounded-xl sm:rounded-2xl p-4 sm:p-6 md:p-8 border-2 border-gray-200 shadow-lg">
+              <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-3 sm:mb-4">About the Organizer</h3>
+              <div className="space-y-3 sm:space-y-4 text-gray-700 leading-relaxed text-sm sm:text-base md:text-lg">
                 <p>
                   Robonauts Club is Bangladesh&apos;s first youth robotics club, dedicated to preparing students for RoboFest and global STEM challenges. We empower the next generation of robotics innovators through hands-on learning, expert mentorship, and competitive opportunities.
                 </p>
@@ -240,12 +240,12 @@ export default async function EventDetailPage({
             </div>
 
             {/* Tags Section */}
-            <div className="bg-white rounded-2xl p-6 md:p-8 border-2 border-gray-200 shadow-lg">
-              <div className="flex flex-wrap gap-3">
+            <div className="bg-white rounded-xl sm:rounded-2xl p-4 sm:p-6 md:p-8 border-2 border-gray-200 shadow-lg">
+              <div className="flex flex-wrap gap-2 sm:gap-3">
                 {tags.map((tag, index) => (
                   <span
                     key={index}
-                    className="px-4 py-2 bg-indigo-50 text-indigo-700 rounded-full text-sm font-medium border border-indigo-200 hover:bg-indigo-100 transition-colors"
+                    className="px-3 sm:px-4 py-1.5 sm:py-2 bg-indigo-50 text-indigo-700 rounded-full text-xs sm:text-sm font-medium border border-indigo-200 hover:bg-indigo-100 transition-colors"
                   >
                     {tag}
                   </span>
@@ -256,7 +256,7 @@ export default async function EventDetailPage({
 
           {/* Right Column - Booking Form */}
           <div className="lg:col-span-1">
-            <div className="sticky top-4">
+            <div className="sticky top-4 sm:top-6">
               {hasPassed ? (
                 <EventPassedMessage />
               ) : (

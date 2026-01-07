@@ -41,128 +41,248 @@ export async function sendBookingConfirmationEmail({
     // Create email HTML content
     const emailHtml = `
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <title>Booking Confirmation - ${event.title}</title>
 </head>
-<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f3f4f6;">
-  <table role="presentation" style="width: 100%; border-collapse: collapse;">
+<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f5f7fa; line-height: 1.6; color: #374151;">
+  <!-- Wrapper Table -->
+  <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color: #f5f7fa; padding: 40px 20px;">
     <tr>
-      <td style="padding: 40px 20px; text-align: center;">
-        <table role="presentation" style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
-          <!-- Header -->
+      <td align="center" style="padding: 0;">
+        <!-- Main Container -->
+        <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="600" style="max-width: 600px; background-color: #ffffff; border-radius: 16px; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1); overflow: hidden;">
+          
+          <!-- Header with Brand -->
           <tr>
-            <td style="padding: 40px 30px 30px; background: linear-linear(135deg, #667eea 0%, #764ba2 100%); border-radius: 12px 12px 0 0; text-align: center;">
-              <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: 700;">Booking Confirmed!</h1>
-              <p style="margin: 10px 0 0; color: #e0e7ff; font-size: 16px;">Thank you for registering</p>
+            <td style="background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a855f7 100%); padding: 0;">
+              <!-- Top Spacer -->
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                <tr>
+                  <td style="padding: 48px 40px 32px; text-align: center;">
+                    <!-- Success Icon -->
+                    <div style="width: 80px; height: 80px; background-color: rgba(255, 255, 255, 0.2); border-radius: 50%; margin: 0 auto 24px; display: inline-block; line-height: 80px; text-align: center; backdrop-filter: blur(10px);">
+                      <span style="font-size: 42px; color: #ffffff;">✓</span>
+                    </div>
+                    <!-- Title -->
+                    <h1 style="margin: 0 0 12px; color: #ffffff; font-size: 32px; font-weight: 700; letter-spacing: -0.5px;">Booking Confirmed</h1>
+                    <p style="margin: 0; color: rgba(255, 255, 255, 0.95); font-size: 17px; font-weight: 400;">Your registration has been successfully processed</p>
+                  </td>
+                </tr>
+              </table>
             </td>
           </tr>
           
-          <!-- Content -->
+          <!-- Main Content -->
           <tr>
-            <td style="padding: 30px;">
-              <p style="margin: 0 0 20px; color: #374151; font-size: 16px; line-height: 1.6;">
-                Dear <strong>${name}</strong>,
+            <td style="padding: 40px;">
+              <!-- Greeting -->
+              <p style="margin: 0 0 24px; color: #374151; font-size: 16px; line-height: 1.7;">
+                Dear <strong style="color: #111827; font-weight: 600;">${name}</strong>,
               </p>
-              <p style="margin: 0 0 20px; color: #374151; font-size: 16px; line-height: 1.6;">
-                We're excited to confirm your booking for <strong>${event.title}</strong>! Your registration has been successfully received.
+              <p style="margin: 0 0 32px; color: #4b5563; font-size: 16px; line-height: 1.7;">
+                Thank you for registering! We're thrilled to confirm your booking for <strong style="color: #6366f1; font-weight: 600;">${event.title}</strong>. Your spot has been secured and we're looking forward to having you join us.
               </p>
               
               <!-- Event Details Card -->
-              <div style="background-color: #f9fafb; border-left: 4px solid #667eea; padding: 20px; margin: 25px 0; border-radius: 8px;">
-                <h2 style="margin: 0 0 15px; color: #111827; font-size: 22px; font-weight: 600;">Event Details</h2>
-                
-                <table role="presentation" style="width: 100%; border-collapse: collapse;">
-                  <tr>
-                    <td style="padding: 8px 0; color: #6b7280; font-size: 14px; width: 120px;">Event Name:</td>
-                    <td style="padding: 8px 0; color: #111827; font-size: 14px; font-weight: 600;">${event.title}</td>
-                  </tr>
-                  <tr>
-                    <td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Date:</td>
-                    <td style="padding: 8px 0; color: #111827; font-size: 14px;">${formattedDate}</td>
-                  </tr>
-                  ${event.time ? `
-                  <tr>
-                    <td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Time:</td>
-                    <td style="padding: 8px 0; color: #111827; font-size: 14px;">${event.time}</td>
-                  </tr>
-                  ` : ''}
-                  ${event.venue || event.location ? `
-                  <tr>
-                    <td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Venue:</td>
-                    <td style="padding: 8px 0; color: #111827; font-size: 14px;">${event.venue || event.location}</td>
-                  </tr>
-                  ` : ''}
-                  ${event.eligibility ? `
-                  <tr>
-                    <td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Eligibility:</td>
-                    <td style="padding: 8px 0; color: #111827; font-size: 14px;">${event.eligibility}</td>
-                  </tr>
-                  ` : ''}
-                </table>
-              </div>
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background: linear-gradient(to right, #f8fafc 0%, #ffffff 100%); border: 2px solid #e2e8f0; border-radius: 12px; margin-bottom: 32px; overflow: hidden;">
+                <tr>
+                  <td style="padding: 0;">
+                    <!-- Card Header -->
+                    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                      <tr>
+                        <td style="background-color: #6366f1; padding: 20px 28px;">
+                          <h2 style="margin: 0; color: #ffffff; font-size: 20px; font-weight: 600; letter-spacing: -0.3px;">📅 Event Details</h2>
+                        </td>
+                      </tr>
+                    </table>
+                    <!-- Card Body -->
+                    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                      <tr>
+                        <td style="padding: 28px;">
+                          <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                            <tr>
+                              <td style="padding: 12px 0; border-bottom: 1px solid #e5e7eb;">
+                                <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                                  <tr>
+                                    <td width="130" style="padding: 0; color: #6b7280; font-size: 14px; font-weight: 500; vertical-align: top;">Event Name:</td>
+                                    <td style="padding: 0; color: #111827; font-size: 15px; font-weight: 600; vertical-align: top;">${event.title}</td>
+                                  </tr>
+                                </table>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td style="padding: 12px 0; border-bottom: 1px solid #e5e7eb;">
+                                <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                                  <tr>
+                                    <td width="130" style="padding: 0; color: #6b7280; font-size: 14px; font-weight: 500; vertical-align: top;">📆 Date:</td>
+                                    <td style="padding: 0; color: #111827; font-size: 15px; font-weight: 500; vertical-align: top;">${formattedDate}</td>
+                                  </tr>
+                                </table>
+                              </td>
+                            </tr>
+                            ${event.time ? `
+                            <tr>
+                              <td style="padding: 12px 0; border-bottom: 1px solid #e5e7eb;">
+                                <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                                  <tr>
+                                    <td width="130" style="padding: 0; color: #6b7280; font-size: 14px; font-weight: 500; vertical-align: top;">🕐 Time:</td>
+                                    <td style="padding: 0; color: #111827; font-size: 15px; font-weight: 500; vertical-align: top;">${event.time}</td>
+                                  </tr>
+                                </table>
+                              </td>
+                            </tr>
+                            ` : ''}
+                            ${event.venue || event.location ? `
+                            <tr>
+                              <td style="padding: 12px 0; border-bottom: 1px solid #e5e7eb;">
+                                <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                                  <tr>
+                                    <td width="130" style="padding: 0; color: #6b7280; font-size: 14px; font-weight: 500; vertical-align: top;">📍 Venue:</td>
+                                    <td style="padding: 0; color: #111827; font-size: 15px; font-weight: 500; vertical-align: top;">${event.venue || event.location}</td>
+                                  </tr>
+                                </table>
+                              </td>
+                            </tr>
+                            ` : ''}
+                            ${event.eligibility ? `
+                            <tr>
+                              <td style="padding: 12px 0;">
+                                <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                                  <tr>
+                                    <td width="130" style="padding: 0; color: #6b7280; font-size: 14px; font-weight: 500; vertical-align: top;">🎯 Eligibility:</td>
+                                    <td style="padding: 0; color: #111827; font-size: 15px; font-weight: 500; vertical-align: top;">${event.eligibility}</td>
+                                  </tr>
+                                </table>
+                              </td>
+                            </tr>
+                            ` : ''}
+                          </table>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
               
               ${event.description ? `
-              <div style="margin: 25px 0;">
-                <h3 style="margin: 0 0 10px; color: #111827; font-size: 18px; font-weight: 600;">About the Event</h3>
-                <p style="margin: 0; color: #374151; font-size: 15px; line-height: 1.6;">
-                  ${event.fullDescription || event.description}
-                </p>
-              </div>
+              <!-- Event Description -->
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin-bottom: 32px;">
+                <tr>
+                  <td style="padding: 0 0 12px;">
+                    <h3 style="margin: 0; color: #111827; font-size: 18px; font-weight: 600; letter-spacing: -0.2px;">About the Event</h3>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding: 20px; background-color: #f8fafc; border-left: 4px solid #6366f1; border-radius: 8px;">
+                    <p style="margin: 0; color: #4b5563; font-size: 15px; line-height: 1.7;">
+                      ${event.fullDescription || event.description}
+                    </p>
+                  </td>
+                </tr>
+              </table>
               ` : ''}
               
               ${event.agenda ? `
-              <div style="margin: 25px 0;">
-                <h3 style="margin: 0 0 10px; color: #111827; font-size: 18px; font-weight: 600;">Agenda</h3>
-                <div style="background-color: #f9fafb; padding: 15px; border-radius: 8px;">
-                  <p style="margin: 0; color: #374151; font-size: 15px; line-height: 1.8; white-space: pre-line;">${event.agenda}</p>
-                </div>
-              </div>
+              <!-- Agenda -->
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin-bottom: 32px;">
+                <tr>
+                  <td style="padding: 0 0 12px;">
+                    <h3 style="margin: 0; color: #111827; font-size: 18px; font-weight: 600; letter-spacing: -0.2px;">📋 Agenda</h3>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding: 24px; background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px;">
+                    <p style="margin: 0; color: #4b5563; font-size: 15px; line-height: 1.8; white-space: pre-line;">${event.agenda}</p>
+                  </td>
+                </tr>
+              </table>
               ` : ''}
               
-              <!-- Booking Information -->
-              <div style="background-color: #eff6ff; border: 1px solid #bfdbfe; padding: 20px; margin: 25px 0; border-radius: 8px;">
-                <h3 style="margin: 0 0 15px; color: #1e40af; font-size: 18px; font-weight: 600;">Your Booking Information</h3>
-                <table role="presentation" style="width: 100%; border-collapse: collapse;">
-                  <tr>
-                    <td style="padding: 6px 0; color: #6b7280; font-size: 14px; width: 120px;">Name:</td>
-                    <td style="padding: 6px 0; color: #111827; font-size: 14px; font-weight: 500;">${name}</td>
-                  </tr>
-                  <tr>
-                    <td style="padding: 6px 0; color: #6b7280; font-size: 14px;">School:</td>
-                    <td style="padding: 6px 0; color: #111827; font-size: 14px; font-weight: 500;">${bookingDetails.school}</td>
-                  </tr>
-                  <tr>
-                    <td style="padding: 6px 0; color: #6b7280; font-size: 14px;">Email:</td>
-                    <td style="padding: 6px 0; color: #111827; font-size: 14px; font-weight: 500;">${to}</td>
-                  </tr>
-                </table>
-              </div>
+              <!-- Booking Information Highlight -->
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); border: 2px solid #93c5fd; border-radius: 12px; margin-bottom: 32px;">
+                <tr>
+                  <td style="padding: 28px;">
+                    <h3 style="margin: 0 0 20px; color: #1e40af; font-size: 18px; font-weight: 600; letter-spacing: -0.2px;">✉️ Your Booking Information</h3>
+                    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                      <tr>
+                        <td style="padding: 10px 0; border-bottom: 1px solid rgba(147, 197, 253, 0.3);">
+                          <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                            <tr>
+                              <td width="120" style="padding: 0; color: #3b82f6; font-size: 14px; font-weight: 500; vertical-align: top;">Name:</td>
+                              <td style="padding: 0; color: #1e40af; font-size: 15px; font-weight: 600; vertical-align: top;">${name}</td>
+                            </tr>
+                          </table>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td style="padding: 10px 0; border-bottom: 1px solid rgba(147, 197, 253, 0.3);">
+                          <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                            <tr>
+                              <td width="120" style="padding: 0; color: #3b82f6; font-size: 14px; font-weight: 500; vertical-align: top;">School:</td>
+                              <td style="padding: 0; color: #1e40af; font-size: 15px; font-weight: 600; vertical-align: top;">${bookingDetails.school}</td>
+                            </tr>
+                          </table>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td style="padding: 10px 0;">
+                          <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                            <tr>
+                              <td width="120" style="padding: 0; color: #3b82f6; font-size: 14px; font-weight: 500; vertical-align: top;">Email:</td>
+                              <td style="padding: 0; color: #1e40af; font-size: 15px; font-weight: 600; vertical-align: top; word-break: break-word;">${to}</td>
+                            </tr>
+                          </table>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
               
-              <p style="margin: 25px 0 0; color: #374151; font-size: 15px; line-height: 1.6;">
-                We look forward to seeing you at the event! If you have any questions or need to make changes to your booking, please don't hesitate to contact us.
-              </p>
+              <!-- Closing Message -->
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                <tr>
+                  <td style="padding: 24px; background-color: #f8fafc; border-radius: 10px; border-left: 4px solid #10b981;">
+                    <p style="margin: 0 0 12px; color: #374151; font-size: 15px; line-height: 1.7;">
+                      We look forward to seeing you at the event! If you have any questions or need to make changes to your booking, please don't hesitate to reach out to us.
+                    </p>
+                    <p style="margin: 0; color: #374151; font-size: 15px; line-height: 1.7;">
+                      Best regards,<br>
+                      <strong style="color: #6366f1; font-weight: 600; font-size: 16px;">The Robonauts Club Team</strong>
+                    </p>
+                  </td>
+                </tr>
+              </table>
               
-              <p style="margin: 20px 0 0; color: #374151; font-size: 15px; line-height: 1.6;">
-                Best regards,<br>
-                <strong style="color: #667eea;">Robonauts Club Team</strong>
-              </p>
             </td>
           </tr>
           
           <!-- Footer -->
           <tr>
-            <td style="padding: 20px 30px; background-color: #f9fafb; border-radius: 0 0 12px 12px; text-align: center; border-top: 1px solid #e5e7eb;">
-              <p style="margin: 0 0 10px; color: #6b7280; font-size: 12px;">
-                This is an automated confirmation email. Please do not reply to this email.
-              </p>
-              <p style="margin: 0; color: #9ca3af; font-size: 11px;">
-                © ${new Date().getFullYear()} Robonauts Club. All rights reserved.
-              </p>
+            <td style="padding: 32px 40px; background-color: #f8fafc; border-top: 1px solid #e5e7eb;">
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                <tr>
+                  <td align="center" style="padding: 0 0 16px;">
+                    <p style="margin: 0; color: #6b7280; font-size: 13px; line-height: 1.6;">
+                      This is an automated confirmation email. Please save this email for your records.
+                    </p>
+                  </td>
+                </tr>
+                <tr>
+                  <td align="center" style="padding: 16px 0; border-top: 1px solid #e5e7eb;">
+                    <p style="margin: 0; color: #9ca3af; font-size: 12px;">
+                      © ${new Date().getFullYear()} Robonauts Club. All rights reserved.
+                    </p>
+                  </td>
+                </tr>
+              </table>
             </td>
           </tr>
+          
         </table>
       </td>
     </tr>
@@ -184,7 +304,7 @@ export async function sendBookingConfirmationEmail({
     if (!fromEmail || fromEmail.trim() === '') {
       // Use Resend's default onboarding domain which works without verification
       // Format: "Your Name <onboarding@resend.dev>"
-      fromEmail = 'Robonauts Club <onboarding@resend.dev>'
+      fromEmail = 'Robonauts Club <noreply@robonautsclub.com>'
     }
 
     // Send email using Resend
