@@ -1,6 +1,6 @@
 import { requireAuth } from '@/lib/auth'
 import { getEvents } from '../actions'
-import { Calendar, Plus, MapPin, Clock, Users } from 'lucide-react'
+import { Calendar, Plus, MapPin, Clock, Users, User } from 'lucide-react'
 import { format, isFuture, isPast } from 'date-fns'
 import CreateEventForm from './CreateEventForm'
 import EventActions from './EventActions'
@@ -101,6 +101,9 @@ export default async function EventsPage() {
                     Location
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                    Created By
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                     Status
                   </th>
                   <th className="px-6 py-3 text-right text-xs font-semibold text-gray-700 uppercase tracking-wider">
@@ -143,6 +146,23 @@ export default async function EventsPage() {
                           </div>
                         ) : (
                           <span className="text-sm text-gray-400">N/A</span>
+                        )}
+                      </td>
+                      <td className="px-6 py-4">
+                        {event.createdByName ? (
+                          <div className="text-sm text-gray-900">
+                            <div className="flex items-center gap-1.5 mb-1">
+                              <User className="w-4 h-4 text-gray-400" />
+                              <span className="font-medium">{event.createdByName}</span>
+                            </div>
+                            {event.createdByEmail && (
+                              <div className="text-xs text-gray-500 truncate max-w-xs">
+                                {event.createdByEmail}
+                              </div>
+                            )}
+                          </div>
+                        ) : (
+                          <span className="text-sm text-gray-400">Unknown</span>
                         )}
                       </td>
                       <td className="px-6 py-4">

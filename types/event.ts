@@ -16,5 +16,7 @@ export type Event = {
   createdAt: Date | string
   updatedAt: Date | string
   createdBy: string // UID of the admin who created it
+  createdByName?: string // Name of the admin who created it
+  createdByEmail?: string // Email of the admin who created it
 }
 

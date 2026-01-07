@@ -2,7 +2,7 @@ import { requireAuth } from '@/lib/auth'
 import { getEvent, getBookings } from '../../actions'
 import { notFound } from 'next/navigation'
 import { format, isFuture } from 'date-fns'
-import { Calendar, Clock, MapPin, Users, Mail, Building2, ArrowLeft } from 'lucide-react'
+import { Calendar, Clock, MapPin, Users, Mail, Building2, ArrowLeft, User } from 'lucide-react'
 import type { Booking } from '@/types/booking'
 import Link from 'next/link'
 import EventHeaderActions from './EventHeaderActions'
@@ -107,6 +107,22 @@ export default async function EventDetailsPage({
               <div>
                 <p className="text-sm font-medium text-gray-500 mb-1">Eligibility</p>
                 <p className="font-semibold text-gray-900">{event.eligibility}</p>
+              </div>
+            </div>
+          )}
+
+          {/* Created By */}
+          {event.createdByName && (
+            <div className="flex items-start gap-3 p-4 rounded-lg bg-amber-50 border border-amber-100">
+              <div className="w-10 h-10 rounded-lg bg-amber-100 flex items-center justify-center shrink-0">
+                <User className="w-5 h-5 text-amber-600" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-gray-500 mb-1">Created By</p>
+                <p className="font-semibold text-gray-900">{event.createdByName}</p>
+                {event.createdByEmail && (
+                  <p className="text-xs text-gray-500 mt-1">{event.createdByEmail}</p>
+                )}
               </div>
             </div>
           )}

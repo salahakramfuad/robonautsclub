@@ -124,6 +124,8 @@ export async function createEvent(formData: {
       createdAt: now,
       updatedAt: now,
       createdBy: session.uid,
+      createdByName: session.name,
+      createdByEmail: session.email,
     })
 
     return {
