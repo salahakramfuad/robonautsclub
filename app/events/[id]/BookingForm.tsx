@@ -60,7 +60,14 @@ export default function BookingForm({ event }: { event: Event }) {
           setIsSubmitted(false)
         }, 5000)
       } else {
-        setErrors({ submit: result.error || 'Failed to submit booking. Please try again.' })
+        // Show specific error message
+        const errorMessage = result.error || 'Failed to submit booking. Please try again.'
+        setErrors({ submit: errorMessage })
+        
+        // If it's a duplicate booking error, highlight it
+        if (errorMessage.includes('already registered')) {
+          // Optionally clear the form or keep it for user to see
+        }
       }
     } catch (error) {
       console.error('Booking error:', error)
@@ -81,11 +88,11 @@ export default function BookingForm({ event }: { event: Event }) {
             Booking Successful!
           </h3>
           <p className="text-gray-600 mb-2">
-            Your booking request for <strong className="text-indigo-600">{event.title}</strong> has been
-            submitted.
+            Your booking for <strong className="text-indigo-600">{event.title}</strong> has been
+            confirmed!
           </p>
           <p className="text-sm text-gray-500">
-            We&apos;ll contact you soon with confirmation details.
+            A confirmation email with event details has been sent to your email address.
           </p>
         </div>
       </div>

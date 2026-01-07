@@ -2,6 +2,7 @@
 
 import { adminDb } from '@/lib/firebase-admin'
 import { Event } from '@/types/event'
+import { sendBookingConfirmationEmail } from '@/lib/email'
 
 /**
  * Get all events from Firestore (public - no auth required)
@@ -67,6 +68,7 @@ export async function getPublicEvent(id: string): Promise<Event | null> {
 /**
  * Create a booking for an event
  * This is a public action (no auth required) as users need to book events
+ * IMPORTANT: Email confirmation is sent FIRST, booking is only saved if email succeeds
  */
 export async function createBooking(formData: {
   eventId: string
@@ -102,7 +104,60 @@ export async function createBooking(formData: {
       }
     }
 
-    // Create booking in Firestore
+    // Step 1: Check if user has already booked this event with the same email
+    const normalizedEmail = formData.email.trim().toLowerCase()
+    const existingBookings = await adminDb
+      .collection('bookings')
+      .where('eventId', '==', formData.eventId)
+      .where('email', '==', normalizedEmail)
+      .get()
+
+    if (!existingBookings.empty) {
+      return {
+        success: false,
+        error: 'You have already registered for this event with this email address.',
+      }
+    }
+
+    // Step 2: Fetch event details for the email
+    const eventDoc = await adminDb.collection('events').doc(formData.eventId).get()
+    
+    if (!eventDoc.exists) {
+      return {
+        success: false,
+        error: 'Event not found',
+      }
+    }
+
+    const eventData = eventDoc.data()!
+    const event: Event = {
+      id: eventDoc.id,
+      ...eventData,
+      createdAt: eventData.createdAt?.toDate?.() || eventData.createdAt,
+      updatedAt: eventData.updatedAt?.toDate?.() || eventData.updatedAt,
+    } as Event
+
+    // Step 3: Send confirmation email FIRST
+    // Only proceed to save booking if email is sent successfully
+    const emailResult = await sendBookingConfirmationEmail({
+      to: formData.email.trim().toLowerCase(),
+      name: formData.name.trim(),
+      event,
+      bookingDetails: {
+        school: formData.school.trim(),
+        information: formData.information.trim(),
+      },
+    })
+
+    if (!emailResult.success) {
+      console.error('Failed to send confirmation email:', emailResult.error)
+      return {
+        success: false,
+        error: emailResult.error || 'Failed to send confirmation email. Please check your email address and try again.',
+      }
+    }
+
+    // Step 4: Only save booking to database if email was sent successfully
     const now = new Date()
     const bookingRef = await adminDb.collection('bookings').add({
       eventId: formData.eventId,
@@ -112,6 +167,8 @@ export async function createBooking(formData: {
       information: formData.information.trim(),
       createdAt: now,
     })
+
+    console.log('Booking created successfully after email confirmation:', bookingRef.id)
 
     return {
       success: true,

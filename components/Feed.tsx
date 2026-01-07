@@ -144,7 +144,7 @@ const Feed = () => {
       <Hero />
 
       {/* Why Us Section */}
-      <section className="py-24 bg-gray-50/50 relative overflow-hidden">
+      <section className="py-24 bg-gradient-to-br from-indigo-50/50 via-blue-50/50 to-purple-50/30 relative overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <SectionHeader
             title="Why Choose Robonauts Club?"
@@ -196,7 +196,7 @@ const Feed = () => {
       </section>
 
       {/* Mission & Vision Section */}
-      <section className="py-24 bg-indigo-50/30 relative">
+      <section className="py-24 bg-gradient-to-br from-indigo-50/80 via-blue-50/60 to-purple-50/40 relative">
         <div className="absolute top-0 left-0 right-0 h-px bg-linear-to-r from-transparent via-gray-200 to-transparent" />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <SectionHeader
@@ -338,7 +338,7 @@ const Feed = () => {
       </section>
 
       {/* FAQ Section */}
-      <section className="py-24 bg-blue-50/30 relative">
+      <section className="py-24 bg-gradient-to-br from-blue-50/80 via-indigo-50/60 to-purple-50/40 relative">
         <div className="absolute top-0 left-0 right-0 h-px bg-linear-to-r from-transparent via-gray-200 to-transparent" />
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <SectionHeader
@@ -350,7 +350,7 @@ const Feed = () => {
       </section>
 
       {/* Optional CTA Section */}
-      <section className="py-16 bg-linear-to-br from-indigo-100 via-blue-100 to-purple-50 relative overflow-hidden">
+      <section className="py-16 bg-gradient-to-br from-indigo-100 via-blue-100 to-purple-50 relative overflow-hidden">
         <div className="absolute top-0 left-0 right-0 h-px bg-linear-to-r from-transparent via-gray-200 to-transparent" />
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
           <div className="inline-block mb-4">
