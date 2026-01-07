@@ -30,10 +30,10 @@ const SERVICES = [
 
 const SOCIAL_LINKS = [
   { icon: FaFacebookF, href: COMPANY.facebook, label: "Facebook" },
-  { icon: FaInstagram, href: "#", label: "Instagram" },
-  { icon: FaLinkedinIn, href: "#", label: "LinkedIn" },
-  { icon: FaYoutube, href: "#", label: "YouTube" },
-  { icon: FaWhatsapp, href: "#", label: "WhatsApp" },
+  { icon: FaInstagram, href: "https://www.instagram.com/robonauts_club", label: "Instagram" },
+  { icon: FaLinkedinIn, href: "/linkedin", label: "LinkedIn" },
+  { icon: FaYoutube, href: "/youtube", label: "YouTube" },
+  { icon: FaWhatsapp, href: "https://wa.me/8801824863366", label: "WhatsApp" },
 ];
 
 /* ================== COMPONENT ================== */

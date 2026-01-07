@@ -10,6 +10,7 @@ export type Event = {
   image: string
   eligibility?: string
   venue?: string
+  agenda?: string
 }
 
 export const eventsData: Event[] = [
@@ -26,6 +27,7 @@ export const eventsData: Event[] = [
       'Join us for the most exciting robotics competition of the year! This national qualifier brings together talented students from across Bangladesh to compete in various robotics challenges including line following, obstacle avoidance, and creative design categories. Winners will represent Bangladesh in the international RoboFest competition.',
     eligibility: 'Open for students in grades 3-12. Teams of 2-4 members.',
     image: '/robotics-event.jpg',
+    agenda: '10:00 AM - 10:30 AM: Registration and Welcome\n10:30 AM - 11:00 AM: Opening Ceremony & Rules Briefing\n11:00 AM - 12:30 PM: Round 1 - Line Following Competition\n12:30 PM - 1:30 PM: Lunch Break\n1:30 PM - 3:00 PM: Round 2 - Obstacle Avoidance Challenge\n3:00 PM - 3:15 PM: Break\n3:15 PM - 4:30 PM: Round 3 - Creative Design Presentation\n4:30 PM - 5:00 PM: Results Announcement & Award Ceremony',
   },
   {
     id: 2,
@@ -40,6 +42,7 @@ export const eventsData: Event[] = [
       'A comprehensive workshop introducing students to the fundamentals of STEM through interactive experiments. Participants will build simple circuits, explore basic programming concepts, and engage in team-based problem-solving activities. Perfect for beginners!',
     eligibility: 'Ideal for ages 8-16. No prior experience required.',
     image: '/workshop_kids.jpg',
+    agenda: '2:00 PM - 2:15 PM: Welcome and Introduction to STEM\n2:15 PM - 3:00 PM: Hands-on Circuit Building Activity\n3:00 PM - 3:15 PM: Break and Refreshments\n3:15 PM - 4:00 PM: Basic Programming Concepts Session\n4:00 PM - 4:45 PM: Team Problem-Solving Challenge\n4:45 PM - 5:00 PM: Q&A and Closing Remarks',
   },
   {
     id: 3,
@@ -265,6 +268,7 @@ export const eventsData: Event[] = [
       'A unique opportunity for families to learn robotics together! Parents and children work as a team to build and program a robot. This workshop promotes family engagement in STEM education and helps parents understand what their children are learning. Fun for all ages!',
     eligibility: 'Open to parent-child pairs. Children ages 8-14. No prior experience needed.',
     image: '/workshop_kids.jpg',
+    agenda: '2:00 PM - 2:20 PM: Welcome and Introduction\n2:20 PM - 3:00 PM: Building Your First Robot Together\n3:00 PM - 3:15 PM: Break and Family Networking\n3:15 PM - 4:00 PM: Programming and Testing Session\n4:00 PM - 4:45 PM: Robot Challenge and Competition\n4:45 PM - 5:00 PM: Showcase and Award Certificates',
   },
   {
     id: 19,

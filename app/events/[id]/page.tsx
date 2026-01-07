@@ -8,41 +8,6 @@ import { Calendar, Clock, MapPin, ArrowLeft, CheckCircle, Users, Monitor, Buildi
 import { format, parse, isPast } from 'date-fns'
 import { eventsData, type Event } from '../data'
 
-// Helper function to format 24-hour time to 12-hour format
-const formatTime12 = (hour24: number, minute: number) => {
-  const period = hour24 >= 12 ? 'PM' : 'AM'
-  const hour12 = hour24 % 12 || 12
-  return `${hour12}:${String(minute).padStart(2, '0')} ${period}`
-}
-
-// Helper function to generate agenda from event time
-const generateAgenda = (event: Event) => {
-  const timeMatch = event.time.match(/(\d{1,2}):(\d{2})\s*(AM|PM)/i)
-  if (!timeMatch) {
-    return [
-      { time: '09:30 AM - 10:30 AM', title: 'Opening & Welcome' },
-      { time: '10:45 AM - 12:00 PM', title: 'Main Session' },
-      { time: '12:00 PM - 1:00 PM', title: 'Break & Networking' },
-      { time: '01:00 PM - 02:15 PM', title: 'Workshop & Activities' },
-      { time: '02:30 PM - 04:00 PM', title: 'Hands-on Practice' },
-      { time: '04:15 PM - 05:00 PM', title: 'Closing & Q&A' },
-    ]
-  }
-
-  const startHour = parseInt(timeMatch[1])
-  const startMin = parseInt(timeMatch[2])
-  const isPM = timeMatch[3].toUpperCase() === 'PM'
-  const start24 = isPM && startHour !== 12 ? startHour + 12 : startHour === 12 && !isPM ? 0 : startHour
-
-  return [
-    { time: `${formatTime12(start24, startMin)} - ${formatTime12((start24 + 1) % 24, startMin)}`, title: 'Opening & Welcome' },
-    { time: `${formatTime12((start24 + 1) % 24, 15)} - ${formatTime12((start24 + 2) % 24, 30)}`, title: 'Main Session' },
-    { time: `${formatTime12((start24 + 2) % 24, 30)} - ${formatTime12((start24 + 3) % 24, 0)}`, title: 'Break & Networking' },
-    { time: `${formatTime12((start24 + 3) % 24, 0)} - ${formatTime12((start24 + 4) % 24, 15)}`, title: 'Workshop & Activities' },
-    { time: `${formatTime12((start24 + 4) % 24, 30)} - ${formatTime12((start24 + 5) % 24, 0)}`, title: 'Hands-on Practice' },
-    { time: `${formatTime12((start24 + 5) % 24, 15)} - ${formatTime12((start24 + 6) % 24, 0)}`, title: 'Closing & Q&A' },
-  ]
-}
 
 // Helper function to extract tags from event
 const getEventTags = (event: Event) => {
@@ -305,12 +270,11 @@ export default function EventDetailPage() {
 
   const eventDate = parse(event.date, 'yyyy-MM-dd', new Date())
   const hasPassed = isPast(eventDate) && eventDate.toDateString() !== new Date().toDateString()
-  const agenda = generateAgenda(event)
   const tags = getEventTags(event)
   const isOnline = event.location.toLowerCase().includes('online') || event.venue?.toLowerCase().includes('online')
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-sky-50 via-blue-50 to-indigo-50">
+    <div className="min-h-screen bg-gradient-to-br from-sky-50 via-blue-50 to-indigo-50">
       {/* Compact Header Section */}
       <section className="relative overflow-hidden">
         {/* Background decoration */}
@@ -319,45 +283,31 @@ export default function EventDetailPage() {
           <div className="absolute bottom-0 left-0 h-96 bg-indigo-200 rounded-full blur-3xl transform -translate-x-1/2 translate-y-1/2" />
         </div>
 
-        <div className="relative max-w-7xl mx-auto px-6 py-12 md:py-16">
+        <div className="relative max-w-7xl mx-auto px-6 pt-6 md:pt-8 pb-6">
           <Link
             href="/events"
-            className="inline-flex items-center gap-2 text-gray-700 hover:text-indigo-600 mb-6 transition-colors group"
+            className="inline-flex items-center gap-2 text-gray-700 hover:text-indigo-600 mb-4 transition-colors group"
           >
             <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
             <span className="font-medium">Back to Events</span>
           </Link>
           
-          <div className="grid lg:grid-cols-3 gap-6 lg:gap-8 items-start">
-            {/* Left Column - Title and Subtitle */}
-            <div className="lg:col-span-2">
-              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold text-gray-900 mb-4 leading-tight">
-                {event.title}
-              </h1>
-              <p className="text-base sm:text-lg md:text-xl text-gray-600 leading-relaxed max-w-3xl">
-                {event.description}
-              </p>
-            </div>
-
-            {/* Right Column - Booking Form */}
-            <div className="lg:col-span-1 order-first lg:order-last">
-              <div className="sticky top-24">
-                {hasPassed ? (
-                  <EventPassedMessage />
-                ) : (
-                  <BookingForm event={event} />
-                )}
-              </div>
-            </div>
+          <div className="max-w-4xl">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold text-gray-900 mb-3 leading-tight">
+              {event.title}
+            </h1>
+            <p className="text-base sm:text-lg md:text-xl text-gray-600 leading-relaxed">
+              {event.description}
+            </p>
           </div>
         </div>
       </section>
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-6 pb-12">
-        <div className="grid lg:grid-cols-3 gap-8">
+        <div className="grid lg:grid-cols-3 gap-6 lg:gap-8">
           {/* Left Column - Image and Content Sections */}
-          <div className="lg:col-span-2 space-y-6">
+          <div className="lg:col-span-2 space-y-5">
             {/* Main Event Image */}
             <div className="bg-white rounded-2xl overflow-hidden border-2 border-gray-200 shadow-lg">
               <div className="relative h-64 md:h-80 lg:h-96">
@@ -372,7 +322,7 @@ export default function EventDetailPage() {
             </div>
 
             {/* Overview Section */}
-            <div className="bg-white rounded-2xl p-6 md:p-8 border-2 border-gray-200 shadow-lg">
+            <div className="bg-white rounded-2xl p-4 md:p-8 border-2 border-gray-200 shadow-lg">
               <h3 className="text-2xl font-bold text-gray-900 mb-4">Overview</h3>
               <p className="text-gray-700 leading-relaxed text-base md:text-lg">
                 {event.fullDescription || event.description}
@@ -446,18 +396,14 @@ export default function EventDetailPage() {
             </div>
 
             {/* Agenda Section */}
-            <div className="bg-white rounded-2xl p-6 md:p-8 border-2 border-gray-200 shadow-lg">
-              <h3 className="text-2xl font-bold text-gray-900 mb-6">Agenda</h3>
-              <ul className="space-y-3">
-                {agenda.map((item, index) => (
-                  <li key={index} className="flex flex-col sm:flex-row sm:items-start gap-2 sm:gap-3">
-                    <span className="text-indigo-600 font-semibold shrink-0 sm:min-w-[140px]">{item.time}</span>
-                    <span className="text-gray-700 hidden sm:inline">|</span>
-                    <span className="text-gray-700">{item.title}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
+            {event.agenda && (
+              <div className="bg-white rounded-2xl p-6 md:p-8 border-2 border-gray-200 shadow-lg">
+                <h3 className="text-2xl font-bold text-gray-900 mb-6">Agenda</h3>
+                <div className="text-gray-700 leading-relaxed text-base md:text-lg whitespace-pre-line">
+                  {event.agenda}
+                </div>
+              </div>
+            )}
 
             {/* About the Organizer Section */}
             <div className="bg-white rounded-2xl p-6 md:p-8 border-2 border-gray-200 shadow-lg">
@@ -487,8 +433,16 @@ export default function EventDetailPage() {
             </div>
           </div>
 
-          {/* Right Column - Empty space for form (already positioned above) */}
-          <div className="lg:col-span-1"></div>
+          {/* Right Column - Booking Form */}
+          <div className="lg:col-span-1">
+            <div className="sticky top-4">
+              {hasPassed ? (
+                <EventPassedMessage />
+              ) : (
+                <BookingForm event={event} />
+              )}
+            </div>
+          </div>
         </div>
       </main>
     </div>
