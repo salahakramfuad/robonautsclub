@@ -26,11 +26,11 @@ export async function sendBookingConfirmationEmail({
 }: BookingConfirmationEmailProps): Promise<{ success: boolean; error?: string }> {
   try {
     // Check if Resend API key is configured
-    if (!process.env.RESEND_API_KEY) {
+    if (!process.env.RESEND_API_KEY || process.env.RESEND_API_KEY.trim() === '') {
       console.error('RESEND_API_KEY is not configured')
       return {
         success: false,
-        error: 'Email service is not configured',
+        error: 'Email service is not configured. Please set RESEND_API_KEY in your environment variables. Get your API key from https://resend.com/api-keys',
       }
     }
 
@@ -174,16 +174,17 @@ export async function sendBookingConfirmationEmail({
     // Determine the "from" email address
     // Priority:
     // 1. Use RESEND_FROM_EMAIL if set (must be from a verified domain)
-    // 2. Fallback to a default that should work (user needs to verify domain in Resend)
+    // 2. Fallback to Resend's default onboarding domain (works immediately for testing)
+    // 3. For production, verify your domain in Resend and use your custom domain
     let fromEmail = process.env.RESEND_FROM_EMAIL
     
-    // If no custom from email is set, use a default
-    // NOTE: For production, you should verify your domain in Resend dashboard
-    // and set RESEND_FROM_EMAIL to use your verified domain
-    if (!fromEmail) {
-      // Default fallback - user should verify their domain in Resend
-      // or set RESEND_FROM_EMAIL to a verified domain
-      fromEmail = 'Robonauts Club <noreply@robonautsclub.com>'
+    // If no custom from email is set, use Resend's default onboarding domain
+    // This works immediately without domain verification for testing
+    // For production, verify your domain at https://resend.com/domains and set RESEND_FROM_EMAIL
+    if (!fromEmail || fromEmail.trim() === '') {
+      // Use Resend's default onboarding domain which works without verification
+      // Format: "Your Name <onboarding@resend.dev>"
+      fromEmail = 'Robonauts Club <onboarding@resend.dev>'
     }
 
     // Send email using Resend
@@ -196,33 +197,35 @@ export async function sendBookingConfirmationEmail({
 
     if (error) {
       console.error('Resend email error:', error)
+      console.error('Error details:', JSON.stringify(error, null, 2))
       
       // Provide more specific error messages based on error type
       if (error.message?.includes('domain is not verified') || error.message?.includes('not verified')) {
         return {
           success: false,
-          error: 'Email domain not verified. Please verify your domain at https://resend.com/domains or contact support.',
+          error: `Email domain not verified. Please verify your domain at https://resend.com/domains. Current from address: ${fromEmail}`,
         }
       }
       
       // Handle other Resend API errors
-      if (error.statusCode === 403) {
+      if (error.statusCode === 403 || error.statusCode === 401) {
+        const errorDetails = error.message || 'Access denied'
         return {
           success: false,
-          error: 'Email service access denied. Please check your Resend API key and domain verification.',
+          error: `Email service access denied (${error.statusCode}). Possible causes:\n1. Invalid or expired RESEND_API_KEY - Get a new key from https://resend.com/api-keys\n2. Domain not verified - Verify your domain at https://resend.com/domains\n3. API key doesn't have send permissions\n\nError: ${errorDetails}\n\nCurrent from address: ${fromEmail}`,
         }
       }
       
       if (error.statusCode === 422) {
         return {
           success: false,
-          error: 'Invalid email configuration. Please check your RESEND_FROM_EMAIL setting.',
+          error: `Invalid email configuration. Please check your RESEND_FROM_EMAIL setting. Current from address: ${fromEmail}\n\nThe from address must be from a verified domain in Resend. Verify your domain at https://resend.com/domains or use the default Resend domain.`,
         }
       }
       
       return {
         success: false,
-        error: error.message || 'Failed to send confirmation email. Please try again later.',
+        error: error.message || `Failed to send confirmation email (Status: ${error.statusCode || 'Unknown'}). Please check your Resend configuration.`,
       }
     }
 

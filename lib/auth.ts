@@ -28,8 +28,23 @@ export async function getServerSession() {
           name: user.displayName || user.email || 'Admin',
           emailVerified: user.emailVerified,
         }
-      } catch (error) {
+      } catch (error: any) {
         console.error('Error verifying auth token:', error)
+        
+        // If token is expired or invalid, clear cookies
+        if (error.code === 'auth/id-token-expired' || 
+            error.code === 'auth/argument-error' ||
+            error.code === 'auth/invalid-id-token') {
+          // Token is expired or invalid - clear cookies
+          try {
+            const cookieStore = await cookies()
+            cookieStore.delete('auth-token')
+            cookieStore.delete('user-info')
+          } catch (clearError) {
+            console.error('Error clearing expired token cookies:', clearError)
+          }
+        }
+        
         return null
       }
     }
@@ -64,12 +79,21 @@ export async function getServerSession() {
 
 /**
  * Require authentication - redirects to login if not authenticated
+ * Also redirects if token is expired or invalid
  * Use this in server components and server actions
  */
 export async function requireAuth() {
   const session = await getServerSession()
   
   if (!session) {
+    // Clear any invalid/expired cookies before redirecting
+    try {
+      const cookieStore = await cookies()
+      cookieStore.delete('auth-token')
+      cookieStore.delete('user-info')
+    } catch (error) {
+      console.error('Error clearing auth cookies:', error)
+    }
     redirect('/login')
   }
   
