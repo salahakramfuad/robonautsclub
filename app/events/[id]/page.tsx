@@ -136,9 +136,9 @@ export async function generateMetadata({
   }
 }
 
-// Force dynamic rendering to prevent Next.js from caching this page
-// This ensures Firestore data changes appear immediately without stale cache
-export const dynamic = 'force-dynamic'
+// ISR: Revalidate every 60 seconds to keep content fresh
+// Pages are statically generated and updated on-demand when events change
+export const revalidate = 60
 
 export default async function EventDetailPage({
   params,

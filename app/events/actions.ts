@@ -1,22 +1,14 @@
 'use server'
 
-import { unstable_noStore } from 'next/cache'
 import { adminDb } from '@/lib/firebase-admin'
 import { Event } from '@/types/event'
 import { sendBookingConfirmationEmail } from '@/lib/email'
 
 /**
  * Get all events from Firestore (public - no auth required)
- * 
- * Caching disabled: Next.js App Router caches server-side data fetches by default.
- * We disable caching here to ensure Firestore changes (add/update/delete) appear
- * immediately on the frontend without stale cached data. Real-time listeners handle
- * subsequent updates, but initial SSR must always fetch fresh data.
+ * Used with ISR (Incremental Static Regeneration) for fast page loads
  */
 export async function getPublicEvents(): Promise<Event[]> {
-  // Disable Next.js caching to always fetch fresh data from Firestore
-  unstable_noStore()
-
   if (!adminDb) {
     console.error('Firebase Admin SDK not available. Cannot fetch events.')
     // Return empty array instead of throwing for public pages
@@ -60,15 +52,9 @@ export async function getPublicEvents(): Promise<Event[]> {
 
 /**
  * Get a single event by ID (public - no auth required)
- * 
- * Caching disabled: Next.js App Router caches server-side data fetches by default.
- * We disable caching here to ensure Firestore changes appear immediately without
- * stale cached data on the event detail page.
+ * Used with ISR (Incremental Static Regeneration) for fast page loads
  */
 export async function getPublicEvent(id: string): Promise<Event | null> {
-  // Disable Next.js caching to always fetch fresh data from Firestore
-  unstable_noStore()
-
   if (!adminDb) {
     console.error('Firebase Admin SDK not available. Cannot fetch event.')
     return null

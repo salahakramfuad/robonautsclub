@@ -1,5 +1,6 @@
 'use server'
 
+import { revalidatePath } from 'next/cache'
 import { requireAuth } from '@/lib/auth'
 import { adminDb } from '@/lib/firebase-admin'
 import { Event } from '@/types/event'
@@ -150,6 +151,10 @@ export async function createEvent(formData: {
       createdByEmail: session.email,
     })
 
+    // Revalidate ISR pages to show new event immediately
+    revalidatePath('/events')
+    revalidatePath(`/events/${eventRef.id}`)
+
     return {
       success: true,
       eventId: eventRef.id,
@@ -239,6 +244,10 @@ export async function updateEvent(
       updatedAt: new Date(),
     })
 
+    // Revalidate ISR pages to show updated event immediately
+    revalidatePath('/events')
+    revalidatePath(`/events/${eventId}`)
+
     return {
       success: true,
     }
@@ -302,6 +311,10 @@ export async function deleteEvent(eventId: string): Promise<{ success: boolean; 
 
     // Commit the batch delete
     await batch.commit()
+
+    // Revalidate ISR pages to remove deleted event immediately
+    revalidatePath('/events')
+    revalidatePath(`/events/${eventId}`)
 
     return {
       success: true,
