@@ -31,7 +31,7 @@ const getEventImageUrl = (imageUrl?: string): string => {
   }
   
   // Invalid URL, use default
-  return '/robotics-event.jpg'
+  return '/robot.gif'
 }
 
 // Helper function to get tags from event
@@ -135,6 +135,10 @@ export async function generateMetadata({
     },
   }
 }
+
+// Force dynamic rendering to prevent Next.js from caching this page
+// This ensures Firestore data changes appear immediately without stale cache
+export const dynamic = 'force-dynamic'
 
 export default async function EventDetailPage({
   params,
@@ -273,7 +277,7 @@ export default async function EventDetailPage({
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-xs sm:text-sm font-medium text-gray-500 mb-1">Venue</p>
-                    <p className="text-sm sm:text-base font-semibold text-gray-900 break-words">{event.venue || event.location}</p>
+                    <p className="text-sm sm:text-base font-semibold text-gray-900 wrap-break-word">{event.venue || event.location}</p>
                   </div>
                 </div>
                 {isOnline ? (
@@ -304,7 +308,7 @@ export default async function EventDetailPage({
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-xs sm:text-sm font-medium text-gray-500 mb-1">Audience</p>
-                      <p className="text-sm sm:text-base font-semibold text-gray-900 break-words">{event.eligibility}</p>
+                      <p className="text-sm sm:text-base font-semibold text-gray-900 wrap-break-word">{event.eligibility}</p>
                     </div>
                   </div>
                 )}
