@@ -1,17 +1,22 @@
 'use client'
 
-import { useState, FormEvent } from 'react'
+import { useState, FormEvent, useRef } from 'react'
 import { useRouter } from 'next/navigation'
+import Image from 'next/image'
 import { createEvent } from '../actions'
-import { Plus, X, Calendar, Clock, MapPin, FileText, Users, Image as ImageIcon, Sparkles } from 'lucide-react'
+import { Plus, X, Calendar, Clock, MapPin, FileText, Users, Image as ImageIcon, Sparkles, Upload, Trash2 } from 'lucide-react'
 import DatePicker from './DatePicker'
 import TimePicker from './TimePicker'
 
 export default function CreateEventForm() {
   const router = useRouter()
+  const fileInputRef = useRef<HTMLInputElement>(null)
   const [isOpen, setIsOpen] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [uploading, setUploading] = useState(false)
   const [error, setError] = useState('')
+  const [selectedFile, setSelectedFile] = useState<File | null>(null)
+  const [imagePreview, setImagePreview] = useState<string | null>(null)
   const [formData, setFormData] = useState({
     title: '',
     date: '',
@@ -24,6 +29,80 @@ export default function CreateEventForm() {
     agenda: '',
     image: '',
   })
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    // Validate file type
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif']
+    if (!allowedTypes.includes(file.type)) {
+      setError('Invalid file type. Please select an image file (JPEG, PNG, WebP, or GIF).')
+      return
+    }
+
+    // Validate file size (5MB)
+    const maxSize = 5 * 1024 * 1024
+    if (file.size > maxSize) {
+      setError('File size exceeds 5MB. Please select a smaller image.')
+      return
+    }
+
+    setSelectedFile(file)
+    setError('')
+
+    // Create preview
+    const reader = new FileReader()
+    reader.onloadend = () => {
+      setImagePreview(reader.result as string)
+    }
+    reader.readAsDataURL(file)
+  }
+
+  const handleImageUpload = async () => {
+    if (!selectedFile) return
+
+    setUploading(true)
+    setError('')
+
+    try {
+      const uploadFormData = new FormData()
+      uploadFormData.append('image', selectedFile)
+
+      const response = await fetch('/api/upload-image', {
+        method: 'POST',
+        body: uploadFormData,
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to upload image')
+      }
+
+      // Store the Cloudinary URL in form data
+      setFormData({ ...formData, image: data.secure_url })
+      setSelectedFile(null)
+      setImagePreview(null)
+      if (fileInputRef.current) {
+        fileInputRef.current.value = ''
+      }
+    } catch (err) {
+      console.error('Error uploading image:', err)
+      setError(err instanceof Error ? err.message : 'Failed to upload image. Please try again.')
+    } finally {
+      setUploading(false)
+    }
+  }
+
+  const handleRemoveImage = () => {
+    setSelectedFile(null)
+    setImagePreview(null)
+    setFormData({ ...formData, image: '' })
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ''
+    }
+  }
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
@@ -54,6 +133,11 @@ export default function CreateEventForm() {
           agenda: '',
           image: '',
         })
+        setSelectedFile(null)
+        setImagePreview(null)
+        if (fileInputRef.current) {
+          fileInputRef.current.value = ''
+        }
         setIsOpen(false)
         router.refresh()
       } else {
@@ -94,9 +178,17 @@ export default function CreateEventForm() {
             </div>
           </div>
           <button
-            onClick={() => setIsOpen(false)}
+            onClick={() => {
+              setIsOpen(false)
+              setSelectedFile(null)
+              setImagePreview(null)
+              setError('')
+              if (fileInputRef.current) {
+                fileInputRef.current.value = ''
+              }
+            }}
             className="text-white/80 hover:text-white transition-colors p-1 rounded-lg hover:bg-white/10"
-            disabled={loading}
+            disabled={loading || uploading}
           >
             <X className="w-6 h-6" />
           </button>
@@ -267,22 +359,104 @@ export default function CreateEventForm() {
               <p className="text-xs text-gray-500">Tip: Use line breaks to separate agenda items</p>
             </div>
 
-            {/* Image URL */}
+            {/* Image Upload */}
             <div className="space-y-2">
-              <label htmlFor="image" className="flex items-center gap-2 text-sm font-semibold text-gray-700">
+              <label className="flex items-center gap-2 text-sm font-semibold text-gray-700">
                 <ImageIcon className="w-4 h-4 text-indigo-600" />
-                Image URL
+                Event Image
               </label>
-              <input
-                id="image"
-                type="text"
-                value={formData.image}
-                onChange={(e) => setFormData({ ...formData, image: e.target.value })}
-                placeholder="/robotics-event.jpg or https://..."
-                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 transition-all"
-                disabled={loading}
-              />
-              <p className="text-xs text-gray-500">Enter a relative path (e.g., /image.jpg) or full URL</p>
+              
+              {formData.image ? (
+                <div className="space-y-2">
+                  <div className="relative w-full h-48 rounded-xl overflow-hidden border-2 border-gray-200 bg-gray-50">
+                    <Image
+                      src={formData.image}
+                      alt="Event preview"
+                      fill
+                      className="object-cover"
+                      unoptimized
+                    />
+                    <button
+                      type="button"
+                      onClick={handleRemoveImage}
+                      disabled={loading || uploading}
+                      className="absolute top-2 right-2 p-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed z-10"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                  <p className="text-xs text-green-600">✓ Image uploaded successfully</p>
+                </div>
+              ) : imagePreview ? (
+                <div className="space-y-2">
+                  <div className="relative w-full h-48 rounded-xl overflow-hidden border-2 border-gray-200 bg-gray-50">
+                    <img
+                      src={imagePreview}
+                      alt="Preview"
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={handleImageUpload}
+                      disabled={uploading || loading}
+                      className="flex-1 px-4 py-2.5 bg-indigo-500 hover:bg-indigo-600 text-white font-medium rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                    >
+                      {uploading ? (
+                        <>
+                          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                          Uploading...
+                        </>
+                      ) : (
+                        <>
+                          <Upload className="w-4 h-4" />
+                          Upload Image
+                        </>
+                      )}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleRemoveImage}
+                      disabled={uploading || loading}
+                      className="px-4 py-2.5 border-2 border-gray-300 text-gray-700 font-medium rounded-xl hover:bg-gray-50 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  <input
+                    ref={fileInputRef}
+                    id="image"
+                    type="file"
+                    accept="image/jpeg,image/jpg,image/png,image/webp,image/gif"
+                    onChange={handleFileSelect}
+                    className="hidden"
+                    disabled={loading || uploading}
+                  />
+                  <label
+                    htmlFor="image"
+                    className={`flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-xl cursor-pointer transition-all ${
+                      loading || uploading
+                        ? 'border-gray-200 bg-gray-50 cursor-not-allowed'
+                        : 'border-gray-300 bg-gray-50 hover:border-indigo-400 hover:bg-indigo-50'
+                    }`}
+                  >
+                    <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                      <Upload className="w-8 h-8 mb-2 text-gray-400" />
+                      <p className="mb-2 text-sm text-gray-500">
+                        <span className="font-semibold text-indigo-600">Click to upload</span> or drag and drop
+                      </p>
+                      <p className="text-xs text-gray-500">PNG, JPG, WebP, or GIF (MAX. 5MB)</p>
+                    </div>
+                  </label>
+                </div>
+              )}
+              <p className="text-xs text-gray-500">
+                Upload an image from your device. It will be automatically optimized and converted to AVIF format.
+              </p>
             </div>
 
             {/* Action Buttons */}
@@ -292,8 +466,13 @@ export default function CreateEventForm() {
                 onClick={() => {
                   setIsOpen(false)
                   setError('')
+                  setSelectedFile(null)
+                  setImagePreview(null)
+                  if (fileInputRef.current) {
+                    fileInputRef.current.value = ''
+                  }
                 }}
-                disabled={loading}
+                disabled={loading || uploading}
                 className="px-6 py-2.5 border-2 border-gray-300 text-gray-700 font-medium rounded-xl hover:bg-gray-50 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Cancel
