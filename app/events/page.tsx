@@ -1,4 +1,5 @@
 import React from 'react'
+import { Metadata } from 'next'
 import Link from 'next/link'
 import Image from 'next/image'
 import {
@@ -13,6 +14,36 @@ import { format, parse, isPast, isFuture, differenceInDays } from 'date-fns'
 import { getPublicEvents } from './actions'
 import { Event } from '@/types/event'
 import AutoRefresh from './AutoRefresh'
+
+export const metadata: Metadata = {
+  title: "Events",
+  description: "Discover upcoming robotics workshops, competitions, bootcamps, and STEM events in Bangladesh. Join hands-on training sessions, participate in Robofest, and connect with 500+ robotics enthusiasts.",
+  keywords: [
+    "robotics events Bangladesh",
+    "STEM workshops",
+    "robotics competitions",
+    "Robofest",
+    "robotics bootcamp",
+    "STEM training events",
+    "robotics workshop Dhaka",
+  ],
+  openGraph: {
+    title: "Robotics Events | Robonauts Club",
+    description: "Discover upcoming robotics workshops, competitions, bootcamps, and STEM events in Bangladesh.",
+    url: "/events",
+    images: [
+      {
+        url: "/robotics-event.jpg",
+        width: 1200,
+        height: 630,
+        alt: "Robonauts Club Events",
+      },
+    ],
+  },
+  alternates: {
+    canonical: "/events",
+  },
+};
 
 // --- Helper Components ---
 const SectionHeader = ({

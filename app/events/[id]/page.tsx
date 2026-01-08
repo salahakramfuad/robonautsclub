@@ -1,4 +1,6 @@
 import Link from 'next/link'
+import { Metadata } from 'next'
+import Script from 'next/script'
 import { Calendar, Clock, MapPin, ArrowLeft, Users, Monitor, Building2 } from 'lucide-react'
 import { format, parse, isPast } from 'date-fns'
 import { getPublicEvent } from '../actions'
@@ -7,6 +9,7 @@ import { notFound } from 'next/navigation'
 import BookingForm from './BookingForm'
 import EventImage from './EventImage'
 import AutoRefresh from '../AutoRefresh'
+import { SITE_CONFIG, getEventSchema, getBreadcrumbSchema } from '@/lib/seo'
 
 
 // Helper function to validate and get image URL
@@ -86,6 +89,53 @@ const EventPassedMessage = () => {
   )
 }
 
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>
+}): Promise<Metadata> {
+  const { id } = await params
+  const event = await getPublicEvent(id)
+
+  if (!event) {
+    return {
+      title: 'Event Not Found',
+    }
+  }
+
+  const eventUrl = `${SITE_CONFIG.url}/events/${id}`
+  const eventImage = getEventImageUrl(event.image)
+
+  return {
+    title: event.title,
+    description: event.fullDescription || event.description,
+    keywords: event.tags || ['robotics', 'STEM', 'workshop', 'competition'],
+    openGraph: {
+      title: event.title,
+      description: event.fullDescription || event.description,
+      url: eventUrl,
+      type: 'website',
+      images: [
+        {
+          url: eventImage.startsWith('http') ? eventImage : `${SITE_CONFIG.url}${eventImage}`,
+          width: 1200,
+          height: 630,
+          alt: event.title,
+        },
+      ],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: event.title,
+      description: event.description,
+      images: [eventImage.startsWith('http') ? eventImage : `${SITE_CONFIG.url}${eventImage}`],
+    },
+    alternates: {
+      canonical: eventUrl,
+    },
+  }
+}
+
 export default async function EventDetailPage({
   params,
 }: {
@@ -103,8 +153,38 @@ export default async function EventDetailPage({
   const tags = getEventTags(event)
   const isOnline = event.location.toLowerCase().includes('online') || event.venue?.toLowerCase().includes('online')
 
+  // Generate structured data
+  const eventUrl = `${SITE_CONFIG.url}/events/${id}`
+  const eventSchema = getEventSchema({
+    id: event.id,
+    title: event.title,
+    description: event.fullDescription || event.description,
+    date: event.date,
+    time: event.time,
+    location: event.location,
+    venue: event.venue,
+    image: getEventImageUrl(event.image),
+    url: eventUrl,
+  })
+
+  const breadcrumbSchema = getBreadcrumbSchema([
+    { name: 'Home', url: '/' },
+    { name: 'Events', url: '/events' },
+    { name: event.title, url: `/events/${id}` },
+  ])
+
   return (
     <div className="min-h-screen bg-linear-to-br from-sky-50 via-blue-50 to-indigo-50">
+      <Script
+        id="event-schema"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(eventSchema) }}
+      />
+      <Script
+        id="breadcrumb-schema"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
       <AutoRefresh />
       {/* Compact Header Section */}
       <section className="relative overflow-hidden">
