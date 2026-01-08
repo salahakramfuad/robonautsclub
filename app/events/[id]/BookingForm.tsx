@@ -9,6 +9,8 @@ export default function BookingForm({ event }: { event: Event }) {
     name: '',
     school: '',
     email: '',
+    phone: '',
+    parentsPhone: '',
     information: '',
   })
   const [errors, setErrors] = useState<Record<string, string>>({})
@@ -24,9 +26,17 @@ export default function BookingForm({ event }: { event: Event }) {
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
       newErrors.email = 'Invalid email format'
     }
-    if (!formData.information.trim()) {
-      newErrors.information = 'Basic information is required'
+    if (!formData.phone.trim()) {
+      newErrors.phone = 'Phone number is required'
+    } else if (!/^[+]?[(]?[0-9]{1,4}[)]?[-\s.]?[(]?[0-9]{1,4}[)]?[-\s.]?[0-9]{1,9}$/.test(formData.phone.trim().replace(/\s/g, ''))) {
+      newErrors.phone = 'Invalid phone number format'
     }
+    if (!formData.parentsPhone.trim()) {
+      newErrors.parentsPhone = "Parent's phone number is required"
+    } else if (!/^[+]?[(]?[0-9]{1,4}[)]?[-\s.]?[(]?[0-9]{1,4}[)]?[-\s.]?[0-9]{1,9}$/.test(formData.parentsPhone.trim().replace(/\s/g, ''))) {
+      newErrors.parentsPhone = 'Invalid phone number format'
+    }
+    // Information field is optional, no validation needed
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
   }
@@ -50,12 +60,14 @@ export default function BookingForm({ event }: { event: Event }) {
         name: formData.name.trim(),
         school: formData.school.trim(),
         email: formData.email.trim(),
+        phone: formData.phone.trim(),
+        parentsPhone: formData.parentsPhone.trim(),
         information: formData.information.trim(),
       })
 
       if (result.success) {
         setIsSubmitted(true)
-        setFormData({ name: '', school: '', email: '', information: '' })
+        setFormData({ name: '', school: '', email: '', phone: '', parentsPhone: '', information: '' })
         setTimeout(() => {
           setIsSubmitted(false)
         }, 5000)
@@ -139,7 +151,7 @@ export default function BookingForm({ event }: { event: Event }) {
             htmlFor="school"
             className="block text-sm font-medium text-gray-700 mb-1"
           >
-            School <span className="text-red-500">*</span>
+            School (If you are private candidate, write private candidate)<span className="text-red-500">*</span>
           </label>
           <input
             type="text"
@@ -183,10 +195,58 @@ export default function BookingForm({ event }: { event: Event }) {
         </div>
         <div>
           <label
+            htmlFor="phone"
+            className="block text-sm font-medium text-gray-700 mb-1"
+          >
+            Phone Number <span className="text-red-500">*</span>
+          </label>
+          <input
+            type="tel"
+            id="phone"
+            value={formData.phone}
+            onChange={(e) =>
+              setFormData({ ...formData, phone: e.target.value })
+            }
+            placeholder="Enter your phone number"
+            disabled={isLoading || isSubmitted}
+            className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
+              errors.phone ? 'border-red-400 bg-red-50' : 'border-gray-200 hover:border-gray-300'
+            }`}
+          />
+          {errors.phone && (
+            <p className="text-sm text-red-500 mt-1">{errors.phone}</p>
+          )}
+        </div>
+        <div>
+          <label
+            htmlFor="parentsPhone"
+            className="block text-sm font-medium text-gray-700 mb-1"
+          >
+            Parent&apos;s Phone Number <span className="text-red-500">*</span>
+          </label>
+          <input
+            type="tel"
+            id="parentsPhone"
+            value={formData.parentsPhone}
+            onChange={(e) =>
+              setFormData({ ...formData, parentsPhone: e.target.value })
+            }
+            placeholder="Enter parent's phone number"
+            disabled={isLoading || isSubmitted}
+            className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
+              errors.parentsPhone ? 'border-red-400 bg-red-50' : 'border-gray-200 hover:border-gray-300'
+            }`}
+          />
+          {errors.parentsPhone && (
+            <p className="text-sm text-red-500 mt-1">{errors.parentsPhone}</p>
+          )}
+        </div>
+        <div>
+          <label
             htmlFor="information"
             className="block text-sm font-medium text-gray-700 mb-1"
           >
-            Basic Information <span className="text-red-500">*</span>
+            Other Information
           </label>
           <textarea
             id="information"
@@ -199,7 +259,7 @@ export default function BookingForm({ event }: { event: Event }) {
             className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 transition-colors resize-none disabled:opacity-50 disabled:cursor-not-allowed ${
               errors.information ? 'border-red-400 bg-red-50' : 'border-gray-200 hover:border-gray-300'
             }`}
-            placeholder="Tell us about your interest in this event..."
+            placeholder="Any additional information you'd like to share (optional)..."
           />
           {errors.information && (
             <p className="text-sm text-red-500 mt-1">{errors.information}</p>

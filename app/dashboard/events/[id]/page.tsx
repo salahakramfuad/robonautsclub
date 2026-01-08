@@ -180,6 +180,12 @@ export default async function EventDetailsPage({
                   <th className="px-3 sm:px-6 py-2 sm:py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                     Email
                   </th>
+                  <th className="px-3 sm:px-6 py-2 sm:py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider hidden lg:table-cell">
+                    Phone
+                  </th>
+                  <th className="px-3 sm:px-6 py-2 sm:py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider hidden lg:table-cell">
+                    Parent&apos;s Phone
+                  </th>
                   <th className="px-3 sm:px-6 py-2 sm:py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider hidden md:table-cell">
                     Information
                   </th>
@@ -221,6 +227,16 @@ export default async function EventDetailsPage({
                         <div className="text-xs sm:text-sm text-gray-900 flex items-center gap-1">
                           <Mail className="w-3 h-3 sm:w-4 sm:h-4 text-gray-400" />
                           {booking.email}
+                        </div>
+                      </td>
+                      <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap hidden lg:table-cell">
+                        <div className="text-xs sm:text-sm text-gray-900">
+                          {booking.phone || 'N/A'}
+                        </div>
+                      </td>
+                      <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap hidden lg:table-cell">
+                        <div className="text-xs sm:text-sm text-gray-900">
+                          {booking.parentsPhone || 'N/A'}
                         </div>
                       </td>
                       <td className="px-3 sm:px-6 py-3 sm:py-4 hidden md:table-cell">

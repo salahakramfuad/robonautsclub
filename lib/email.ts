@@ -11,6 +11,8 @@ interface BookingConfirmationEmailProps {
   event: Event
   bookingDetails: {
     school: string
+    phone: string
+    parentsPhone: string
     information: string
   }
 }
@@ -229,11 +231,31 @@ export async function sendBookingConfirmationEmail({
                         </td>
                       </tr>
                       <tr>
-                        <td style="padding: 10px 0;">
+                        <td style="padding: 10px 0; border-bottom: 1px solid rgba(147, 197, 253, 0.3);">
                           <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
                             <tr>
                               <td width="120" style="padding: 0; color: #3b82f6; font-size: 14px; font-weight: 500; vertical-align: top;">Email:</td>
                               <td style="padding: 0; color: #1e40af; font-size: 15px; font-weight: 600; vertical-align: top; word-break: break-word;">${to}</td>
+                            </tr>
+                          </table>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td style="padding: 10px 0; border-bottom: 1px solid rgba(147, 197, 253, 0.3);">
+                          <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                            <tr>
+                              <td width="120" style="padding: 0; color: #3b82f6; font-size: 14px; font-weight: 500; vertical-align: top;">Phone:</td>
+                              <td style="padding: 0; color: #1e40af; font-size: 15px; font-weight: 600; vertical-align: top;">${bookingDetails.phone}</td>
+                            </tr>
+                          </table>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td style="padding: 10px 0;">
+                          <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                            <tr>
+                              <td width="120" style="padding: 0; color: #3b82f6; font-size: 14px; font-weight: 500; vertical-align: top;">Parent's Phone:</td>
+                              <td style="padding: 0; color: #1e40af; font-size: 15px; font-weight: 600; vertical-align: top;">${bookingDetails.parentsPhone}</td>
                             </tr>
                           </table>
                         </td>

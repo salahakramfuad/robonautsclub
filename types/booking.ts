@@ -5,6 +5,8 @@ export type Booking = {
   name: string
   school: string
   email: string
+  phone: string
+  parentsPhone: string
   information: string
   createdAt: Date | string
 }

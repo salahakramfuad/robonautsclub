@@ -44,6 +44,8 @@ export default function ExportBookingsButton({ bookings, eventTitle }: ExportBoo
             'Name': booking.name,
             'School': booking.school,
             'Email': booking.email,
+            'Phone': booking.phone || 'N/A',
+            'Parent\'s Phone': booking.parentsPhone || 'N/A',
             'Additional Information': booking.information,
             'Booked At': formattedDate,
           }
@@ -61,6 +63,8 @@ export default function ExportBookingsButton({ bookings, eventTitle }: ExportBoo
           { wch: 25 }, // Name
           { wch: 30 }, // School
           { wch: 35 }, // Email
+          { wch: 18 }, // Phone
+          { wch: 20 }, // Parent's Phone
           { wch: 50 }, // Additional Information
           { wch: 20 }, // Booked At
         ]

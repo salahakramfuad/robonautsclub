@@ -90,14 +90,16 @@ export async function createBooking(formData: {
   name: string
   school: string
   email: string
+  phone: string
+  parentsPhone: string
   information: string
 }): Promise<{ success: boolean; error?: string; bookingId?: string }> {
   try {
-    // Validate input
-    if (!formData.eventId || !formData.name || !formData.school || !formData.email || !formData.information) {
+    // Validate input (information is optional)
+    if (!formData.eventId || !formData.name || !formData.school || !formData.email || !formData.phone || !formData.parentsPhone) {
       return {
         success: false,
-        error: 'All fields are required',
+        error: 'All required fields must be filled',
       }
     }
 
@@ -107,6 +109,25 @@ export async function createBooking(formData: {
       return {
         success: false,
         error: 'Invalid email format',
+      }
+    }
+
+    // Validate phone number format (allows various international formats)
+    const phoneRegex = /^[+]?[(]?[0-9]{1,4}[)]?[-\s.]?[(]?[0-9]{1,4}[)]?[-\s.]?[0-9]{1,9}$/
+    const normalizedPhone = formData.phone.trim().replace(/\s/g, '')
+    const normalizedParentsPhone = formData.parentsPhone.trim().replace(/\s/g, '')
+    
+    if (!phoneRegex.test(normalizedPhone)) {
+      return {
+        success: false,
+        error: 'Invalid phone number format',
+      }
+    }
+    
+    if (!phoneRegex.test(normalizedParentsPhone)) {
+      return {
+        success: false,
+        error: 'Invalid parent\'s phone number format',
       }
     }
 
@@ -160,7 +181,9 @@ export async function createBooking(formData: {
       event,
       bookingDetails: {
         school: formData.school.trim(),
-        information: formData.information.trim(),
+        phone: normalizedPhone,
+        parentsPhone: normalizedParentsPhone,
+        information: formData.information ? formData.information.trim() : '',
       },
     })
 
@@ -179,7 +202,9 @@ export async function createBooking(formData: {
       name: formData.name.trim(),
       school: formData.school.trim(),
       email: formData.email.trim().toLowerCase(),
-      information: formData.information.trim(),
+      phone: normalizedPhone,
+      parentsPhone: normalizedParentsPhone,
+      information: formData.information ? formData.information.trim() : '',
       createdAt: now,
     })
 

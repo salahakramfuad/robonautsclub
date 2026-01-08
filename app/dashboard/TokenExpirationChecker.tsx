@@ -44,7 +44,7 @@ export default function TokenExpirationChecker() {
 
           // Token is valid, update it in the cookie
           document.cookie = `auth-token=${token}; path=/; max-age=86400; SameSite=Lax`
-        } catch (error: any) {
+        } catch (error: unknown) {
           console.error('Token refresh error:', error)
           
           // Token refresh failed (likely expired), redirect to login
