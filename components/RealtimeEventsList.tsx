@@ -6,7 +6,35 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { Calendar, Clock, MapPin, ArrowRight } from 'lucide-react'
 import { Event } from '@/types/event'
-import { differenceInDays } from 'date-fns'
+import { differenceInDays, differenceInHours } from 'date-fns'
+
+/**
+ * Get current time in Bangladesh Standard Time (BST = UTC+6)
+ */
+function getBSTTime(): Date {
+  const now = new Date()
+  // Convert to BST (UTC+6)
+  // Get UTC timestamp
+  const utcTimestamp = now.getTime() + (now.getTimezoneOffset() * 60000)
+  // Add 6 hours for BST (UTC+6)
+  const bstTimestamp = utcTimestamp + (6 * 3600000)
+  return new Date(bstTimestamp)
+}
+
+/**
+ * Convert event date string to Date object in BST
+ * Event dates are stored as 'YYYY-MM-DD' and should be treated as BST midnight
+ */
+function getEventDateInBST(dateString: string): Date {
+  // Parse the date string (YYYY-MM-DD)
+  const [year, month, day] = dateString.split('-').map(Number)
+  // Create date at midnight BST (UTC+6)
+  // We create it as UTC midnight, then add 6 hours to get BST midnight
+  const utcDate = new Date(Date.UTC(year, month - 1, day, 0, 0, 0))
+  // Convert to BST by adding 6 hours
+  const bstDate = new Date(utcDate.getTime() + (6 * 3600000))
+  return bstDate
+}
 
 interface RealtimeEventsListProps {
   initialEvents?: Event[]
@@ -18,9 +46,35 @@ const EventCard = ({ event }: { event: Event }) => {
   const firstDate = getFirstEventDate(event.date)
   const isUpcoming = isEventUpcoming(event.date)
   const status = isUpcoming ? 'Upcoming' : 'Completed'
-  const daysUntil = firstDate && isUpcoming
-    ? differenceInDays(firstDate, new Date())
-    : null
+  
+  // Calculate time until event in Bangladesh Standard Time
+  let timeDisplay: string | null = null
+  if (firstDate && isUpcoming) {
+    const bstNow = getBSTTime()
+    // Parse the event date string and convert to BST
+    const eventDateStr = Array.isArray(event.date) 
+      ? event.date[0] 
+      : typeof event.date === 'string' && event.date.includes(',')
+      ? event.date.split(',')[0].trim()
+      : event.date || ''
+    
+    if (eventDateStr) {
+      const eventDateBST = getEventDateInBST(eventDateStr)
+      const hoursUntil = differenceInHours(eventDateBST, bstNow)
+      const daysUntil = differenceInDays(eventDateBST, bstNow)
+      
+      if (hoursUntil < 24 && hoursUntil >= 0) {
+        // Less than 24 hours - show "Starting soon"
+        timeDisplay = 'Starting soon'
+      } else if (hoursUntil >= 24 && hoursUntil < 48) {
+        // Between 24-48 hours - show "Tomorrow"
+        timeDisplay = 'Tomorrow'
+      } else if (daysUntil >= 0) {
+        // More than 48 hours - show days count
+        timeDisplay = `${daysUntil} days away`
+      }
+    }
+  }
 
   return (
     <Link href={`/events/${event.id}`}>
@@ -59,14 +113,10 @@ const EventCard = ({ event }: { event: Event }) => {
               </div>
             </>
           )}
-          {isUpcoming && daysUntil !== null && daysUntil >= 0 && (
+          {isUpcoming && timeDisplay && (
             <div className="absolute bottom-4 left-4 bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-lg z-10">
               <span className="text-sm font-bold text-indigo-700">
-                {daysUntil === 0
-                  ? 'Today!'
-                  : daysUntil === 1
-                    ? 'Tomorrow'
-                    : `${daysUntil} days away`}
+                {timeDisplay}
               </span>
             </div>
           )}
