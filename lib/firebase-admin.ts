@@ -1,6 +1,8 @@
 import { initializeApp, getApps, cert, App } from 'firebase-admin/app'
 import { getAuth, Auth } from 'firebase-admin/auth'
 import { getFirestore, Firestore } from 'firebase-admin/firestore'
+import { getStorage } from 'firebase-admin/storage'
+import type { Storage } from 'firebase-admin/storage'
 import { readFileSync } from 'fs'
 import { join } from 'path'
 
@@ -9,6 +11,7 @@ import { join } from 'path'
 let adminApp: App | undefined
 let adminAuth: Auth | undefined
 let adminDb: Firestore | undefined
+let adminStorage: Storage | undefined
 
 // Try to load service account from environment variables first, then JSON file as fallback
 let serviceAccount: {
@@ -68,6 +71,7 @@ if (serviceAccount) {
 
     adminAuth = getAuth(adminApp)
     adminDb = getFirestore(adminApp)
+    adminStorage = getStorage(adminApp)
   } catch (error) {
     console.error('Firebase Admin initialization error:', error)
     // Don't throw - allow app to continue without Admin SDK
@@ -79,6 +83,6 @@ if (serviceAccount) {
   console.warn('  2. FIREBASE_ADMIN_* environment variables')
 }
 
-export { adminAuth, adminDb }
+export { adminAuth, adminDb, adminStorage }
 export default adminApp
 

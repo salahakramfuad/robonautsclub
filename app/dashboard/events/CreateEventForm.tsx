@@ -460,10 +460,12 @@ export default function CreateEventForm() {
               ) : imagePreview ? (
                 <div className="space-y-2">
                   <div className="relative w-full h-48 rounded-xl overflow-hidden border-2 border-gray-200 bg-gray-50">
-                    <img
+                    <Image
                       src={imagePreview}
                       alt="Preview"
-                      className="w-full h-full object-cover"
+                      fill
+                      className="object-cover"
+                      unoptimized
                     />
                     {uploading && (
                       <div className="absolute inset-0 bg-black/50 flex items-center justify-center">

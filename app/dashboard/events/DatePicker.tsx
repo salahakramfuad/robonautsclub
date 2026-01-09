@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useMemo } from 'react'
 import { Calendar } from 'lucide-react'
 import { format } from 'date-fns'
 
@@ -13,15 +13,30 @@ interface DatePickerProps {
 
 export default function DatePicker({ value, onChange, disabled, required }: DatePickerProps) {
   const [isOpen, setIsOpen] = useState(false)
-  const [selectedDate, setSelectedDate] = useState<Date | null>(value ? new Date(value) : null)
+  // Use local state only for calendar navigation - initialized from value or current date
+  const [navigationDate, setNavigationDate] = useState<Date>(() => 
+    value ? new Date(value) : new Date()
+  )
   const inputRef = useRef<HTMLInputElement>(null)
   const calendarRef = useRef<HTMLDivElement>(null)
 
-  useEffect(() => {
-    if (value) {
-      setSelectedDate(new Date(value))
-    }
+  // Derive selectedDate from value prop (no setState in effect needed)
+  const selectedDate = useMemo(() => {
+    return value ? new Date(value) : null
   }, [value])
+
+  // Derive current date for calendar display: use value if it exists, otherwise use navigationDate
+  const currentDate = useMemo(() => {
+    return selectedDate || navigationDate
+  }, [selectedDate, navigationDate])
+
+  const handleOpen = () => {
+    // Initialize navigation date from selected date when opening, if available
+    if (selectedDate) {
+      setNavigationDate(selectedDate)
+    }
+    setIsOpen(true)
+  }
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -45,7 +60,6 @@ export default function DatePicker({ value, onChange, disabled, required }: Date
   }, [isOpen])
 
   const handleDateSelect = (date: Date) => {
-    setSelectedDate(date)
     const dateString = format(date, 'yyyy-MM-dd')
     onChange(dateString)
     setIsOpen(false)
@@ -63,7 +77,6 @@ export default function DatePicker({ value, onChange, disabled, required }: Date
   }
 
   const displayDate = selectedDate ? format(selectedDate, 'MMM d, yyyy') : 'Select date'
-  const currentDate = selectedDate || new Date()
   const { daysInMonth, startingDayOfWeek, year, month } = getDaysInMonth(currentDate)
 
   const days = []
@@ -88,7 +101,7 @@ export default function DatePicker({ value, onChange, disabled, required }: Date
     } else {
       newDate.setMonth(month + 1)
     }
-    setSelectedDate(newDate)
+    setNavigationDate(newDate)
   }
 
   return (
@@ -99,7 +112,15 @@ export default function DatePicker({ value, onChange, disabled, required }: Date
           type="text"
           value={displayDate}
           readOnly
-          onClick={() => !disabled && setIsOpen(!isOpen)}
+          onClick={() => {
+            if (!disabled) {
+              if (!isOpen) {
+                handleOpen()
+              } else {
+                setIsOpen(false)
+              }
+            }
+          }}
           required={required}
           className="w-full px-4 py-3 pl-11 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 transition-all cursor-pointer bg-white"
           disabled={disabled}

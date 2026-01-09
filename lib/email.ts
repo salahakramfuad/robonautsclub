@@ -1,11 +1,15 @@
 import * as brevo from '@getbrevo/brevo'
 import type { Event } from '@/types/event'
 import { formatEventDates, getFirstEventDate, parseEventDates } from './dateUtils'
+import { generateBookingConfirmationPDF } from './pdfGenerator'
+import { savePDFToLocalFilesystem } from './pdfStorage'
 
 interface BookingConfirmationEmailProps {
   to: string
   name: string
   event: Event
+  registrationId: string
+  bookingId: string
   bookingDetails: {
     school: string
     phone: string
@@ -14,6 +18,13 @@ interface BookingConfirmationEmailProps {
   }
 }
 
+interface EmailResult {
+  success: boolean
+  error?: string
+  pdfPath?: string // Local filesystem path instead of URL
+}
+
+
 /**
  * Send booking confirmation email with event details
  */
@@ -21,8 +32,10 @@ export async function sendBookingConfirmationEmail({
   to,
   name,
   event,
+  registrationId,
+  bookingId,
   bookingDetails,
-}: BookingConfirmationEmailProps): Promise<{ success: boolean; error?: string }> {
+}: BookingConfirmationEmailProps): Promise<EmailResult> {
   try {
     // Check if Brevo API key is configured
     if (!process.env.BREVO_API_KEY || process.env.BREVO_API_KEY.trim() === '') {
@@ -37,7 +50,70 @@ export async function sendBookingConfirmationEmail({
     const firstDate = getFirstEventDate(event.date)
     const formattedDate = firstDate ? formatEventDates(parseEventDates(event.date), 'long') : 'TBA'
 
-    // Create email HTML content
+    // Generate PDF confirmation document FIRST (before email HTML)
+    // Get base URL from environment variables, ensuring proper HTTPS in production
+    // Priority: NEXT_PUBLIC_BASE_URL > VERCEL_URL > VERCEL_BRANCH_URL > localhost (dev only)
+    let baseUrl = process.env.NEXT_PUBLIC_BASE_URL
+    
+    if (!baseUrl) {
+      // Try VERCEL_URL (Vercel automatically provides this)
+      if (process.env.VERCEL_URL) {
+        baseUrl = `https://${process.env.VERCEL_URL}`
+      }
+      // Try VERCEL_BRANCH_URL (for preview deployments)
+      else if (process.env.VERCEL_BRANCH_URL) {
+        baseUrl = process.env.VERCEL_BRANCH_URL.startsWith('http') 
+          ? process.env.VERCEL_BRANCH_URL 
+          : `https://${process.env.VERCEL_BRANCH_URL}`
+      }
+      // Fallback to localhost only in development
+      else if (process.env.NODE_ENV === 'development') {
+        baseUrl = 'http://localhost:3000'
+      }
+      // Production fallback - you should set NEXT_PUBLIC_BASE_URL in production
+      else {
+        baseUrl = 'https://robonautsclub.com' // Update this to your actual production domain
+      }
+    }
+    
+    // Ensure baseUrl doesn't have trailing slash and enforce HTTPS in production
+    baseUrl = baseUrl.replace(/\/$/, '')
+    if (process.env.NODE_ENV === 'production' && baseUrl.startsWith('http://')) {
+      baseUrl = baseUrl.replace('http://', 'https://')
+    }
+    
+    // Generate verification URL using bookingId (not registrationId)
+    const verificationUrl = `${baseUrl}/verify-booking?bookingId=${encodeURIComponent(bookingId)}`
+    
+    let pdfBuffer: Buffer | null = null
+    let pdfPath: string | null = null
+    
+    try {
+      pdfBuffer = await generateBookingConfirmationPDF({
+        registrationId,
+        bookingId,
+        event,
+        bookingDetails: {
+          ...bookingDetails,
+          name,
+          email: to,
+        },
+        verificationUrl,
+      })
+      
+      // Save PDF to local filesystem
+      if (pdfBuffer) {
+        pdfPath = await savePDFToLocalFilesystem(pdfBuffer, event.title, bookingId)
+        if (!pdfPath) {
+          console.warn('Failed to save PDF to local filesystem, but continuing with email send')
+        }
+      }
+    } catch (pdfError) {
+      console.error('Error generating or storing PDF:', pdfError)
+      // Continue without PDF attachment if generation fails
+    }
+
+    // Create email HTML content (after PDF is generated so we can include PDF URL if available)
     const emailHtml = `
 <!DOCTYPE html>
 <html lang="en">
@@ -262,6 +338,7 @@ export async function sendBookingConfirmationEmail({
                 </tr>
               </table>
               
+              
               <!-- Closing Message -->
               <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
                 <tr>
@@ -342,48 +419,48 @@ export async function sendBookingConfirmationEmail({
     const sendSmtpEmail = new brevo.SendSmtpEmail()
     sendSmtpEmail.sender = { email: senderEmail, name: senderName }
     sendSmtpEmail.to = [{ email: to, name: name }]
-    sendSmtpEmail.subject = `Booking Confirmation: ${event.title}`
+    sendSmtpEmail.subject = `Booking Confirmation: ${event.title} - ${registrationId}`
     sendSmtpEmail.htmlContent = emailHtml
+
+    // Attach PDF if generated successfully
+    if (pdfBuffer && pdfBuffer.length > 0) {
+      try {
+        const base64Content = pdfBuffer.toString('base64')
+        
+        // Brevo expects attachments with name and content (base64 encoded)
+        const attachment: { name: string; content: string } = {
+          name: `Booking-Confirmation-${registrationId}.pdf`,
+          content: base64Content,
+        }
+        
+        // Set attachments - Brevo SDK uses 'attachment' property
+        const emailWithAttachment = sendSmtpEmail as typeof sendSmtpEmail & { attachment?: Array<{ name: string; content: string }> }
+        emailWithAttachment.attachment = [attachment]
+      } catch (attachmentError) {
+        console.error('Error preparing PDF attachment:', attachmentError)
+      }
+    }
 
     try {
       const data = await apiInstance.sendTransacEmail(sendSmtpEmail)
       
-      // Brevo API can return different response formats:
-      // - A string (messageId directly)
-      // - An object with messageId property
-      // - An object with different property names
-      let messageId: string | undefined
-      
-      if (typeof data === 'string') {
-        messageId = data
-      } else if (data && typeof data === 'object') {
-        // Check for various possible property names
-        const dataObj = data as Record<string, unknown>
-        messageId = 
-          (typeof dataObj.messageId === 'string' ? dataObj.messageId : undefined) ||
-          (typeof dataObj['message-id'] === 'string' ? dataObj['message-id'] : undefined) ||
-          (typeof dataObj.message_id === 'string' ? dataObj.message_id : undefined) ||
-          (typeof dataObj.id === 'string' ? dataObj.id : undefined)
-      }
-      
-      // If we have any response from Brevo (even without messageId), consider it successful
+      // If we have any response from Brevo, consider it successful
       // The email was sent if we got a response without an error
       if (data !== null && data !== undefined) {
-        console.log('Booking confirmation email sent successfully. Message ID:', messageId || 'N/A')
+        // Return PDF path if it was saved successfully
         return {
           success: true,
+          pdfPath: pdfPath || undefined,
         }
       }
       
       // Only fail if we got null/undefined response
-      console.error('Brevo returned null or undefined response')
       return {
         success: false,
         error: 'Email service returned an unexpected response',
       }
     } catch (error: unknown) {
       console.error('Brevo email error:', error)
-      console.error('Error details:', JSON.stringify(error, null, 2))
       
       // Handle Brevo API errors
       const errorObj = error as { response?: { status?: number; body?: unknown; data?: unknown }; statusCode?: number; message?: string }

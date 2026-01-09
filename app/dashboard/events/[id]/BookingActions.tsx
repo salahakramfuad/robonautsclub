@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { cancelBooking } from '../../actions'
-import { Trash2 } from 'lucide-react'
+import { Trash2, FileText, ExternalLink } from 'lucide-react'
 import DeleteConfirmation from '../DeleteConfirmation'
 import type { Booking } from '@/types/booking'
 
@@ -34,16 +34,34 @@ export default function BookingActions({ booking }: BookingActionsProps) {
     }
   }
 
+  // Support both pdfPath (new local storage) and pdfUrl (old Cloudinary storage) for backward compatibility
+  const pdfLink = booking.pdfPath || booking.pdfUrl
+
   return (
     <>
-      <button
-        onClick={() => setShowDeleteConfirm(true)}
-        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors"
-        title="Cancel booking"
-      >
-        <Trash2 className="w-4 h-4" />
-        Cancel
-      </button>
+      <div className="flex items-center gap-2">
+        {pdfLink && (
+          <a
+            href={pdfLink}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50 rounded-lg transition-colors"
+            title="View confirmation PDF"
+          >
+            <FileText className="w-4 h-4" />
+            <span className="hidden sm:inline">PDF</span>
+            <ExternalLink className="w-3 h-3 hidden sm:inline" />
+          </a>
+        )}
+        <button
+          onClick={() => setShowDeleteConfirm(true)}
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors"
+          title="Cancel booking"
+        >
+          <Trash2 className="w-4 h-4" />
+          <span className="hidden sm:inline">Cancel</span>
+        </button>
+      </div>
 
       {showDeleteConfirm && (
         <DeleteConfirmation

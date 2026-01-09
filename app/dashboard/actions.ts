@@ -5,6 +5,7 @@ import { requireAuth } from '@/lib/auth'
 import { adminDb } from '@/lib/firebase-admin'
 import { Event } from '@/types/event'
 import { Booking } from '@/types/booking'
+import { sanitizeEventForDatabase } from '@/lib/textSanitizer'
 
 /**
  * Get all events from Firestore
@@ -110,10 +111,26 @@ export async function createEvent(formData: {
   }
 
   try {
-    // Check if event with same title already exists
+    // Apply default time before sanitization for consistency
+    const defaultTime = '9:00 AM - 5:00 PM'
+    
+    // Sanitize all event text fields before processing
+    const sanitized = sanitizeEventForDatabase({
+      title: formData.title,
+      description: formData.description,
+      fullDescription: formData.fullDescription,
+      venue: formData.venue,
+      location: formData.location,
+      eligibility: formData.eligibility,
+      time: formData.time || defaultTime,
+      agenda: formData.agenda,
+      tags: formData.tags,
+    })
+
+    // Check if event with same sanitized title already exists
     const existingEvents = await adminDb
       .collection('events')
-      .where('title', '==', formData.title)
+      .where('title', '==', sanitized.title)
       .get()
 
     if (!existingEvents.empty) {
@@ -132,18 +149,19 @@ export async function createEvent(formData: {
         : formData.date.join(',')
       : formData.date
     
+    // Use sanitized values for all text fields
     const eventRef = await adminDb.collection('events').add({
-      title: formData.title,
+      title: sanitized.title,
       date: normalizedDate,
-      description: formData.description,
-      time: formData.time || '9:00 AM - 5:00 PM',
-      location: formData.location || '',
-      venue: formData.venue || formData.location || '',
-      fullDescription: formData.fullDescription || formData.description,
-      eligibility: formData.eligibility || '',
-      agenda: formData.agenda || '',
+      description: sanitized.description,
+      time: sanitized.time || defaultTime,
+      location: sanitized.location,
+      venue: sanitized.venue || sanitized.location,
+      fullDescription: sanitized.fullDescription || sanitized.description,
+      eligibility: sanitized.eligibility,
+      agenda: sanitized.agenda,
       image: formData.image || '/robotics-event.jpg',
-      tags: formData.tags && formData.tags.length > 0 ? formData.tags : [],
+      tags: sanitized.tags,
       createdAt: now,
       updatedAt: now,
       createdBy: session.uid,
@@ -207,10 +225,26 @@ export async function updateEvent(
       }
     }
 
-    // Check if another event with the same title exists (excluding current event)
+    // Apply default time before sanitization for consistency
+    const defaultTime = '9:00 AM - 5:00 PM'
+    
+    // Sanitize all event text fields before processing
+    const sanitized = sanitizeEventForDatabase({
+      title: formData.title,
+      description: formData.description,
+      fullDescription: formData.fullDescription,
+      venue: formData.venue,
+      location: formData.location,
+      eligibility: formData.eligibility,
+      time: formData.time || defaultTime,
+      agenda: formData.agenda,
+      tags: formData.tags,
+    })
+
+    // Check if another event with the same sanitized title exists (excluding current event)
     const existingEvents = await adminDb
       .collection('events')
-      .where('title', '==', formData.title)
+      .where('title', '==', sanitized.title)
       .get()
 
     const hasDuplicate = existingEvents.docs.some((doc) => doc.id !== eventId)
@@ -229,18 +263,19 @@ export async function updateEvent(
         : formData.date.join(',')
       : formData.date
     
+    // Use sanitized values for all text fields
     await adminDb.collection('events').doc(eventId).update({
-      title: formData.title,
+      title: sanitized.title,
       date: normalizedDate,
-      description: formData.description,
-      time: formData.time || '9:00 AM - 5:00 PM',
-      location: formData.location || '',
-      venue: formData.venue || formData.location || '',
-      fullDescription: formData.fullDescription || formData.description,
-      eligibility: formData.eligibility || '',
-      agenda: formData.agenda || '',
+      description: sanitized.description,
+      time: sanitized.time || defaultTime,
+      location: sanitized.location,
+      venue: sanitized.venue || sanitized.location,
+      fullDescription: sanitized.fullDescription || sanitized.description,
+      eligibility: sanitized.eligibility,
+      agenda: sanitized.agenda,
       image: formData.image || '/robotics-event.jpg',
-      tags: formData.tags && formData.tags.length > 0 ? formData.tags : [],
+      tags: sanitized.tags,
       updatedAt: new Date(),
     })
 

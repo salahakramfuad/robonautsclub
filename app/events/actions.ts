@@ -3,6 +3,7 @@
 import { adminDb } from '@/lib/firebase-admin'
 import { Event } from '@/types/event'
 import { sendBookingConfirmationEmail } from '@/lib/email'
+import { generateRegistrationId } from '@/lib/registrationId'
 
 /**
  * Get all events from Firestore (public - no auth required)
@@ -112,23 +113,24 @@ export async function createBooking(formData: {
       }
     }
 
-    // Validate phone number format (allows various international formats)
+    // Validate phone number format (11 digits starting with 01)
     // Phone number is optional, but if provided, validate format
-    const phoneRegex = /^[+]?[(]?[0-9]{1,4}[)]?[-\s.]?[(]?[0-9]{1,4}[)]?[-\s.]?[0-9]{1,9}$/
     const normalizedPhone = formData.phone?.trim().replace(/\s/g, '') || ''
     const normalizedParentsPhone = formData.parentsPhone.trim().replace(/\s/g, '')
     
-    if (normalizedPhone && !phoneRegex.test(normalizedPhone)) {
-      return {
-        success: false,
-        error: 'Invalid phone number format',
+    if (normalizedPhone) {
+      if (normalizedPhone.length !== 11 || !normalizedPhone.startsWith('01')) {
+        return {
+          success: false,
+          error: 'Phone number must be 11 digits and start with 01',
+        }
       }
     }
     
-    if (!phoneRegex.test(normalizedParentsPhone)) {
+    if (normalizedParentsPhone.length !== 11 || !normalizedParentsPhone.startsWith('01')) {
       return {
         success: false,
-        error: 'Invalid parent\'s phone number format',
+        error: 'Parent\'s phone number must be 11 digits and start with 01',
       }
     }
 
@@ -174,12 +176,50 @@ export async function createBooking(formData: {
       updatedAt: eventData.updatedAt?.toDate?.() || eventData.updatedAt,
     } as Event
 
-    // Step 3: Send confirmation email FIRST
-    // Only proceed to save booking if email is sent successfully
+    // Step 3: Generate unique registration ID
+    const registrationId = generateRegistrationId()
+
+    // Step 4: Create booking document reference to get bookingId
+    // We'll create the document first, then update it with pdfPath after PDF is generated
+    const bookingRef = adminDb.collection('bookings').doc()
+    const bookingId = bookingRef.id
+
+    // Step 5: Create booking document initially (without pdfPath, will update after PDF generation)
+    const now = new Date()
+    const bookingData: {
+      eventId: string
+      registrationId: string
+      name: string
+      school: string
+      email: string
+      phone: string
+      parentsPhone: string
+      information: string
+      createdAt: Date
+      pdfPath?: string
+    } = {
+      eventId: formData.eventId,
+      registrationId,
+      name: formData.name.trim(),
+      school: formData.school.trim(),
+      email: formData.email.trim().toLowerCase(),
+      phone: normalizedPhone || '',
+      parentsPhone: normalizedParentsPhone,
+      information: formData.information ? formData.information.trim() : '',
+      createdAt: now,
+    }
+
+    // Create booking document first (so we have bookingId for PDF generation)
+    await bookingRef.set(bookingData)
+
+    // Step 6: Send confirmation email with PDF attachment
+    // This will generate PDF with bookingId, save to local filesystem, and return pdfPath
     const emailResult = await sendBookingConfirmationEmail({
       to: formData.email.trim().toLowerCase(),
       name: formData.name.trim(),
       event,
+      registrationId,
+      bookingId,
       bookingDetails: {
         school: formData.school.trim(),
         phone: normalizedPhone || '',
@@ -189,6 +229,8 @@ export async function createBooking(formData: {
     })
 
     if (!emailResult.success) {
+      // If email fails, delete the booking document we just created
+      await bookingRef.delete()
       console.error('Failed to send confirmation email:', emailResult.error)
       return {
         success: false,
@@ -196,20 +238,12 @@ export async function createBooking(formData: {
       }
     }
 
-    // Step 4: Only save booking to database if email was sent successfully
-    const now = new Date()
-    const bookingRef = await adminDb.collection('bookings').add({
-      eventId: formData.eventId,
-      name: formData.name.trim(),
-      school: formData.school.trim(),
-      email: formData.email.trim().toLowerCase(),
-      phone: normalizedPhone || '',
-      parentsPhone: normalizedParentsPhone,
-      information: formData.information ? formData.information.trim() : '',
-      createdAt: now,
-    })
-
-    console.log('Booking created successfully after email confirmation:', bookingRef.id)
+    // Step 7: Update booking document with pdfPath if PDF was saved successfully
+    if (emailResult.pdfPath) {
+      await bookingRef.update({
+        pdfPath: emailResult.pdfPath,
+      })
+    }
 
     return {
       success: true,
