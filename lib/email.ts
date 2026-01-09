@@ -2,7 +2,7 @@ import * as brevo from '@getbrevo/brevo'
 import type { Event } from '@/types/event'
 import { formatEventDates, getFirstEventDate, parseEventDates } from './dateUtils'
 import { generateBookingConfirmationPDF } from './pdfGenerator'
-import { savePDFToLocalFilesystem } from './pdfStorage'
+import { uploadPDFToStorage } from './pdfStorage'
 
 interface BookingConfirmationEmailProps {
   to: string
@@ -21,7 +21,7 @@ interface BookingConfirmationEmailProps {
 interface EmailResult {
   success: boolean
   error?: string
-  pdfPath?: string // Local filesystem path instead of URL
+  pdfUrl?: string // Cloudinary URL for the uploaded PDF
 }
 
 
@@ -86,7 +86,7 @@ export async function sendBookingConfirmationEmail({
     const verificationUrl = `${baseUrl}/verify-booking?bookingId=${encodeURIComponent(bookingId)}`
     
     let pdfBuffer: Buffer | null = null
-    let pdfPath: string | null = null
+    let pdfUrl: string | null = null
     
     try {
       pdfBuffer = await generateBookingConfirmationPDF({
@@ -101,11 +101,11 @@ export async function sendBookingConfirmationEmail({
         verificationUrl,
       })
       
-      // Save PDF to local filesystem
+      // Upload PDF to Cloudinary with event-based folder structure
       if (pdfBuffer) {
-        pdfPath = await savePDFToLocalFilesystem(pdfBuffer, event.title, bookingId)
-        if (!pdfPath) {
-          console.warn('Failed to save PDF to local filesystem, but continuing with email send')
+        pdfUrl = await uploadPDFToStorage(pdfBuffer, event.title, bookingId)
+        if (!pdfUrl) {
+          console.warn('Failed to upload PDF to Cloudinary, but continuing with email send')
         }
       }
     } catch (pdfError) {
@@ -447,10 +447,10 @@ export async function sendBookingConfirmationEmail({
       // If we have any response from Brevo, consider it successful
       // The email was sent if we got a response without an error
       if (data !== null && data !== undefined) {
-        // Return PDF path if it was saved successfully
+        // Return PDF URL if it was uploaded successfully
         return {
           success: true,
-          pdfPath: pdfPath || undefined,
+          pdfUrl: pdfUrl || undefined,
         }
       }
       

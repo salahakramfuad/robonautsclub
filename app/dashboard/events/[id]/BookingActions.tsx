@@ -34,8 +34,8 @@ export default function BookingActions({ booking }: BookingActionsProps) {
     }
   }
 
-  // Support both pdfPath (new local storage) and pdfUrl (old Cloudinary storage) for backward compatibility
-  const pdfLink = booking.pdfPath || booking.pdfUrl
+  // PDF URL from Cloudinary
+  const pdfLink = booking.pdfUrl
 
   return (
     <>

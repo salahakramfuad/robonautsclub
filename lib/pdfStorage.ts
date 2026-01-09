@@ -1,11 +1,10 @@
 /**
- * PDF Storage utility for Cloudinary and Local Filesystem
+ * PDF Storage utility for Cloudinary
+ * Stores PDFs in event-organized folder structure: booking-confirmations/events/<event-slug>/booking-<bookingId>.pdf
  */
 
 import cloudinary from './cloudinary'
 import { Readable } from 'stream'
-import { existsSync, mkdirSync, writeFileSync } from 'fs'
-import { getAbsolutePDFPath, getAbsoluteEventDirectoryPath, generateEventSlug } from './pathUtils'
 
 /**
  * Convert buffer to stream for Cloudinary upload
@@ -18,12 +17,14 @@ function bufferToStream(buffer: Buffer): Readable {
 }
 
 /**
- * Upload PDF to Cloudinary and return the download URL
+ * Upload PDF to Cloudinary with event-based folder structure
+ * Stores PDFs in: booking-confirmations/events/<event-slug>/booking-<bookingId>.pdf
  * Tries 'raw' resource_type first, falls back to 'image' if needed
  */
 export async function uploadPDFToStorage(
   pdfBuffer: Buffer,
-  registrationId: string
+  eventTitle: string,
+  bookingId: string
 ): Promise<string | null> {
   try {
     if (!process.env.CLOUDINARY_URL) {
@@ -31,14 +32,23 @@ export async function uploadPDFToStorage(
       return null
     }
 
+    // Generate event slug for folder structure
+    const { generateEventSlug } = require('./pathUtils')
+    const eventSlug = generateEventSlug(eventTitle)
+    const sanitizedBookingId = bookingId.replace(/[^a-zA-Z0-9]/g, '')
+    
+    // Create folder path: booking-confirmations/events/<event-slug>
+    // File name: booking-<bookingId>.pdf
+    const publicId = `booking-confirmations/events/${eventSlug}/booking-${sanitizedBookingId}`
+
     // Try uploading as 'raw' resource_type first (Option 1)
-    const rawResult = await uploadPDFWithResourceType(pdfBuffer, registrationId, 'raw')
+    const rawResult = await uploadPDFWithResourceType(pdfBuffer, publicId, 'raw')
     if (rawResult) {
       return rawResult
     }
 
     // Fallback to 'image' resource_type if 'raw' fails (Option 2)
-    const imageResult = await uploadPDFWithResourceType(pdfBuffer, registrationId, 'image')
+    const imageResult = await uploadPDFWithResourceType(pdfBuffer, publicId, 'image')
     if (imageResult) {
       return imageResult
     }
@@ -55,7 +65,7 @@ export async function uploadPDFToStorage(
  */
 async function uploadPDFWithResourceType(
   pdfBuffer: Buffer,
-  registrationId: string,
+  publicId: string,
   resourceType: 'raw' | 'image'
 ): Promise<string | null> {
   return new Promise<string | null>((resolve) => {
@@ -64,10 +74,10 @@ async function uploadPDFWithResourceType(
       const stream = bufferToStream(pdfBuffer)
 
       // Upload options with proper access settings
+      // publicId already contains the full path: booking-confirmations/events/<event-slug>/booking-<bookingId>
       const uploadOptions: any = {
-        folder: 'booking-confirmations', // Organize PDFs in a folder
         resource_type: resourceType,
-        public_id: registrationId, // Use registrationId as the public_id
+        public_id: publicId, // Full path including folder structure
         format: 'pdf',
         access_mode: 'public', // Ensure file is publicly accessible
         invalidate: true, // Clear CDN cache
@@ -122,79 +132,27 @@ async function uploadPDFWithResourceType(
 }
 
 /**
- * Save PDF to local filesystem in event-organized structure
- * Creates directory structure automatically: /uploads/events/<event-slug>/booking-<bookingId>.pdf
- * 
- * @param pdfBuffer - The PDF file buffer to save
- * @param eventTitle - The event title (will be converted to slug)
- * @param bookingId - The booking document ID
- * @returns The relative path to the saved PDF, or null if save failed
- */
-export async function savePDFToLocalFilesystem(
-  pdfBuffer: Buffer,
-  eventTitle: string,
-  bookingId: string
-): Promise<string | null> {
-  try {
-    if (!pdfBuffer || !Buffer.isBuffer(pdfBuffer)) {
-      console.error('Invalid PDF buffer provided')
-      return null
-    }
-
-    if (!eventTitle || typeof eventTitle !== 'string' || eventTitle.trim() === '') {
-      console.error('Invalid event title provided')
-      return null
-    }
-
-    if (!bookingId || typeof bookingId !== 'string' || bookingId.trim() === '') {
-      console.error('Invalid bookingId provided')
-      return null
-    }
-
-    // Generate event slug and get paths
-    const eventSlug = generateEventSlug(eventTitle)
-    const absoluteDirPath = getAbsoluteEventDirectoryPath(eventSlug)
-    const absoluteFilePath = getAbsolutePDFPath(eventSlug, bookingId)
-
-    // Create directory if it doesn't exist (recursive)
-    try {
-      if (!existsSync(absoluteDirPath)) {
-        mkdirSync(absoluteDirPath, { recursive: true })
-      }
-    } catch (error: any) {
-      console.error('Error creating directory for PDF storage:', error)
-      return null
-    }
-
-    // Write PDF buffer to file
-    try {
-      writeFileSync(absoluteFilePath, pdfBuffer, 'binary')
-      
-      // Return relative path (starts with /)
-      const relativePath = `/uploads/events/${eventSlug}/booking-${bookingId.replace(/[^a-zA-Z0-9]/g, '')}.pdf`
-      return relativePath
-    } catch (error: any) {
-      console.error('Error writing PDF file to filesystem:', error)
-      return null
-    }
-  } catch (error) {
-    console.error('Error saving PDF to local filesystem:', error)
-    return null
-  }
-}
-
-/**
  * Delete PDF from Cloudinary
  * Tries both 'raw' and 'image' resource types since we support both
+ * Constructs publicId from eventTitle and bookingId using the same folder structure as upload
  */
-export async function deletePDFFromStorage(registrationId: string): Promise<boolean> {
+export async function deletePDFFromStorage(
+  eventTitle: string,
+  bookingId: string
+): Promise<boolean> {
   try {
     if (!process.env.CLOUDINARY_URL) {
       console.error('Cloudinary is not configured')
       return false
     }
 
-    const publicId = `booking-confirmations/${registrationId}`
+    // Generate event slug for folder structure
+    const { generateEventSlug } = require('./pathUtils')
+    const eventSlug = generateEventSlug(eventTitle)
+    const sanitizedBookingId = bookingId.replace(/[^a-zA-Z0-9]/g, '')
+    
+    // Construct publicId matching the upload structure
+    const publicId = `booking-confirmations/events/${eventSlug}/booking-${sanitizedBookingId}`
     let deleted = false
 
     // Try deleting as 'raw' first

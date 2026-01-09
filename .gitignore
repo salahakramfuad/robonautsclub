@@ -43,8 +43,3 @@ lib/firebase-service-account.json
 # typescript
 *.tsbuildinfo
 next-env.d.ts
-
-# Generated PDF files (keep directory structure but ignore PDF contents)
-/public/uploads/events/**/*.pdf
-# Keep directory structure by adding a .gitkeep in the events directory
-!public/uploads/events/.gitkeep
