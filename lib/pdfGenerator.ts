@@ -8,7 +8,7 @@ import { formatEventDates, getFirstEventDate, parseEventDates } from './dateUtil
 import { generateQRCodeBuffer } from './qrCode'
 import { sanitizeEventForPDF, sanitizeBookingDetailsForPDF, sanitizeTextForPDF } from './textSanitizer'
 import { join, dirname } from 'path'
-import { existsSync, readFileSync } from 'fs'
+import { existsSync, readdirSync } from 'fs'
 
 interface BookingDetails {
   name: string
@@ -63,10 +63,9 @@ function truncateTextToFit(text: string, maxWidth: number, maxHeight: number, fo
  */
 function resolvePDFKitFontPath(): string | null {
   try {
-    const fs = require('fs')
-    
     // Method 1: Try to find PDFKit package using require.resolve
     try {
+      // Dynamic require needed for PDFKit resolution in serverless environments
       const pdfkitPath = require.resolve('pdfkit')
       const pdfkitDir = dirname(pdfkitPath)
       // Navigate up from lib/pdfkit.js to node_modules/pdfkit, then to js/data
@@ -88,7 +87,7 @@ function resolvePDFKitFontPath(): string | null {
           return fontPath
         }
       }
-    } catch (e) {
+    } catch {
       // Continue to next method
     }
 
@@ -96,8 +95,8 @@ function resolvePDFKitFontPath(): string | null {
     try {
       const pnpmDir = join(process.cwd(), 'node_modules', '.pnpm')
       if (existsSync(pnpmDir)) {
-        const dirs = fs.readdirSync(pnpmDir).filter((dir: string) => dir.startsWith('pdfkit@'))
-        const pnpmPaths = dirs.map((dir: string) => 
+        const dirs = readdirSync(pnpmDir).filter((dir) => dir.startsWith('pdfkit@'))
+        const pnpmPaths = dirs.map((dir) => 
           join(pnpmDir, dir, 'node_modules', 'pdfkit', 'js', 'data')
         )
         
@@ -117,7 +116,7 @@ function resolvePDFKitFontPath(): string | null {
           }
         }
       }
-    } catch (e) {
+    } catch {
       // Continue
     }
 
@@ -144,13 +143,14 @@ function resolvePDFKitFontPath(): string | null {
         if (existsSync(helveticaPath)) {
           return fontPath
         }
-      } catch (e) {
+      } catch {
         // Path might not be accessible, continue
       }
     }
     
     // Method 4: Try to find pdfkit using require.resolve and navigate from there
     try {
+      // Dynamic require needed for PDFKit resolution in serverless environments
       const pdfkitMain = require.resolve('pdfkit')
       // Try to find the data directory relative to the main file
       // pdfkit main is usually at: .../pdfkit/lib/pdfkit.js
@@ -167,23 +167,33 @@ function resolvePDFKitFontPath(): string | null {
       if (existsSync(join(altDataPath, 'Times-Roman.afm')) || existsSync(join(altDataPath, 'Helvetica.afm'))) {
         return altDataPath
       }
-    } catch (e) {
+    } catch {
       // require.resolve might fail in some environments
     }
 
     return null
   } catch (error) {
-    console.error('Error resolving PDFKit font path:', error)
+    // Log error but don't throw - return null to allow fallback behavior
+    // Error logging is intentional for debugging font loading issues
+    if (error instanceof Error) {
+      // Intentional console.error for debugging - server-side only
+      console.error('Error resolving PDFKit font path:', error.message)
+    }
     return null
   }
 }
+
+/**
+ * Type for the original readFileSync function
+ */
+type ReadFileSyncFn = (path: string | Buffer | number, options?: string) => Buffer | string
 
 /**
  * Patch fs.readFileSync to intercept PDFKit font file reads
  * Returns the original function and the patched function setup status
  * This is the most reliable way to handle font loading in serverless environments
  */
-function setupPDFKitFonts(): { originalReadFileSync: Function; fontPath: string | null } | null {
+function setupPDFKitFonts(): { originalReadFileSync: ReadFileSyncFn; fontPath: string | null } | null {
   try {
     const fontPath = resolvePDFKitFontPath()
     if (!fontPath) {
@@ -191,11 +201,14 @@ function setupPDFKitFonts(): { originalReadFileSync: Function; fontPath: string 
     }
 
     // Get the original fs module
+    // Dynamic require needed for monkey-patching in serverless environments
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     const fs = require('fs')
-    const originalReadFileSync = fs.readFileSync.bind(fs)
+    const originalReadFileSync = fs.readFileSync.bind(fs) as ReadFileSyncFn
     
     // Patch readFileSync to intercept font file reads
-    fs.readFileSync = function(path: string | Buffer | number, ...args: any[]) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    fs.readFileSync = function(path: string | Buffer | number, ...args: any[]): Buffer | string {
       const pathStr = String(path)
       
       // Check if this is a PDFKit font file request (more comprehensive matching)
@@ -231,9 +244,10 @@ function setupPDFKitFonts(): { originalReadFileSync: Function; fontPath: string 
       // For all other files, use original behavior
       try {
         return originalReadFileSync(path, ...args)
-      } catch (error: any) {
+      } catch (error: unknown) {
         // If the original path fails and it's a PDFKit font file, try our resolved path
-        if (error.code === 'ENOENT' && isPDFKitFontRequest) {
+        const nodeError = error as { code?: string }
+        if (nodeError.code === 'ENOENT' && isPDFKitFontRequest) {
           const fileName = pathStr.split(/[\/\\]/).pop() || ''
           if (fileName.endsWith('.afm')) {
             const correctPath = join(fontPath, fileName)
@@ -256,7 +270,12 @@ function setupPDFKitFonts(): { originalReadFileSync: Function; fontPath: string 
     }
     return { originalReadFileSync, fontPath }
   } catch (error) {
-    console.error('Error setting up PDFKit fonts:', error)
+    // Log error but don't throw - return null to allow fallback behavior
+    // Error logging is intentional for debugging font loading issues
+    if (error instanceof Error) {
+      // Intentional console.error for debugging - server-side only
+      console.error('Error setting up PDFKit fonts:', error.message)
+    }
     return null
   }
 }
@@ -272,8 +291,10 @@ export async function generateBookingConfirmationPDF({
   verificationUrl,
 }: GeneratePDFProps): Promise<Buffer> {
   return new Promise(async (resolve, reject) => {
+    // Dynamic require needed for monkey-patching in serverless environments
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     const fs = require('fs')
-    let fontPatch: { originalReadFileSync: Function; fontPath: string | null } | null = null
+    let fontPatch: { originalReadFileSync: ReadFileSyncFn; fontPath: string | null } | null = null
     
     try {
       // Setup fonts before creating PDFDocument
@@ -292,6 +313,7 @@ export async function generateBookingConfirmationPDF({
       doc.on('pageAdded', () => {
         pageCount++
         if (pageCount > 1) {
+          // Intentional console.warn for debugging layout issues - server-side only
           console.warn('Warning: Content exceeded single page - consider reducing font sizes or content')
         }
       })
@@ -330,7 +352,10 @@ export async function generateBookingConfirmationPDF({
       if (fontPatch) {
         fs.readFileSync = fontPatch.originalReadFileSync
       }
-      console.error('Error in PDF generation:', error)
+      // Intentional console.error for debugging PDF generation issues - server-side only
+      if (error instanceof Error) {
+        console.error('Error in PDF generation:', error.message)
+      }
       reject(error)
     }
   })
@@ -576,7 +601,7 @@ async function generatePDFContent(
     }
 
     // ==================== QR CODE SECTION (at bottom) ====================
-    yPos += 25 // Increased spacing before QR section
+    yPos += 40 // Increased spacing before QR section
     const qrSize = 100
     // Increased section height to accommodate more spacing and full URL display
     const qrSectionHeight = qrSize + 110 // Increased from 60 to 110 for better spacing
@@ -623,7 +648,7 @@ async function generatePDFContent(
       const urlY = qrY + qrSize + 38 // Increased spacing below instruction text
       const questionMarkIndex = verificationUrl.indexOf('?')
       
-      if (questionMarkIndex > 0 && verificationUrl.length > 70) {
+      if (questionMarkIndex > 0 && verificationUrl.length > 120) {
         // If URL is long and has query params, display base URL and params on separate lines
         const baseUrl = verificationUrl.substring(0, questionMarkIndex)
         const queryParams = verificationUrl.substring(questionMarkIndex)
@@ -644,7 +669,7 @@ async function generatePDFContent(
           lineGap: 2,
         })
       }
-    } catch (error) {
+    } catch {
       // Continue without QR code if generation fails
       doc.font('Times-Roman').fontSize(fontSizes.body).fillColor('#6b7280').text('QR code unavailable - Please contact support', margin, qrSectionY + 40, {
         align: 'center',
