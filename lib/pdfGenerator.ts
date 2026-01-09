@@ -545,8 +545,8 @@ async function generatePDFContent(
 
     // ==================== EVENT DESCRIPTION (if space available) ====================
     const eventDescription = sanitizedEvent.fullDescription || sanitizedEvent.description
-    // Reserve space for QR code section (120px) and footer (50px)
-    const minQRAndFooterSpace = 170
+    // Reserve space for QR code section (210px: 100px QR + 110px spacing/text) and footer (35px)
+    const minQRAndFooterSpace = 245
     const remainingHeight = pageHeight - yPos - marginBottom - minQRAndFooterSpace
     
     if (eventDescription && remainingHeight > 50) {
@@ -576,10 +576,11 @@ async function generatePDFContent(
     }
 
     // ==================== QR CODE SECTION (at bottom) ====================
-    yPos += 20
+    yPos += 25 // Increased spacing before QR section
     const qrSize = 100
-    const qrSectionHeight = qrSize + 60
-    const minFooterSpace = 30
+    // Increased section height to accommodate more spacing and full URL display
+    const qrSectionHeight = qrSize + 110 // Increased from 60 to 110 for better spacing
+    const minFooterSpace = 35 // Increased footer space
     
     // Calculate position - ensure QR section fits before footer
     const maxQRY = pageHeight - marginBottom - qrSectionHeight - minFooterSpace
@@ -591,15 +592,15 @@ async function generatePDFContent(
     // Decorative top border
     doc.rect(margin - 10, qrSectionY - 10, contentWidth + 20, 4).fill('#6366f1')
     
-    // Section title
-    doc.font('Times-Roman').fontSize(15).fillColor('#1e40af').text('Scan QR Code to Verify Registration', margin, qrSectionY + 5, {
+    // Section title with more spacing
+    doc.font('Times-Roman').fontSize(15).fillColor('#1e40af').text('Scan QR Code to Verify Registration', margin, qrSectionY + 8, {
       align: 'center',
       width: contentWidth,
     })
     
-    // Generate and place QR code centered
+    // Generate and place QR code centered with more spacing below title
     try {
-      const qrY = qrSectionY + 18
+      const qrY = qrSectionY + 28 // Increased from 18 to 28 for more space below title
       const qrX = (pageWidth - qrSize) / 2
       
       // Add elegant white border around QR code with shadow effect
@@ -611,18 +612,38 @@ async function generatePDFContent(
         height: qrSize,
       })
       
-      // Instruction text below QR code
-      doc.font('Times-Roman').fontSize(10).fillColor('#1e40af').text('Scan with your phone camera to verify your registration', margin, qrY + qrSize + 14, {
+      // Instruction text below QR code with more spacing
+      doc.font('Times-Roman').fontSize(10).fillColor('#1e40af').text('Scan with your phone camera to verify your registration', margin, qrY + qrSize + 20, {
         align: 'center',
         width: contentWidth,
       })
       
-      // URL text (smaller, below instruction) - truncate if too long
-      const displayUrl = verificationUrl.length > 55 ? verificationUrl.substring(0, 52) + '...' : verificationUrl
-      doc.font('Times-Roman').fontSize(8).fillColor('#6b7280').text(displayUrl, margin, qrY + qrSize + 28, {
-        align: 'center',
-        width: contentWidth,
-      })
+      // URL text - display full URL with proper spacing (may wrap to multiple lines)
+      // Split URL at query parameter for better readability if URL is long
+      const urlY = qrY + qrSize + 38 // Increased spacing below instruction text
+      const questionMarkIndex = verificationUrl.indexOf('?')
+      
+      if (questionMarkIndex > 0 && verificationUrl.length > 70) {
+        // If URL is long and has query params, display base URL and params on separate lines
+        const baseUrl = verificationUrl.substring(0, questionMarkIndex)
+        const queryParams = verificationUrl.substring(questionMarkIndex)
+        
+        doc.font('Times-Roman').fontSize(7).fillColor('#6b7280').text(baseUrl, margin, urlY, {
+          align: 'center',
+          width: contentWidth - 20,
+        })
+        doc.font('Times-Roman').fontSize(7).fillColor('#6b7280').text(queryParams, margin, urlY + 10, {
+          align: 'center',
+          width: contentWidth - 20,
+        })
+      } else {
+        // Display full URL, allow natural wrapping across multiple lines if needed
+        doc.font('Times-Roman').fontSize(7).fillColor('#6b7280').text(verificationUrl, margin, urlY, {
+          align: 'center',
+          width: contentWidth - 20,
+          lineGap: 2,
+        })
+      }
     } catch (error) {
       // Continue without QR code if generation fails
       doc.font('Times-Roman').fontSize(fontSizes.body).fillColor('#6b7280').text('QR code unavailable - Please contact support', margin, qrSectionY + 40, {
