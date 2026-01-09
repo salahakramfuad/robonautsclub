@@ -82,8 +82,8 @@ export async function sendBookingConfirmationEmail({
       baseUrl = baseUrl.replace('http://', 'https://')
     }
     
-    // Generate verification URL using bookingId (not registrationId)
-    const verificationUrl = `${baseUrl}/verify-booking?bookingId=${encodeURIComponent(bookingId)}`
+    // Generate verification URL using registrationId (this is what users will scan/enter)
+    const verificationUrl = `${baseUrl}/verify-booking?registrationId=${encodeURIComponent(registrationId)}`
     
     let pdfBuffer: Buffer | null = null
     let pdfUrl: string | null = null

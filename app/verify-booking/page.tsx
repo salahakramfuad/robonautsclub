@@ -9,10 +9,10 @@ import { format } from 'date-fns'
 export const dynamic = 'force-dynamic'
 
 interface VerificationPageProps {
-  searchParams: Promise<{ bookingId?: string }>
+  searchParams: Promise<{ registrationId?: string }>
 }
 
-async function getBookingById(bookingId: string): Promise<{
+async function getBookingByRegistrationId(registrationId: string): Promise<{
   booking: Booking | null
   event: Event | null
 }> {
@@ -22,17 +22,22 @@ async function getBookingById(bookingId: string): Promise<{
       return { booking: null, event: null }
     }
 
-    if (!bookingId || bookingId.trim() === '') {
+    if (!registrationId || registrationId.trim() === '') {
       return { booking: null, event: null }
     }
 
-    // Fetch booking directly by document ID
-    const bookingDoc = await adminDb.collection('bookings').doc(bookingId).get()
+    // Query bookings collection by registrationId
+    const bookingsSnapshot = await adminDb
+      .collection('bookings')
+      .where('registrationId', '==', registrationId.trim())
+      .limit(1)
+      .get()
 
-    if (!bookingDoc.exists) {
+    if (bookingsSnapshot.empty) {
       return { booking: null, event: null }
     }
 
+    const bookingDoc = bookingsSnapshot.docs[0]
     const bookingData = bookingDoc.data()!
 
     const booking: Booking = {
@@ -65,28 +70,28 @@ async function getBookingById(bookingId: string): Promise<{
 
 export default async function VerifyBookingPage({ searchParams }: VerificationPageProps) {
   const params = await searchParams
-  const bookingId = params.bookingId
+  const registrationId = params.registrationId
 
-  if (!bookingId) {
+  if (!registrationId) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center p-4">
         <div className="max-w-md w-full bg-white rounded-2xl shadow-xl border-2 border-red-200 p-8 text-center">
           <div className="w-20 h-20 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-6">
             <XCircle className="w-12 h-12 text-red-500" />
           </div>
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">Booking ID Required</h1>
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">Registration Number Required</h1>
           <p className="text-gray-600 mb-4">
-            Please provide a booking ID to verify your registration.
+            Please provide a registration number to verify your registration.
           </p>
           <p className="text-sm text-gray-500">
-            The booking ID can be found in your confirmation email or PDF.
+            The registration number can be found in your confirmation email or PDF.
           </p>
         </div>
       </div>
     )
   }
 
-  const { booking, event } = await getBookingById(bookingId)
+  const { booking, event } = await getBookingByRegistrationId(registrationId)
 
   const isValid = booking !== null && event !== null
   
@@ -106,7 +111,7 @@ export default async function VerifyBookingPage({ searchParams }: VerificationPa
     }
   }
   baseUrl = baseUrl.replace(/\/$/, '')
-  const verificationUrl = `${baseUrl}/verify-booking?bookingId=${bookingId}`
+  const verificationUrl = `${baseUrl}/verify-booking?registrationId=${encodeURIComponent(registrationId)}`
   const qrCodeDataURL = isValid ? await generateQRCodeDataURL(verificationUrl, 200) : null
 
   if (!isValid) {
@@ -116,12 +121,12 @@ export default async function VerifyBookingPage({ searchParams }: VerificationPa
           <div className="w-20 h-20 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-6">
             <XCircle className="w-12 h-12 text-red-500" />
           </div>
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">Invalid Booking</h1>
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">Registration Not Found</h1>
           <p className="text-gray-600 mb-4">
-            The booking ID <code className="bg-gray-100 px-2 py-1 rounded font-mono text-sm">{bookingId}</code> could not be found.
+            The registration number <code className="bg-gray-100 px-2 py-1 rounded font-mono text-sm break-all">{registrationId}</code> could not be found in our database.
           </p>
           <p className="text-sm text-gray-500">
-            Please check the booking ID and try again.
+            Please check the registration number and try again. The registration number format is: REG-YYYYMMDD-XXXXX
           </p>
         </div>
       </div>

@@ -172,6 +172,9 @@ export default async function EventDetailsPage({
               <thead className="bg-gray-50 border-b border-gray-200">
                 <tr>
                   <th className="px-3 sm:px-6 py-2 sm:py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                    Registration ID
+                  </th>
+                  <th className="px-3 sm:px-6 py-2 sm:py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                     Name
                   </th>
                   <th className="px-3 sm:px-6 py-2 sm:py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
@@ -217,6 +220,11 @@ export default async function EventDetailsPage({
                   
                   return (
                     <tr key={booking.id} className="hover:bg-gray-50 transition-colors">
+                      <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
+                        <div className="text-xs sm:text-sm font-mono font-semibold text-indigo-600">
+                          {booking.registrationId || 'N/A'}
+                        </div>
+                      </td>
                       <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
                         <div className="text-xs sm:text-sm font-medium text-gray-900">{booking.name}</div>
                       </td>

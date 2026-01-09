@@ -41,6 +41,7 @@ export default function ExportBookingsButton({ bookings, eventTitle }: ExportBoo
 
           return {
             'No.': index + 1,
+            'Registration ID': booking.registrationId || 'N/A',
             'Name': booking.name,
             'School': booking.school,
             'Email': booking.email,
@@ -60,6 +61,7 @@ export default function ExportBookingsButton({ bookings, eventTitle }: ExportBoo
         // Set column widths for better readability
         const columnWidths = [
           { wch: 8 },  // No.
+          { wch: 20 }, // Registration ID
           { wch: 25 }, // Name
           { wch: 30 }, // School
           { wch: 35 }, // Email
