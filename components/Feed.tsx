@@ -178,7 +178,7 @@ const Feed = () => {
         <div className="absolute top-0 left-0 right-0 h-px bg-linear-to-r from-transparent via-gray-200 to-transparent" />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <SectionHeader
-            title="Choose Your Learning Path with HOPETTC"
+            title="Choose Your Learning Path with HOPE TTC"
             subtitle="Explore our comprehensive robotics courses designed for all skill levels"
           />
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
