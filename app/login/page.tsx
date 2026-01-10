@@ -139,7 +139,10 @@ function LoginForm() {
 
       {/* Close Button */}
       <button
-        onClick={handleGoBack}
+        onClick={() => {
+          // Using client-side navigation to root
+          window.location.href = '/';
+        }}
         className="absolute top-4 hover:cursor-pointer right-4 z-20 p-2 rounded-full bg-white/90 hover:bg-white shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-110"
         aria-label="Go back"
       >
