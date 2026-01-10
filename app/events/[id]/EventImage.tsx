@@ -26,16 +26,13 @@ export default function EventImage({ src, alt, priority = false }: EventImagePro
   if (hasError) {
     return (
       <div className="relative h-64 md:h-80 lg:h-96">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
+        <Image
           src="/robot.gif"
           alt={alt}
-          className="w-full h-full object-cover"
-          onError={(e) => {
-            // If even the fallback fails, hide the broken image
-            const target = e.target as HTMLImageElement
-            target.style.display = 'none'
-          }}
+          fill
+          className="object-cover"
+          priority={priority}
+          onError={() => {}} // prevent infinite loop if fallback fails
         />
       </div>
     )

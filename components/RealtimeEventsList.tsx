@@ -36,6 +36,105 @@ function getEventDateInBST(dateString: string): Date {
   return bstDate
 }
 
+/**
+ * Check if an event is currently going on
+ * Returns true if current date/time is within the event's date and time
+ */
+function isEventGoingOn(event: Event): boolean {
+  const bstNow = getBSTTime()
+  const eventDates = parseEventDates(event.date)
+  
+  if (eventDates.length === 0) return false
+  
+  // Check if today is within the event date range
+  const sortedDates = [...eventDates].sort()
+  const firstEventDate = getEventDateInBST(sortedDates[0])
+  const lastEventDate = getEventDateInBST(sortedDates[sortedDates.length - 1])
+  
+  const daysFromStart = differenceInDays(bstNow, firstEventDate)
+  const daysFromEnd = differenceInDays(bstNow, lastEventDate)
+  
+  // Check if today is within the event date range (inclusive)
+  const isWithinRange = daysFromStart >= 0 && daysFromEnd <= 0
+  
+  if (!isWithinRange) return false
+  
+  // Find which event date matches today
+  let matchedEventDate: string | null = null
+  for (const eventDateStr of sortedDates) {
+    const eventDateBST = getEventDateInBST(eventDateStr)
+    const daysDiff = differenceInDays(eventDateBST, bstNow)
+    if (daysDiff === 0) {
+      matchedEventDate = eventDateStr
+      break
+    }
+  }
+  
+  // If no exact match but we're within range, use the first date
+  if (!matchedEventDate) {
+    matchedEventDate = sortedDates[0]
+  }
+  
+  // If event has a time, check if current time is past the event start time
+  if (event.time && matchedEventDate) {
+    try {
+      // Parse time string (e.g., "10:00 AM", "2:30 PM", "14:00")
+      const timeStr = event.time.trim()
+      
+      // Handle formats like "10:00 AM" or "2:30 PM"
+      const is12Hour = /AM|PM/i.test(timeStr)
+      let eventHours = 0
+      let eventMinutes = 0
+      
+      if (is12Hour) {
+        const match = timeStr.match(/(\d+):(\d+)\s*(AM|PM)/i)
+        if (match) {
+          let hours = parseInt(match[1])
+          const minutes = parseInt(match[2])
+          const period = match[3].toUpperCase()
+          
+          if (period === 'PM' && hours !== 12) hours += 12
+          if (period === 'AM' && hours === 12) hours = 0
+          
+          eventHours = hours
+          eventMinutes = minutes
+        } else {
+          // If parsing fails, assume event is going on if it's today
+          return true
+        }
+      } else {
+        // Handle 24-hour format (e.g., "14:00", "09:30")
+        const match = timeStr.match(/(\d+):(\d+)/)
+        if (match) {
+          eventHours = parseInt(match[1])
+          eventMinutes = parseInt(match[2])
+        } else {
+          // If parsing fails, assume event is going on if it's today
+          return true
+        }
+      }
+      
+      // Get the matched event date in BST and create datetime
+      const eventDateBST = getEventDateInBST(matchedEventDate)
+      const eventDateTime = new Date(eventDateBST)
+      eventDateTime.setHours(eventHours, eventMinutes, 0, 0)
+      
+      // Check if current time is past or equal to event start time
+      // Assume event runs for 8 hours (full day event) - adjust as needed
+      const eventEndTime = new Date(eventDateTime)
+      eventEndTime.setHours(eventEndTime.getHours() + 8)
+      
+      return bstNow >= eventDateTime && bstNow <= eventEndTime
+    } catch (error) {
+      // If time parsing fails, assume event is going on if it's today
+      return true
+    }
+  }
+  
+  // If no time specified, assume event is going on all day if it's today
+  return true
+}
+
 interface RealtimeEventsListProps {
   initialEvents?: Event[]
 }
@@ -50,28 +149,41 @@ const EventCard = ({ event }: { event: Event }) => {
   // Calculate time until event in Bangladesh Standard Time
   let timeDisplay: string | null = null
   if (firstDate && isUpcoming) {
-    const bstNow = getBSTTime()
-    // Parse the event date string and convert to BST
-    const eventDateStr = Array.isArray(event.date) 
-      ? event.date[0] 
-      : typeof event.date === 'string' && event.date.includes(',')
-      ? event.date.split(',')[0].trim()
-      : event.date || ''
-    
-    if (eventDateStr) {
-      const eventDateBST = getEventDateInBST(eventDateStr)
-      const hoursUntil = differenceInHours(eventDateBST, bstNow)
-      const daysUntil = differenceInDays(eventDateBST, bstNow)
+    // First check if event is currently going on
+    if (isEventGoingOn(event)) {
+      timeDisplay = 'Event going on'
+    } else {
+      const bstNow = getBSTTime()
+      // Parse the event date string and convert to BST
+      const eventDateStr = Array.isArray(event.date) 
+        ? event.date[0] 
+        : typeof event.date === 'string' && event.date.includes(',')
+        ? event.date.split(',')[0].trim()
+        : event.date || ''
       
-      if (hoursUntil < 24 && hoursUntil >= 0) {
-        // Less than 24 hours - show "Starting soon"
-        timeDisplay = 'Starting soon'
-      } else if (hoursUntil >= 24 && hoursUntil < 48) {
-        // Between 24-48 hours - show "Tomorrow"
-        timeDisplay = 'Tomorrow'
-      } else if (daysUntil >= 0) {
-        // More than 48 hours - show days count
-        timeDisplay = `${daysUntil} days away`
+      if (eventDateStr) {
+        const eventDateBST = getEventDateInBST(eventDateStr)
+        const hoursUntil = differenceInHours(eventDateBST, bstNow)
+        const daysUntil = differenceInDays(eventDateBST, bstNow)
+        
+        if (daysUntil === 0) {
+          // Same day but event hasn't started yet
+          if (hoursUntil >= 0) {
+            timeDisplay = 'Starting soon'
+          } else {
+            // Past today, might be multi-day event still going
+            timeDisplay = 'Event going on'
+          }
+        } else if (hoursUntil < 24 && hoursUntil >= 0) {
+          // Less than 24 hours - show "Starting soon"
+          timeDisplay = 'Starting soon'
+        } else if (hoursUntil >= 24 && hoursUntil < 48) {
+          // Between 24-48 hours - show "Tomorrow"
+          timeDisplay = 'Tomorrow'
+        } else if (daysUntil > 0) {
+          // More than 48 hours - show days count
+          timeDisplay = `${daysUntil} days away`
+        }
       }
     }
   }

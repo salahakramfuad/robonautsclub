@@ -5,7 +5,7 @@ import { adminDb } from '@/lib/firebase-admin'
 import type { Booking } from '@/types/booking'
 import type { Event } from '@/types/event'
 import { format } from 'date-fns'
-
+import Image from 'next/image'
 export const dynamic = 'force-dynamic'
 
 interface VerificationPageProps {
@@ -77,7 +77,7 @@ export default async function VerificationPage({ params }: VerificationPageProps
 
   if (!isValid) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-linaer-to-br from-gray-50 to-gray-100 flex items-center justify-center p-4">
         <div className="max-w-md w-full bg-white rounded-2xl shadow-xl border-2 border-red-200 p-8 text-center">
           <div className="w-20 h-20 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-6">
             <XCircle className="w-12 h-12 text-red-500" />
@@ -101,7 +101,7 @@ export default async function VerificationPage({ params }: VerificationPageProps
     : new Date(booking!.createdAt)
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-8 px-4">
+    <div className="min-h-screen bg-linear-to-br from-gray-50 to-gray-100 py-8 px-4">
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="bg-white rounded-2xl shadow-xl border-2 border-green-200 overflow-hidden mb-6">
@@ -123,7 +123,14 @@ export default async function VerificationPage({ params }: VerificationPageProps
                 </div>
                 {qrCodeDataURL && (
                   <div className="flex-shrink-0">
-                    <img src={qrCodeDataURL} alt="QR Code" className="w-32 h-32 border-2 border-indigo-200 rounded-lg" />
+                    <Image
+                      src={qrCodeDataURL}
+                      alt="QR Code"
+                      width={128}
+                      height={128}
+                      className="w-32 h-32 border-2 border-indigo-200 rounded-lg"
+                      unoptimized
+                    />
                     <p className="text-xs text-center text-gray-500 mt-2">Scan to verify</p>
                   </div>
                 )}
