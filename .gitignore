@@ -44,4 +44,4 @@ lib/firebase-service-account.json
 *.tsbuildinfo
 next-env.d.ts
 
-.cursor.log
+.cursor/debug.log
