@@ -4,8 +4,6 @@ import { adminDb } from '@/lib/firebase-admin'
 import { Event } from '@/types/event'
 import { sendBookingConfirmationEmail } from '@/lib/email'
 import { generateRegistrationId } from '@/lib/registrationId'
-import { appendFileSync } from 'fs'
-import { join } from 'path'
 
 /**
  * Get all events from Firestore (public - no auth required)
@@ -216,9 +214,6 @@ export async function createBooking(formData: {
 
     // Step 6: Send confirmation email with PDF attachment
     // This will generate PDF with bookingId, upload to Cloudinary, and return pdfUrl
-    // #region agent log
-    try{appendFileSync(join(process.cwd(),'.cursor','debug.log'),JSON.stringify({location:'app/events/actions.ts:216',message:'Sending confirmation email',data:{bookingId,registrationId,email:formData.email.trim().toLowerCase()},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})+'\n');}catch{/*ignore*/}
-    // #endregion
     const emailResult = await sendBookingConfirmationEmail({
       to: formData.email.trim().toLowerCase(),
       name: formData.name.trim(),
@@ -233,15 +228,8 @@ export async function createBooking(formData: {
       },
     })
 
-    // #region agent log
-    try{appendFileSync(join(process.cwd(),'.cursor','debug.log'),JSON.stringify({location:'app/events/actions.ts:231',message:'Email result received',data:{success:emailResult.success,hasPdfUrl:!!emailResult.pdfUrl,error:emailResult.error},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})+'\n');}catch{/*ignore*/}
-    // #endregion
-
     if (!emailResult.success) {
       // If email fails, delete the booking document we just created
-      // #region agent log
-      try{appendFileSync(join(process.cwd(),'.cursor','debug.log'),JSON.stringify({location:'app/events/actions.ts:233',message:'Email failed, deleting booking',data:{bookingId},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})+'\n');}catch{/*ignore*/}
-      // #endregion
       await bookingRef.delete()
       console.error('Failed to send confirmation email:', emailResult.error)
       return {
@@ -252,9 +240,6 @@ export async function createBooking(formData: {
 
     // Step 7: Update booking document with pdfUrl if PDF was uploaded successfully
     if (emailResult.pdfUrl) {
-      // #region agent log
-      try{appendFileSync(join(process.cwd(),'.cursor','debug.log'),JSON.stringify({location:'app/events/actions.ts:243',message:'Updating booking with pdfUrl',data:{bookingId,pdfUrl:emailResult.pdfUrl},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})+'\n');}catch{/*ignore*/}
-      // #endregion
       await bookingRef.update({
         pdfUrl: emailResult.pdfUrl,
       })

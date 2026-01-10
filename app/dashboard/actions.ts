@@ -464,14 +464,8 @@ export async function cancelBooking(bookingId: string): Promise<{ success: boole
     } as Event
 
     // Send cancellation email before deleting the booking
-    // #region agent log
-    try{appendFileSync(join(process.cwd(),'.cursor','debug.log'),JSON.stringify({location:'app/dashboard/actions.ts:467',message:'Checking cancellation email requirements',data:{hasEmail:!!booking.email,hasRegistrationId:!!booking.registrationId,bookingId},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})+'\n');}catch{/*ignore*/}
-    // #endregion
     if (booking.email && booking.registrationId) {
       try {
-        // #region agent log
-        try{appendFileSync(join(process.cwd(),'.cursor','debug.log'),JSON.stringify({location:'app/dashboard/actions.ts:469',message:'Sending cancellation email',data:{email:booking.email,registrationId:booking.registrationId,eventId:event.id},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})+'\n');}catch{/*ignore*/}
-        // #endregion
         const { sendBookingCancellationEmail } = await import('@/lib/email')
         const emailResult = await sendBookingCancellationEmail({
           to: booking.email,
@@ -480,19 +474,12 @@ export async function cancelBooking(bookingId: string): Promise<{ success: boole
           registrationId: booking.registrationId,
         })
 
-        // #region agent log
-        try{appendFileSync(join(process.cwd(),'.cursor','debug.log'),JSON.stringify({location:'app/dashboard/actions.ts:478',message:'Cancellation email result',data:{success:emailResult.success,error:emailResult.error},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})+'\n');}catch{/*ignore*/}
-        // #endregion
-
         // Log if email failed, but continue with deletion
         if (!emailResult.success) {
           console.error('Failed to send cancellation email:', emailResult.error)
           // Continue with deletion even if email fails
         }
       } catch (emailError) {
-        // #region agent log
-        try{appendFileSync(join(process.cwd(),'.cursor','debug.log'),JSON.stringify({location:'app/dashboard/actions.ts:482',message:'Cancellation email exception',data:{error:emailError instanceof Error?emailError.message:String(emailError)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})+'\n');}catch{/*ignore*/}
-        // #endregion
         console.error('Error sending cancellation email:', emailError)
         // Continue with deletion even if email fails
       }
