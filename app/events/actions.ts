@@ -25,11 +25,40 @@ export async function getPublicEvents(): Promise<Event[]> {
     const events: Event[] = []
     eventsSnapshot.forEach((doc) => {
       const data = doc.data()
+      
+      // Convert Firestore Timestamps to ISO strings for serialization
+      const createdAt = data.createdAt?.toDate?.() || data.createdAt
+      const updatedAt = data.updatedAt?.toDate?.() || data.updatedAt
+      
+      // Convert Date objects to ISO strings for Next.js serialization
+      const createdAtStr = createdAt instanceof Date 
+        ? createdAt.toISOString() 
+        : typeof createdAt === 'string' 
+        ? createdAt 
+        : null
+      
+      const updatedAtStr = updatedAt instanceof Date 
+        ? updatedAt.toISOString() 
+        : typeof updatedAt === 'string' 
+        ? updatedAt 
+        : null
+      
+      // Handle date field - convert Timestamp to string if needed
+      let dateValue = data.date
+      if (dateValue && typeof dateValue === 'object' && 'toDate' in dateValue) {
+        // It's a Firestore Timestamp
+        dateValue = dateValue.toDate().toISOString().split('T')[0] // Convert to YYYY-MM-DD
+      } else if (dateValue && typeof dateValue === 'object' && '_seconds' in dateValue) {
+        // It's a Firestore Timestamp (alternative format)
+        dateValue = new Date(dateValue._seconds * 1000).toISOString().split('T')[0]
+      }
+      
       events.push({
         id: doc.id,
         ...data,
-        createdAt: data.createdAt?.toDate?.() || data.createdAt,
-        updatedAt: data.updatedAt?.toDate?.() || data.updatedAt,
+        date: dateValue,
+        createdAt: createdAtStr || new Date().toISOString(),
+        updatedAt: updatedAtStr || new Date().toISOString(),
       } as Event)
     })
 
@@ -39,8 +68,8 @@ export async function getPublicEvents(): Promise<Event[]> {
       if (!a.createdAt) return 1
       if (!b.createdAt) return -1
       
-      const dateA = a.createdAt instanceof Date ? a.createdAt.getTime() : new Date(a.createdAt).getTime()
-      const dateB = b.createdAt instanceof Date ? b.createdAt.getTime() : new Date(b.createdAt).getTime()
+      const dateA = new Date(a.createdAt).getTime()
+      const dateB = new Date(b.createdAt).getTime()
       return dateB - dateA // Descending order
     })
 
@@ -70,11 +99,40 @@ export async function getPublicEvent(id: string): Promise<Event | null> {
     }
 
     const data = eventDoc.data()!
+    
+    // Convert Firestore Timestamps to ISO strings for serialization
+    const createdAt = data.createdAt?.toDate?.() || data.createdAt
+    const updatedAt = data.updatedAt?.toDate?.() || data.updatedAt
+    
+    // Convert Date objects to ISO strings for Next.js serialization
+    const createdAtStr = createdAt instanceof Date 
+      ? createdAt.toISOString() 
+      : typeof createdAt === 'string' 
+      ? createdAt 
+      : new Date().toISOString()
+    
+    const updatedAtStr = updatedAt instanceof Date 
+      ? updatedAt.toISOString() 
+      : typeof updatedAt === 'string' 
+      ? updatedAt 
+      : new Date().toISOString()
+    
+    // Handle date field - convert Timestamp to string if needed
+    let dateValue = data.date
+    if (dateValue && typeof dateValue === 'object' && 'toDate' in dateValue) {
+      // It's a Firestore Timestamp
+      dateValue = dateValue.toDate().toISOString().split('T')[0] // Convert to YYYY-MM-DD
+    } else if (dateValue && typeof dateValue === 'object' && '_seconds' in dateValue) {
+      // It's a Firestore Timestamp (alternative format)
+      dateValue = new Date(dateValue._seconds * 1000).toISOString().split('T')[0]
+    }
+    
     return {
       id: eventDoc.id,
       ...data,
-      createdAt: data.createdAt?.toDate?.() || data.createdAt,
-      updatedAt: data.updatedAt?.toDate?.() || data.updatedAt,
+      date: dateValue,
+      createdAt: createdAtStr,
+      updatedAt: updatedAtStr,
     } as Event
   } catch (error) {
     console.error('Error fetching event:', error)
@@ -280,11 +338,29 @@ export async function getPublicCourses(): Promise<Course[]> {
     const courses: Course[] = []
     coursesSnapshot.forEach((doc) => {
       const data = doc.data()
+      
+      // Convert Firestore Timestamps to ISO strings for serialization
+      const createdAt = data.createdAt?.toDate?.() || data.createdAt
+      const updatedAt = data.updatedAt?.toDate?.() || data.updatedAt
+      
+      // Convert Date objects to ISO strings for Next.js serialization
+      const createdAtStr = createdAt instanceof Date 
+        ? createdAt.toISOString() 
+        : typeof createdAt === 'string' 
+        ? createdAt 
+        : new Date().toISOString()
+      
+      const updatedAtStr = updatedAt instanceof Date 
+        ? updatedAt.toISOString() 
+        : typeof updatedAt === 'string' 
+        ? updatedAt 
+        : new Date().toISOString()
+      
       courses.push({
         id: doc.id,
         ...data,
-        createdAt: data.createdAt?.toDate?.() || data.createdAt,
-        updatedAt: data.updatedAt?.toDate?.() || data.updatedAt,
+        createdAt: createdAtStr,
+        updatedAt: updatedAtStr,
       } as Course)
     })
 
@@ -294,8 +370,8 @@ export async function getPublicCourses(): Promise<Course[]> {
       if (!a.createdAt) return 1
       if (!b.createdAt) return -1
       
-      const dateA = a.createdAt instanceof Date ? a.createdAt.getTime() : new Date(a.createdAt).getTime()
-      const dateB = b.createdAt instanceof Date ? b.createdAt.getTime() : new Date(b.createdAt).getTime()
+      const dateA = new Date(a.createdAt).getTime()
+      const dateB = new Date(b.createdAt).getTime()
       return dateB - dateA // Descending order
     })
 
