@@ -303,6 +303,36 @@ const Feed = ({ initialCourses = [] }: FeedProps) => {
                 </div>
               </div>
             </div>
+            
+            {/* Scrolling Countries Section */}
+            <div className="mt-8 sm:mt-10 pt-6 sm:pt-8 border-t border-gray-200">
+              <div className="overflow-hidden relative">
+                <div className="flex animate-scroll-left gap-8 sm:gap-12">
+                  {/* First set of countries */}
+                  {['Bangladesh', 'India', 'Thailand', 'Malaysia', 'Singapore', 'Indonesia', 'Philippines', 'Vietnam', 'China', 'Japan', 'South Korea', 'UAE', 'Qatar', 'Saudi Arabia', 'Turkey'].map((country, index) => (
+                    <div
+                      key={`country-1-${index}`}
+                      className="shrink-0 px-4 sm:px-6 py-2 sm:py-3 bg-white rounded-lg sm:rounded-xl border border-indigo-200 shadow-sm hover:shadow-md transition-shadow"
+                    >
+                      <span className="text-sm sm:text-base font-semibold text-indigo-600 whitespace-nowrap">
+                        {country}
+                      </span>
+                    </div>
+                  ))}
+                  {/* Duplicate set for seamless loop */}
+                  {['Bangladesh', 'India', 'Thailand', 'Malaysia', 'Singapore', 'Indonesia', 'Philippines', 'Vietnam', 'China', 'Japan', 'South Korea', 'UAE', 'Qatar', 'Saudi Arabia', 'Turkey'].map((country, index) => (
+                    <div
+                      key={`country-2-${index}`}
+                      className="shrink-0 px-4 sm:px-6 py-2 sm:py-3 bg-white rounded-lg sm:rounded-xl border border-indigo-200 shadow-sm hover:shadow-md transition-shadow"
+                    >
+                      <span className="text-sm sm:text-base font-semibold text-indigo-600 whitespace-nowrap">
+                        {country}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
