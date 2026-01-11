@@ -150,14 +150,14 @@ export default function EditCourseForm({ course, onClose }: EditCourseFormProps)
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
       <div className="bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[95vh] overflow-hidden flex flex-col animate-in zoom-in-95 duration-200">
         {/* Header */}
-        <div className="bg-linear-to-r from-indigo-500 to-blue-600 px-6 py-5 flex justify-between items-center">
+        <div className="bg-linear-to-r from-indigo-500 to-blue-600 px-4 sm:px-6 py-4 sm:py-5 flex justify-between items-center">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-lg bg-white/20 backdrop-blur-sm flex items-center justify-center">
               <Edit className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h3 className="text-xl font-bold text-white">Edit Course</h3>
-              <p className="text-sm text-indigo-100">Update the course details below</p>
+              <h3 className="text-lg sm:text-xl font-bold text-white">Edit Course</h3>
+              <p className="text-xs sm:text-sm text-indigo-100">Update the course details below</p>
             </div>
           </div>
           <button
@@ -171,7 +171,7 @@ export default function EditCourseForm({ course, onClose }: EditCourseFormProps)
 
         {/* Form Content */}
         <div className="flex-1 overflow-y-auto">
-          <form onSubmit={handleSubmit} className="p-6 space-y-6">
+          <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-4 sm:space-y-6">
             {error && (
               <div className="bg-red-50 border-l-4 border-red-500 text-red-700 px-4 py-3 rounded-r-lg">
                 <div className="flex items-center gap-2">

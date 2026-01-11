@@ -25,7 +25,7 @@ export default function Hero() {
       <div className="relative w-full min-w-full px-4 sm:px-6 lg:px-8 py-16 sm:py-20 md:py-24 lg:py-28 xl:py-36">
         <div className="grid lg:grid-cols-2 gap-8 md:gap-12 lg:gap-16 items-center">
           {/* Left Column - Content */}
-          <div className="text-center ml-12 lg:text-left space-y-6 md:space-y-8 lg:space-y-10">
+          <div className="text-center lg:ml-12 lg:text-left space-y-6 md:space-y-8 lg:space-y-10">
             {/* Main Tagline */}
             <div className="space-y-4 md:space-y-6">
               <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 leading-tight tracking-tight">
