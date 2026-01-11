@@ -7,10 +7,46 @@ import type { Event } from '@/types/event'
 import { format } from 'date-fns'
 import Link from 'next/link'
 import Image from 'next/image'
+import { Metadata } from 'next'
 import CopyButton from './CopyButton'
 import RetryButton from './RetryButton'
 
 export const dynamic = 'force-dynamic'
+
+export const metadata: Metadata = {
+  title: 'Verify Booking | Robonauts Club',
+  description: 'Verify your event registration with Robonauts Club. Enter your registration ID to confirm your booking and view event details.',
+  keywords: [
+    'verify registration',
+    'event verification',
+    'robotics event booking',
+    'registration confirmation',
+    'Robonauts Club verification',
+  ],
+  openGraph: {
+    title: 'Verify Booking | Robonauts Club',
+    description: 'Verify your event registration with Robonauts Club. Enter your registration ID to confirm your booking.',
+    url: '/verify-booking',
+    type: 'website',
+    images: [
+      {
+        url: '/robotics-event.jpg',
+        width: 1200,
+        height: 630,
+        alt: 'Robonauts Club - Verify Booking',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Verify Booking | Robonauts Club',
+    description: 'Verify your event registration with Robonauts Club.',
+    images: ['/robotics-event.jpg'],
+  },
+  alternates: {
+    canonical: '/verify-booking',
+  },
+}
 
 interface VerificationPageProps {
   searchParams: Promise<{ registrationId?: string }>

@@ -131,7 +131,7 @@ export async function generateMetadata({
       images: [eventImage.startsWith('http') ? eventImage : `${SITE_CONFIG.url}${eventImage}`],
     },
     alternates: {
-      canonical: eventUrl,
+      canonical: `/events/${id}`,
     },
   }
 }

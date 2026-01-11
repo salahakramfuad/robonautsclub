@@ -6,6 +6,9 @@ import type { Booking } from '@/types/booking'
 import type { Event } from '@/types/event'
 import { format } from 'date-fns'
 import Image from 'next/image'
+import { Metadata } from 'next'
+import { SITE_CONFIG } from '@/lib/seo'
+
 export const dynamic = 'force-dynamic'
 
 interface VerificationPageProps {
@@ -61,6 +64,69 @@ async function getBookingByRegistrationId(registrationId: string): Promise<{
   } catch (error) {
     console.error('Error fetching booking:', error)
     return { booking: null, event: null }
+  }
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ registrationId: string }>
+}): Promise<Metadata> {
+  const { registrationId } = await params
+  const { booking, event } = await getBookingByRegistrationId(registrationId)
+
+  if (!booking || !event) {
+    return {
+      title: 'Registration Not Found | Robonauts Club',
+      description: 'The registration ID you provided could not be found. Please verify your registration number and try again.',
+      alternates: {
+        canonical: `/verify/${registrationId}`,
+      },
+    }
+  }
+
+  const title = `Registration Verified - ${event.title} | Robonauts Club`
+  const description = `Verified registration for ${event.title}. Registration ID: ${booking.registrationId}. Event date: ${formatEventDates(parseEventDates(event.date), 'long')}.`
+
+  return {
+    title,
+    description,
+    keywords: [
+      'registration verification',
+      'event confirmation',
+      'robotics event',
+      'Robonauts Club',
+      event.title,
+    ],
+    openGraph: {
+      title,
+      description,
+      url: `/verify/${registrationId}`,
+      type: 'website',
+      images: [
+        {
+          url: event.image && event.image.startsWith('http')
+            ? event.image
+            : `${SITE_CONFIG.url}${event.image || '/robotics-event.jpg'}`,
+          width: 1200,
+          height: 630,
+          alt: event.title,
+        },
+      ],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+      images: [
+        event.image && event.image.startsWith('http')
+          ? event.image
+          : `${SITE_CONFIG.url}${event.image || '/robotics-event.jpg'}`,
+      ],
+    },
+    alternates: {
+      canonical: `/verify/${registrationId}`,
+    },
   }
 }
 
