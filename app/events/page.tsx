@@ -8,6 +8,7 @@ import {
 } from 'lucide-react'
 import { getPublicEvents } from './actions'
 import RealtimeEventsList from '@/components/RealtimeEventsList'
+import { isEventUpcoming } from '@/lib/dateUtils'
 
 export const metadata: Metadata = {
   title: "Events",
@@ -50,15 +51,7 @@ export default async function EventsPage() {
 
   // Calculate initial stats for hero section
   const initialUpcoming = initialEvents.filter((event) => {
-    const dates = event.date ? (Array.isArray(event.date) ? event.date : event.date.includes(',') ? event.date.split(',').map(d => d.trim()) : [event.date]) : []
-    if (dates.length === 0) return false
-    const now = new Date()
-    now.setHours(0, 0, 0, 0)
-    return dates.some(d => {
-      const eventDate = new Date(d)
-      eventDate.setHours(0, 0, 0, 0)
-      return eventDate >= now
-    })
+    return isEventUpcoming(event.date)
   })
 
   return (
