@@ -42,8 +42,32 @@ export default function TokenExpirationChecker() {
             return
           }
 
-          // Token is valid, update it in the cookie
-          document.cookie = `auth-token=${token}; path=/; max-age=86400; SameSite=Lax`
+          // Assign/refresh role via server-side API (ensures custom claims are up-to-date)
+          try {
+            const roleResponse = await fetch('/api/auth/assign-role', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`,
+              },
+              credentials: 'include',
+            })
+
+            if (roleResponse.ok) {
+              // Get fresh token with updated claims after role assignment
+              const freshToken = await user.getIdToken(true)
+              // Use the fresh token with updated claims
+              document.cookie = `auth-token=${freshToken}; path=/; max-age=86400; SameSite=Lax`
+            } else {
+              // Role assignment failed, but continue with current token
+              document.cookie = `auth-token=${token}; path=/; max-age=86400; SameSite=Lax`
+            }
+          } catch (roleError) {
+            console.error('Error assigning role during token refresh:', roleError)
+            // Continue with current token even if role assignment fails
+            // The role will be assigned on next token refresh or login
+            document.cookie = `auth-token=${token}; path=/; max-age=86400; SameSite=Lax`
+          }
         } catch (error: unknown) {
           console.error('Token refresh error:', error)
           

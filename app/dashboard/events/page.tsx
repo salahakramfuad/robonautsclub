@@ -177,7 +177,7 @@ export default async function EventsPage() {
                             </span>
                           </td>
                           <td className="px-3 sm:px-6 py-4 text-right">
-                            <EventActions event={event} currentUserId={session.uid} />
+                            <EventActions event={event} currentUserId={session.uid} userRole={session.role} />
                           </td>
                         </tr>
                       )
@@ -285,7 +285,7 @@ export default async function EventsPage() {
                             </span>
                           </td>
                           <td className="px-3 sm:px-6 py-4 text-right">
-                            <EventActions event={event} currentUserId={session.uid} />
+                            <EventActions event={event} currentUserId={session.uid} userRole={session.role} />
                           </td>
                         </tr>
                       )

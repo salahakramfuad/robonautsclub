@@ -11,17 +11,23 @@ import type { Course } from '@/types/course'
 interface CourseActionsProps {
   course: Course
   currentUserId?: string
+  userRole?: 'superAdmin' | 'admin'
 }
 
-export default function CourseActions({ course, currentUserId }: CourseActionsProps) {
+export default function CourseActions({ course, currentUserId, userRole }: CourseActionsProps) {
   const router = useRouter()
   const [showEditForm, setShowEditForm] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const [archiving, setArchiving] = useState(false)
   
-  // Only show delete button if current user is the creator
-  const canDelete = currentUserId && course.createdBy === currentUserId
+  // Show edit/delete buttons if:
+  // - User is Super Admin (can edit/delete any course), OR
+  // - User is Admin AND is the creator of the course
+  const isSuperAdmin = userRole === 'superAdmin'
+  const isOwner = currentUserId && course.createdBy === currentUserId
+  const canEdit = isSuperAdmin || isOwner
+  const canDelete = isSuperAdmin || isOwner
 
   const handleDelete = async () => {
     setDeleting(true)
@@ -34,7 +40,6 @@ export default function CourseActions({ course, currentUserId }: CourseActionsPr
         alert(result.error || 'Failed to delete course')
       }
     } catch (error) {
-      console.error('Error deleting course:', error)
       alert('An unexpected error occurred')
     } finally {
       setDeleting(false)
@@ -51,7 +56,6 @@ export default function CourseActions({ course, currentUserId }: CourseActionsPr
         alert(result.error || 'Failed to archive course')
       }
     } catch (error) {
-      console.error('Error archiving course:', error)
       alert('An unexpected error occurred')
     } finally {
       setArchiving(false)
@@ -61,14 +65,16 @@ export default function CourseActions({ course, currentUserId }: CourseActionsPr
   return (
     <>
       <div className="flex items-center gap-2">
-        <button
-          onClick={() => setShowEditForm(true)}
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50 rounded-lg transition-colors"
-          title="Edit course"
-        >
-          <Edit className="w-4 h-4" />
-          Edit
-        </button>
+        {canEdit && (
+          <button
+            onClick={() => setShowEditForm(true)}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50 rounded-lg transition-colors"
+            title="Edit course"
+          >
+            <Edit className="w-4 h-4" />
+            Edit
+          </button>
+        )}
         <button
           onClick={handleArchive}
           disabled={archiving}

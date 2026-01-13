@@ -2,13 +2,38 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     
-    // Events collection - public read, authenticated write
+    // Events collection - public read, role-based write
     match /events/{eventId} {
       // Allow anyone to read events (for public pages)
       allow read: if true;
       
-      // Only authenticated users can create/update/delete events
-      allow create, update, delete: if request.auth != null;
+      // Helper function to check if user is Super Admin
+      function isSuperAdmin() {
+        return request.auth != null && request.auth.token.role == 'superAdmin';
+      }
+      
+      // Helper function to check if user is Admin (includes Super Admin)
+      function isAdmin() {
+        return request.auth != null && (request.auth.token.role == 'admin' || request.auth.token.role == 'superAdmin');
+      }
+      
+      // Helper function to check if user owns the resource
+      function isOwner() {
+        return request.auth != null && resource.data.createdBy == request.auth.uid;
+      }
+      
+      // Create: Both Super Admin and Admin can create events
+      // Must set createdBy field to the authenticated user's UID
+      allow create: if isAdmin() 
+        && request.resource.data.createdBy == request.auth.uid;
+      
+      // Update: Super Admin can update any event, Admin can only update own events
+      allow update: if isSuperAdmin() 
+        || (request.auth.token.role == 'admin' && isOwner());
+      
+      // Delete: Super Admin can delete any event, Admin can only delete own events
+      allow delete: if isSuperAdmin() 
+        || (request.auth.token.role == 'admin' && isOwner());
     }
     
     // Bookings collection - public read/write for booking forms, authenticated full access
@@ -24,13 +49,53 @@ service cloud.firestore {
       allow update, delete: if request.auth != null;
     }
     
-    // Courses collection - public read for non-archived, authenticated write
+    // Courses collection - public read for non-archived, role-based write
     match /courses/{courseId} {
       // Allow public read for non-archived courses
       allow read: if resource.data.isArchived == false || request.auth != null;
       
-      // Only authenticated users can create/update/delete courses
-      allow create, update, delete: if request.auth != null;
+      // Helper function to check if user is Super Admin
+      function isSuperAdmin() {
+        return request.auth != null && request.auth.token.role == 'superAdmin';
+      }
+      
+      // Helper function to check if user is Admin (includes Super Admin)
+      function isAdmin() {
+        return request.auth != null && (request.auth.token.role == 'admin' || request.auth.token.role == 'superAdmin');
+      }
+      
+      // Helper function to check if user owns the resource
+      function isOwner() {
+        return request.auth != null && resource.data.createdBy == request.auth.uid;
+      }
+      
+      // Create: Both Super Admin and Admin can create courses
+      // Must set createdBy field to the authenticated user's UID
+      allow create: if isAdmin() 
+        && request.resource.data.createdBy == request.auth.uid;
+      
+      // Update: Super Admin can update any course, Admin can only update own courses
+      allow update: if isSuperAdmin() 
+        || (request.auth.token.role == 'admin' && isOwner());
+      
+      // Delete: Super Admin can delete any course, Admin can only delete own courses
+      allow delete: if isSuperAdmin() 
+        || (request.auth.token.role == 'admin' && isOwner());
+    }
+    
+    // Notifications collection - authenticated read/write for admins
+    match /notifications/{notificationId} {
+      // Only authenticated users (admins/super admins) can read notifications
+      allow read: if request.auth != null;
+      
+      // Only authenticated users can create notifications (typically done server-side)
+      allow create: if request.auth != null;
+      
+      // Users can update notifications to mark as read
+      allow update: if request.auth != null;
+      
+      // Only authenticated users can delete notifications
+      allow delete: if request.auth != null;
     }
     
     // Deny all other collections by default

@@ -2,10 +2,14 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { LayoutDashboard, Calendar, BookOpen } from 'lucide-react'
+import { LayoutDashboard, Calendar, BookOpen, Users, User } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
-export default function Sidebar() {
+interface SidebarProps {
+  role?: 'superAdmin' | 'admin'
+}
+
+export default function Sidebar({ role }: SidebarProps) {
   const pathname = usePathname()
 
   const navItems = [
@@ -23,6 +27,21 @@ export default function Sidebar() {
       href: '/dashboard/courses',
       icon: BookOpen,
       label: 'Courses',
+    },
+    // Only show Members link for Super Admin
+    ...(role === 'superAdmin'
+      ? [
+          {
+            href: '/dashboard/members',
+            icon: Users,
+            label: 'Members',
+          },
+        ]
+      : []),
+    {
+      href: '/dashboard/profile',
+      icon: User,
+      label: 'Profile',
     },
   ]
 

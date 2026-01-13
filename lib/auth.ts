@@ -22,11 +22,25 @@ export async function getServerSession() {
         const decodedToken = await adminAuth.verifyIdToken(token)
         const user = await adminAuth.getUser(decodedToken.uid)
         
+        // Extract role from custom claims (set via /api/auth/assign-role)
+        // Custom claims are available in decodedToken after verification
+        // Also check user's custom claims as fallback
+        let role = (decodedToken.role as 'superAdmin' | 'admin' | undefined)
+        
+        // If role not in token, check user's custom claims directly
+        if (!role) {
+          role = (user.customClaims?.role as 'superAdmin' | 'admin' | undefined)
+        }
+        
+        // Default to admin if still no role found
+        role = role || 'admin'
+        
         return {
           uid: user.uid,
           email: user.email || '',
           name: user.displayName || user.email || 'Admin',
           emailVerified: user.emailVerified,
+          role,
         }
       } catch (error: unknown) {
         const errorObj = error as { code?: string; message?: string }
@@ -51,6 +65,7 @@ export async function getServerSession() {
 
     // Fallback: If Admin SDK is not available, use stored user info
     // This is less secure but allows the app to work without Admin SDK
+    // Note: Role will default to 'admin' in fallback mode
     if (userInfo) {
       try {
         const parsed = JSON.parse(userInfo)
@@ -61,6 +76,7 @@ export async function getServerSession() {
             email: parsed.email,
             name: parsed.name || parsed.email || 'Admin',
             emailVerified: parsed.emailVerified || false,
+            role: (parsed.role === 'superAdmin' || parsed.role === 'admin' ? parsed.role : 'admin') as 'superAdmin' | 'admin', // Default to admin if role not in cookie
           }
         }
       } catch (error) {
@@ -109,5 +125,52 @@ export function setAuthToken(token: string) {
  */
 export function clearAuthToken() {
   document.cookie = 'auth-token=; path=/; max-age=0'
+}
+
+/**
+ * Session type with role information
+ */
+export type Session = {
+  uid: string
+  email: string
+  name: string
+  emailVerified: boolean
+  role: 'superAdmin' | 'admin'
+}
+
+/**
+ * Check if user is Super Admin
+ */
+export function isSuperAdmin(session: Session | null): boolean {
+  return session?.role === 'superAdmin'
+}
+
+/**
+ * Check if user is Admin (includes Super Admin)
+ */
+export function isAdmin(session: Session | null): boolean {
+  return session?.role === 'admin' || session?.role === 'superAdmin'
+}
+
+/**
+ * Get user role from session
+ */
+export function getUserRole(session: Session | null): 'superAdmin' | 'admin' | null {
+  return session?.role || null
+}
+
+/**
+ * Require Super Admin - redirects to dashboard if not Super Admin
+ * Use this in server components and server actions that require Super Admin access
+ */
+export async function requireSuperAdmin() {
+  const session = await requireAuth()
+  
+  if (session.role !== 'superAdmin') {
+    // Redirect to dashboard if not Super Admin
+    redirect('/dashboard')
+  }
+  
+  return session
 }
 

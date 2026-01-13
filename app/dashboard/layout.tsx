@@ -4,6 +4,7 @@ import LogoutButton from './LogoutButton'
 import Sidebar from './Sidebar'
 import AutoRefresh from './AutoRefresh'
 import TokenExpirationChecker from './TokenExpirationChecker'
+import Notifications from './Notifications'
 
 // Force dynamic rendering since this layout uses cookies for authentication
 export const dynamic = 'force-dynamic'
@@ -38,6 +39,7 @@ export default async function DashboardLayout({
                 <p className="text-xs sm:text-sm font-medium text-gray-900 truncate max-w-[120px] sm:max-w-[200px]">{session.name}</p>
                 <p className="text-xs text-gray-500 truncate max-w-[120px] sm:max-w-[200px]">{session.email}</p>
               </div>
+              <Notifications />
               <LogoutButton />
             </div>
           </div>
@@ -46,7 +48,7 @@ export default async function DashboardLayout({
 
       <div className="flex flex-col lg:flex-row">
         {/* Sidebar */}
-        <Sidebar />
+        <Sidebar role={session.role} />
 
         {/* Main Content */}
         <main className="flex-1 p-4 sm:p-6 lg:p-8 min-w-0">

@@ -18,6 +18,7 @@ export default async function CoursesPage() {
       activeCourses={activeCourses}
       archivedCourses={archivedCourses}
       sessionId={session.uid}
+      userRole={session.role}
     />
   )
 }

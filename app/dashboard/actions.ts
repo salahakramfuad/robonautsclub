@@ -1,12 +1,13 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { requireAuth } from '@/lib/auth'
+import { requireAuth, isSuperAdmin } from '@/lib/auth'
 import { adminDb } from '@/lib/firebase-admin'
 import { Event } from '@/types/event'
 import { Booking } from '@/types/booking'
 import { Course } from '@/types/course'
 import { sanitizeEventForDatabase } from '@/lib/textSanitizer'
+import { createNotification } from '@/lib/notifications'
 
 /**
  * Get all events from Firestore
@@ -174,12 +175,19 @@ export async function createEvent(formData: {
     revalidatePath('/events')
     revalidatePath(`/events/${eventRef.id}`)
 
+    // Create notification for event creation
+    await createNotification(
+      'event_created',
+      `${session.name} created a new event: "${sanitized.title}"`,
+      session,
+      ['event created']
+    )
+
     return {
       success: true,
       eventId: eventRef.id,
     }
   } catch (error) {
-    console.error('Error creating event:', error)
     return {
       success: false,
       error: 'Failed to create event. Please try again.',
@@ -206,7 +214,7 @@ export async function updateEvent(
     tags?: string[]
   }
 ): Promise<{ success: boolean; error?: string }> {
-  await requireAuth()
+  const session = await requireAuth()
 
   if (!adminDb) {
     console.error('Firebase Admin SDK not available. Cannot update event.')
@@ -223,6 +231,19 @@ export async function updateEvent(
       return {
         success: false,
         error: 'Event not found',
+      }
+    }
+
+    const eventData = eventDoc.data()!
+    
+    // Role-based permission check: Super Admin can update any event, Admin can only update own events
+    const userIsSuperAdmin = isSuperAdmin(session)
+    const userIsOwner = eventData.createdBy === session.uid
+    
+    if (!userIsSuperAdmin && !userIsOwner) {
+      return {
+        success: false,
+        error: 'You can only update events that you created.',
       }
     }
 
@@ -284,6 +305,14 @@ export async function updateEvent(
     revalidatePath('/events')
     revalidatePath(`/events/${eventId}`)
 
+    // Create notification for event update
+    await createNotification(
+      'event_updated',
+      `${session.name} updated the event: "${sanitized.title}"`,
+      session,
+      ['event updated']
+    )
+
     return {
       success: true,
     }
@@ -323,8 +352,11 @@ export async function deleteEvent(eventId: string): Promise<{ success: boolean; 
 
     const eventData = eventDoc.data()!
     
-    // Check if the current user is the creator of the event
-    if (eventData.createdBy !== session.uid) {
+    // Role-based permission check: Super Admin can delete any event, Admin can only delete own events
+    const userIsSuperAdmin = isSuperAdmin(session)
+    const userIsOwner = eventData.createdBy === session.uid
+    
+    if (!userIsSuperAdmin && !userIsOwner) {
       return {
         success: false,
         error: 'You can only delete events that you created.',
@@ -351,6 +383,14 @@ export async function deleteEvent(eventId: string): Promise<{ success: boolean; 
     // Revalidate ISR pages to remove deleted event immediately
     revalidatePath('/events')
     revalidatePath(`/events/${eventId}`)
+
+    // Create notification for event deletion
+    await createNotification(
+      'event_deleted',
+      `${session.name} deleted the event: "${eventData.title}"`,
+      session,
+      ['event deleted']
+    )
 
     return {
       success: true,
@@ -590,7 +630,6 @@ export async function createCourse(formData: {
   const session = await requireAuth()
 
   if (!adminDb) {
-    console.error('Firebase Admin SDK not available. Cannot create course.')
     return {
       success: false,
       error: 'Firebase Admin SDK is not configured. Please set up FIREBASE_ADMIN_* environment variables.',
@@ -639,12 +678,19 @@ export async function createCourse(formData: {
     revalidatePath('/')
     revalidatePath('/dashboard/courses')
 
+    // Create notification for course creation
+    await createNotification(
+      'course_created',
+      `${session.name} created a new course: "${formData.title.trim()}"`,
+      session,
+      ['course created']
+    )
+
     return {
       success: true,
       courseId: courseRef.id,
     }
   } catch (error) {
-    console.error('Error creating course:', error)
     return {
       success: false,
       error: 'Failed to create course. Please try again.',
@@ -665,10 +711,9 @@ export async function updateCourse(
     image: string
   }
 ): Promise<{ success: boolean; error?: string }> {
-  await requireAuth()
+  const session = await requireAuth()
 
   if (!adminDb) {
-    console.error('Firebase Admin SDK not available. Cannot update course.')
     return {
       success: false,
       error: 'Firebase Admin SDK is not configured. Please set up FIREBASE_ADMIN_* environment variables.',
@@ -682,6 +727,19 @@ export async function updateCourse(
       return {
         success: false,
         error: 'Course not found',
+      }
+    }
+
+    const courseData = courseDoc.data()!
+    
+    // Role-based permission check: Super Admin can update any course, Admin can only update own courses
+    const userIsSuperAdmin = isSuperAdmin(session)
+    const userIsOwner = courseData.createdBy === session.uid
+    
+    if (!userIsSuperAdmin && !userIsOwner) {
+      return {
+        success: false,
+        error: 'You can only update courses that you created.',
       }
     }
 
@@ -721,11 +779,18 @@ export async function updateCourse(
     revalidatePath('/')
     revalidatePath('/dashboard/courses')
 
+    // Create notification for course update
+    await createNotification(
+      'course_updated',
+      `${session.name} updated the course: "${formData.title.trim()}"`,
+      session,
+      ['course updated']
+    )
+
     return {
       success: true,
     }
   } catch (error) {
-    console.error('Error updating course:', error)
     return {
       success: false,
       error: 'Failed to update course. Please try again.',
@@ -737,59 +802,9 @@ export async function updateCourse(
  * Archive or unarchive a course
  */
 export async function archiveCourse(courseId: string): Promise<{ success: boolean; error?: string }> {
-  await requireAuth()
-
-  if (!adminDb) {
-    console.error('Firebase Admin SDK not available. Cannot archive course.')
-    return {
-      success: false,
-      error: 'Firebase Admin SDK is not configured. Please set up FIREBASE_ADMIN_* environment variables.',
-    }
-  }
-
-  try {
-    // Check if course exists
-    const courseDoc = await adminDb.collection('courses').doc(courseId).get()
-    if (!courseDoc.exists) {
-      return {
-        success: false,
-        error: 'Course not found',
-      }
-    }
-
-    const courseData = courseDoc.data()!
-    const currentArchiveStatus = courseData.isArchived || false
-
-    // Toggle archive status
-    await adminDb.collection('courses').doc(courseId).update({
-      isArchived: !currentArchiveStatus,
-      updatedAt: new Date(),
-    })
-
-    // Revalidate pages
-    revalidatePath('/')
-    revalidatePath('/dashboard/courses')
-
-    return {
-      success: true,
-    }
-  } catch (error) {
-    console.error('Error archiving course:', error)
-    return {
-      success: false,
-      error: 'Failed to archive course. Please try again.',
-    }
-  }
-}
-
-/**
- * Delete a course permanently
- */
-export async function deleteCourse(courseId: string): Promise<{ success: boolean; error?: string }> {
   const session = await requireAuth()
 
   if (!adminDb) {
-    console.error('Firebase Admin SDK not available. Cannot delete course.')
     return {
       success: false,
       error: 'Firebase Admin SDK is not configured. Please set up FIREBASE_ADMIN_* environment variables.',
@@ -808,8 +823,79 @@ export async function deleteCourse(courseId: string): Promise<{ success: boolean
 
     const courseData = courseDoc.data()!
     
-    // Check if the current user is the creator of the course
-    if (courseData.createdBy !== session.uid) {
+    // Role-based permission check: Super Admin can archive any course, Admin can only archive own courses
+    const userIsSuperAdmin = isSuperAdmin(session)
+    const userIsOwner = courseData.createdBy === session.uid
+    
+    if (!userIsSuperAdmin && !userIsOwner) {
+      return {
+        success: false,
+        error: 'You can only archive courses that you created.',
+      }
+    }
+
+    const currentArchiveStatus = courseData.isArchived || false
+
+    // Toggle archive status
+    await adminDb.collection('courses').doc(courseId).update({
+      isArchived: !currentArchiveStatus,
+      updatedAt: new Date(),
+    })
+
+    // Revalidate pages
+    revalidatePath('/')
+    revalidatePath('/dashboard/courses')
+
+    // Create notification for course archive/unarchive
+    const action = !currentArchiveStatus ? 'archived' : 'unarchived'
+    await createNotification(
+      'course_archived',
+      `${session.name} ${action} the course: "${courseData.title}"`,
+      session,
+      [`course ${action}`]
+    )
+
+    return {
+      success: true,
+    }
+  } catch (error) {
+    return {
+      success: false,
+      error: 'Failed to archive course. Please try again.',
+    }
+  }
+}
+
+/**
+ * Delete a course permanently
+ */
+export async function deleteCourse(courseId: string): Promise<{ success: boolean; error?: string }> {
+  const session = await requireAuth()
+
+  if (!adminDb) {
+    return {
+      success: false,
+      error: 'Firebase Admin SDK is not configured. Please set up FIREBASE_ADMIN_* environment variables.',
+    }
+  }
+
+  try {
+    // Check if course exists
+    const courseDoc = await adminDb.collection('courses').doc(courseId).get()
+    if (!courseDoc.exists) {
+      return {
+        success: false,
+        error: 'Course not found',
+      }
+    }
+
+    const courseData = courseDoc.data()!
+    
+    // Role-based permission check: Super Admin can delete any course, Admin can only delete own courses
+    const userIsSuperAdmin = isSuperAdmin(session)
+    const userIsOwner = courseData.createdBy === session.uid
+    
+    if (!userIsSuperAdmin && !userIsOwner) {
       return {
         success: false,
         error: 'You can only delete courses that you created.',
@@ -823,11 +909,18 @@ export async function deleteCourse(courseId: string): Promise<{ success: boolean
     revalidatePath('/')
     revalidatePath('/dashboard/courses')
 
+    // Create notification for course deletion
+    await createNotification(
+      'course_deleted',
+      `${session.name} deleted the course: "${courseData.title}"`,
+      session,
+      ['course deleted']
+    )
+
     return {
       success: true,
     }
   } catch (error) {
-    console.error('Error deleting course:', error)
     return {
       success: false,
       error: 'Failed to delete course. Please try again.',

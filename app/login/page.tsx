@@ -45,15 +45,60 @@ function LoginForm() {
       const token = await userCredential.user.getIdToken()
       const user = userCredential.user
 
-      // Set token in cookie
-      document.cookie = `auth-token=${token}; path=/; max-age=86400; SameSite=Lax`
+      // Assign role via server-side API (sets custom claims)
+      let assignedRole: 'superAdmin' | 'admin' = 'admin'
+      let finalToken = token
+      
+      try {
+        console.log('Calling role assignment API...')
+        const roleResponse = await fetch('/api/auth/assign-role', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+          credentials: 'include',
+        })
+
+        if (!roleResponse.ok) {
+          // Role assignment failed, but continue with login
+          // The role will be assigned on next token refresh
+        } else {
+          const roleData = await roleResponse.json()
+          assignedRole = roleData.role || 'admin'
+          
+          // After setting custom claims, wait a moment for Firebase to propagate
+          // Then try to get a fresh token with the updated claims
+          // Note: We don't revoke tokens during initial login, so this should work
+          await new Promise(resolve => setTimeout(resolve, 1000))
+          
+          try {
+            // Force a token refresh to get the new claims
+            // This should work since we didn't revoke tokens during initial login
+            finalToken = await user.getIdToken(true)
+          } catch (tokenError: any) {
+            // If token refresh fails, use the original token
+            // The role will be available on the next page load after claims propagate
+            finalToken = token
+          }
+        }
+      } catch (roleError) {
+        console.error('Error assigning role:', roleError)
+        // Continue with login even if role assignment fails
+        // The role will be assigned on next token refresh
+      }
+
+      // Set the final token in cookie
+      document.cookie = `auth-token=${finalToken}; path=/; max-age=86400; SameSite=Lax`
 
       // Store user info in cookie (for fallback when Admin SDK is not available)
+      // Include role for client-side access
       const userInfo = {
         uid: user.uid,
         email: user.email || '',
         name: user.displayName || user.email || 'Admin',
         emailVerified: user.emailVerified,
+        role: assignedRole,
       }
       document.cookie = `user-info=${JSON.stringify(userInfo)}; path=/; max-age=86400; SameSite=Lax`
 

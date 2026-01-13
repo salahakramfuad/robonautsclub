@@ -12,16 +12,22 @@ import type { Event } from '@/types/event'
 interface EventActionsProps {
   event: Event
   currentUserId?: string
+  userRole?: 'superAdmin' | 'admin'
 }
 
-export default function EventActions({ event, currentUserId }: EventActionsProps) {
+export default function EventActions({ event, currentUserId, userRole }: EventActionsProps) {
   const router = useRouter()
   const [showEditForm, setShowEditForm] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [deleting, setDeleting] = useState(false)
   
-  // Only show delete button if current user is the creator
-  const canDelete = currentUserId && event.createdBy === currentUserId
+  // Show edit/delete buttons if:
+  // - User is Super Admin (can edit/delete any event), OR
+  // - User is Admin AND is the creator of the event
+  const isSuperAdmin = userRole === 'superAdmin'
+  const isOwner = currentUserId && event.createdBy === currentUserId
+  const canEdit = isSuperAdmin || isOwner
+  const canDelete = isSuperAdmin || isOwner
 
   const handleDelete = async () => {
     setDeleting(true)
@@ -44,14 +50,16 @@ export default function EventActions({ event, currentUserId }: EventActionsProps
   return (
     <>
       <div className="flex items-center gap-2">
-        <button
-          onClick={() => setShowEditForm(true)}
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50 rounded-lg transition-colors"
-          title="Edit event"
-        >
-          <Edit className="w-4 h-4" />
-          Edit
-        </button>
+        {canEdit && (
+          <button
+            onClick={() => setShowEditForm(true)}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50 rounded-lg transition-colors"
+            title="Edit event"
+          >
+            <Edit className="w-4 h-4" />
+            Edit
+          </button>
+        )}
         {canDelete && (
           <button
             onClick={() => setShowDeleteConfirm(true)}

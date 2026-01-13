@@ -12,6 +12,7 @@ interface CoursesClientProps {
   activeCourses: Course[]
   archivedCourses: Course[]
   sessionId: string
+  userRole?: 'superAdmin' | 'admin'
 }
 
 export default function CoursesClient({
@@ -19,6 +20,7 @@ export default function CoursesClient({
   activeCourses,
   archivedCourses,
   sessionId,
+  userRole,
 }: CoursesClientProps) {
   const [filter, setFilter] = useState<'all' | 'active' | 'archived'>('all')
 
@@ -245,7 +247,7 @@ export default function CoursesClient({
                       )}
                     </td>
                     <td className="px-3 sm:px-6 py-4 text-right">
-                      <CourseActions course={course} currentUserId={sessionId} />
+                      <CourseActions course={course} currentUserId={sessionId} userRole={userRole} />
                     </td>
                   </tr>
                 ))}
