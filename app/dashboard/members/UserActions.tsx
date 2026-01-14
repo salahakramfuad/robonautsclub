@@ -17,15 +17,26 @@ type User = {
 
 interface UserActionsProps {
   user: User
+  currentUserUid: string
 }
 
-export default function UserActions({ user }: UserActionsProps) {
+export default function UserActions({ user, currentUserUid }: UserActionsProps) {
   const router = useRouter()
   const [showEditForm, setShowEditForm] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [deleting, setDeleting] = useState(false)
 
+  // Super Admin accounts are protected: cannot be edited/deleted from user management.
+  const isProtectedSuperAdmin = user.role === 'superAdmin'
+  const isSelf = user.uid === currentUserUid
+  const disableActions = isProtectedSuperAdmin
+
   const handleDelete = async () => {
+    if (disableActions) {
+      alert('Super Admin accounts cannot be deleted.')
+      return
+    }
+
     setDeleting(true)
     try {
       const response = await fetch(`/api/admin/users/${user.uid}`, {
@@ -54,16 +65,32 @@ export default function UserActions({ user }: UserActionsProps) {
       <div className="flex items-center gap-2">
         <button
           onClick={() => setShowEditForm(true)}
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50 rounded-lg transition-colors"
-          title="Edit user"
+          disabled={disableActions}
+          className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-lg transition-colors ${
+            disableActions
+              ? 'text-gray-400 cursor-not-allowed'
+              : 'text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50'
+          }`}
+          title={
+            disableActions
+              ? isSelf
+                ? 'Use Profile page to edit your account'
+                : 'Super Admin accounts cannot be edited'
+              : 'Edit user'
+          }
         >
           <Edit className="w-4 h-4" />
           Edit
         </button>
         <button
           onClick={() => setShowDeleteConfirm(true)}
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors"
-          title="Delete user"
+          disabled={disableActions}
+          className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-lg transition-colors ${
+            disableActions
+              ? 'text-gray-400 cursor-not-allowed'
+              : 'text-red-600 hover:text-red-700 hover:bg-red-50'
+          }`}
+          title={disableActions ? 'Super Admin accounts cannot be deleted' : 'Delete user'}
         >
           <Trash2 className="w-4 h-4" />
           Delete

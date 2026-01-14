@@ -111,6 +111,14 @@ export async function PUT(
       )
     }
 
+    // Prevent Super Admins from editing any Super Admin account via this endpoint.
+    // Super Admins should manage their own profile via /dashboard/profile only.
+    const superAdminEmailsEnv = process.env.SUPER_ADMIN_EMAILS || ''
+    const superAdminEmails = superAdminEmailsEnv
+      .split(',')
+      .map((email) => email.trim().toLowerCase())
+      .filter((email) => email.length > 0)
+
     // Email updates are not allowed - even for Super Admin
     // This ensures email addresses remain stable and secure
     if (body.email !== undefined) {
@@ -146,8 +154,21 @@ export async function PUT(
       updateData.disabled = disabled
     }
 
-    // Get current user data for notification
+    // Get current user data for notification + Super Admin protection check
     const currentUser = await adminAuth.getUser(uid)
+    const currentRole =
+      (currentUser.customClaims?.role as 'superAdmin' | 'admin' | undefined) || 'admin'
+    const currentEmail = (currentUser.email || '').toLowerCase()
+    const isProtectedSuperAdmin =
+      currentRole === 'superAdmin' || (currentEmail && superAdminEmails.includes(currentEmail))
+
+    if (isProtectedSuperAdmin) {
+      return NextResponse.json(
+        { error: 'Super Admin accounts cannot be edited via user management.' },
+        { status: 403 }
+      )
+    }
+
     const changes: string[] = []
     if (updateData.displayName && updateData.displayName !== currentUser.displayName) changes.push('display name')
     if (updateData.password) changes.push('password')
@@ -256,6 +277,26 @@ export async function DELETE(
     try {
       const user = await adminAuth.getUser(uid)
       userEmail = user.email || ''
+
+      // Prevent Super Admins from deleting any Super Admin account.
+      const superAdminEmailsEnv = process.env.SUPER_ADMIN_EMAILS || ''
+      const superAdminEmails = superAdminEmailsEnv
+        .split(',')
+        .map((email) => email.trim().toLowerCase())
+        .filter((email) => email.length > 0)
+
+      const targetRole =
+        (user.customClaims?.role as 'superAdmin' | 'admin' | undefined) || 'admin'
+      const targetEmail = (user.email || '').toLowerCase()
+      const isProtectedSuperAdmin =
+        targetRole === 'superAdmin' || (targetEmail && superAdminEmails.includes(targetEmail))
+
+      if (isProtectedSuperAdmin) {
+        return NextResponse.json(
+          { error: 'Super Admin accounts cannot be deleted.' },
+          { status: 403 }
+        )
+      }
     } catch (error) {
       // User might not exist, continue with deletion
     }

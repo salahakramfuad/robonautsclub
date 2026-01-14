@@ -49,7 +49,7 @@ async function getUsers(): Promise<User[]> {
 }
 
 export default async function MembersPage() {
-  await requireSuperAdmin()
+  const session = await requireSuperAdmin()
   
   // Fetch users from API
   const users = await getUsers()
@@ -120,7 +120,7 @@ export default async function MembersPage() {
 
       {/* Users Table */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-        <div className="px-4 sm:px-6 py-4 sm:py-5 border-b border-gray-200 bg-gradient-to-r from-indigo-50 to-blue-50">
+        <div className="px-4 sm:px-6 py-4 sm:py-5 border-b border-gray-200 bg-linear-to-r from-indigo-50 to-blue-50">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-lg bg-indigo-500 flex items-center justify-center">
               <Users className="w-5 h-5 text-white" />
@@ -170,7 +170,7 @@ export default async function MembersPage() {
                   <tr key={user.uid} className="hover:bg-gray-50 transition-colors">
                     <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
-                        <div className="flex-shrink-0 h-10 w-10 rounded-full bg-indigo-100 flex items-center justify-center">
+                        <div className="shrink-0 h-10 w-10 rounded-full bg-indigo-100 flex items-center justify-center">
                           <span className="text-indigo-600 font-semibold text-sm">
                             {user.displayName?.[0]?.toUpperCase() || user.email[0]?.toUpperCase() || 'U'}
                           </span>
@@ -232,7 +232,7 @@ export default async function MembersPage() {
                         : 'Never'}
                     </td>
                     <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                      <UserActions user={user} />
+                      <UserActions user={user} currentUserUid={session.uid} />
                     </td>
                   </tr>
                 ))}
