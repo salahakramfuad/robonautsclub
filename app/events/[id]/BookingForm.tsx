@@ -73,13 +73,14 @@ export default function BookingForm({ event }: { event: Event }) {
       })
 
       if (result.success) {
+        // Only show success message if booking was created AND email was sent
         setIsSubmitted(true)
         setFormData({ name: '', school: '', email: '', phone: '', parentsPhone: '', information: '' })
         setTimeout(() => {
           setIsSubmitted(false)
         }, 5000)
       } else {
-        // Show specific error message
+        // Show specific error message - this includes email sending failures
         const errorMessage = result.error || 'Failed to submit booking. Please try again.'
         setErrors({ submit: errorMessage })
         
@@ -111,7 +112,7 @@ export default function BookingForm({ event }: { event: Event }) {
             confirmed!
           </p>
           <p className="text-xs sm:text-sm text-gray-500">
-            A confirmation email with event details has been sent to your email address.
+            A confirmation email with event details has been sent to your email address. Please check your inbox (and spam folder).
           </p>
         </div>
       </div>

@@ -37,6 +37,18 @@ export async function sendBookingConfirmationEmail({
   bookingDetails,
 }: BookingConfirmationEmailProps): Promise<EmailResult> {
   try {
+    // Validate email format before proceeding
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!to || !to.trim() || !emailRegex.test(to.trim())) {
+      return {
+        success: false,
+        error: 'Invalid email address. Please provide a valid email address.',
+      }
+    }
+
+    // Normalize email
+    const normalizedEmail = to.trim().toLowerCase()
+
     // Check if Brevo API key is configured
     if (!process.env.BREVO_API_KEY || process.env.BREVO_API_KEY.trim() === '') {
       console.error('BREVO_API_KEY is not configured')
@@ -420,7 +432,7 @@ export async function sendBookingConfirmationEmail({
     // Send email using Brevo
     const sendSmtpEmail = new brevo.SendSmtpEmail()
     sendSmtpEmail.sender = { email: senderEmail, name: senderName }
-    sendSmtpEmail.to = [{ email: to, name: name }]
+    sendSmtpEmail.to = [{ email: normalizedEmail, name: name }]
     sendSmtpEmail.subject = `Booking Confirmation: ${event.title} - ${registrationId}`
     sendSmtpEmail.htmlContent = emailHtml
 
@@ -446,20 +458,34 @@ export async function sendBookingConfirmationEmail({
     try {
       const data = await apiInstance.sendTransacEmail(sendSmtpEmail)
       
-      // If we have any response from Brevo, consider it successful
-      // The email was sent if we got a response without an error
-      if (data !== null && data !== undefined) {
-        // Return PDF URL if it was uploaded successfully
+      // Check if Brevo returned a valid response with messageId
+      // Brevo returns an object with messageId if email was accepted for delivery
+      if (data && typeof data === 'object' && 'messageId' in data) {
+        // Email was accepted by Brevo - return success
+        // Note: Brevo accepts emails even if the address doesn't exist (for privacy)
+        // The email will bounce later, but we consider it "sent" if Brevo accepted it
         return {
           success: true,
           pdfUrl: pdfUrl || undefined,
         }
       }
       
-      // Only fail if we got null/undefined response
+      // If response doesn't have messageId, it might be an error response
+      // Check for error indicators
+      if (data && typeof data === 'object' && ('error' in data || 'code' in data)) {
+        const errorMsg = (data as { error?: string; message?: string; code?: string }).error || 
+                        (data as { error?: string; message?: string; code?: string }).message ||
+                        'Email service returned an error response'
+        return {
+          success: false,
+          error: errorMsg,
+        }
+      }
+      
+      // If we got null/undefined or unexpected response, fail
       return {
         success: false,
-        error: 'Email service returned an unexpected response',
+        error: 'Email service returned an unexpected response. Please check your email address and try again.',
       }
     } catch (error: unknown) {
       console.error('Brevo email error:', error)
@@ -488,15 +514,33 @@ export async function sendBookingConfirmationEmail({
         }
         
         if (statusCode === 422) {
+          // 422 usually means invalid email address or format
+          if (errorMessage.toLowerCase().includes('email') || errorMessage.toLowerCase().includes('invalid') || errorMessage.toLowerCase().includes('address')) {
+            return {
+              success: false,
+              error: `Invalid email address: ${normalizedEmail}. Please check the email address and try again.`,
+            }
+          }
           return {
             success: false,
             error: `Invalid email configuration. Please check your BREVO_FROM_EMAIL setting. Current from address: ${fromEmail}\n\nThe from address must be from a verified domain in Brevo. Verify your domain at https://app.brevo.com/settings/senders/domains.`,
           }
         }
         
+        // Check for invalid email address errors
+        if (errorMessage.toLowerCase().includes('invalid email') || 
+            errorMessage.toLowerCase().includes('email address') ||
+            errorMessage.toLowerCase().includes('recipient') ||
+            errorMessage.toLowerCase().includes('does not exist')) {
+          return {
+            success: false,
+            error: `Invalid email address: ${normalizedEmail}. Please check the email address and try again.`,
+          }
+        }
+        
         return {
           success: false,
-          error: errorMessage || `Failed to send confirmation email (Status: ${statusCode || 'Unknown'}). Please check your Brevo configuration.`,
+          error: errorMessage || `Failed to send confirmation email (Status: ${statusCode || 'Unknown'}). Please check your email address and Brevo configuration.`,
         }
       }
       
@@ -533,6 +577,18 @@ export async function sendBookingCancellationEmail({
   registrationId,
 }: BookingCancellationEmailProps): Promise<{ success: boolean; error?: string }> {
   try {
+    // Validate email format before proceeding
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!to || !to.trim() || !emailRegex.test(to.trim())) {
+      return {
+        success: false,
+        error: 'Invalid email address. Please provide a valid email address.',
+      }
+    }
+
+    // Normalize email
+    const normalizedEmail = to.trim().toLowerCase()
+
     // Check if Brevo API key is configured
     if (!process.env.BREVO_API_KEY || process.env.BREVO_API_KEY.trim() === '') {
       return {
@@ -805,22 +861,35 @@ export async function sendBookingCancellationEmail({
     // Send email using Brevo
     const sendSmtpEmail = new brevo.SendSmtpEmail()
     sendSmtpEmail.sender = { email: senderEmail, name: senderName }
-    sendSmtpEmail.to = [{ email: to, name: name }]
+    sendSmtpEmail.to = [{ email: normalizedEmail, name: name }]
     sendSmtpEmail.subject = `Registration Cancelled: ${event.title} - ${registrationId}`
     sendSmtpEmail.htmlContent = emailHtml
 
     try {
       const data = await apiInstance.sendTransacEmail(sendSmtpEmail)
       
-      if (data !== null && data !== undefined) {
+      // Check if Brevo returned a valid response with messageId
+      if (data && typeof data === 'object' && 'messageId' in data) {
+        // Email was accepted by Brevo
         return {
           success: true,
         }
       }
       
+      // If response doesn't have messageId, it might be an error response
+      if (data && typeof data === 'object' && ('error' in data || 'code' in data)) {
+        const errorMsg = (data as { error?: string; message?: string; code?: string }).error || 
+                        (data as { error?: string; message?: string; code?: string }).message ||
+                        'Email service returned an error response'
+        return {
+          success: false,
+          error: errorMsg,
+        }
+      }
+      
       return {
         success: false,
-        error: 'Email service returned an unexpected response',
+        error: 'Email service returned an unexpected response. Please check your email address and try again.',
       }
     } catch (error: unknown) {
       const errorObj = error as { response?: { status?: number; body?: unknown; data?: unknown }; statusCode?: number; message?: string }
@@ -830,9 +899,21 @@ export async function sendBookingCancellationEmail({
         const errorBody = (errorObj.response.body || errorObj.response.data || {}) as { message?: string }
         const errorMessage = errorBody.message || errorObj.message || 'Unknown error'
         
+        // Check for invalid email address errors
+        if (statusCode === 422 || 
+            errorMessage.toLowerCase().includes('invalid email') || 
+            errorMessage.toLowerCase().includes('email address') ||
+            errorMessage.toLowerCase().includes('recipient') ||
+            errorMessage.toLowerCase().includes('does not exist')) {
+          return {
+            success: false,
+            error: `Invalid email address: ${normalizedEmail}. Please check the email address and try again.`,
+          }
+        }
+        
         return {
           success: false,
-          error: errorMessage || `Failed to send cancellation email (Status: ${statusCode || 'Unknown'}).`,
+          error: errorMessage || `Failed to send cancellation email (Status: ${statusCode || 'Unknown'}). Please check your email address and try again.`,
         }
       }
       
