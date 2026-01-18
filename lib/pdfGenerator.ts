@@ -2,10 +2,8 @@
  * PDF Generation Service for Booking Confirmations
  */
 
-import PDFDocument from 'pdfkit'
 import type { Event } from '@/types/event'
 import { formatEventDates, getFirstEventDate, parseEventDates } from './dateUtils'
-import { generateQRCodeBuffer } from './qrCode'
 import { sanitizeEventForPDF, sanitizeBookingDetailsForPDF, sanitizeTextForPDF } from './textSanitizer'
 import { join, dirname } from 'path'
 import { existsSync, readdirSync } from 'fs'
@@ -290,6 +288,9 @@ export async function generateBookingConfirmationPDF({
   bookingDetails,
   verificationUrl,
 }: GeneratePDFProps): Promise<Buffer> {
+  // Dynamically import PDFKit only when needed (code splitting)
+  const PDFDocument = (await import('pdfkit')).default
+  
   return new Promise(async (resolve, reject) => {
     // Dynamic require needed for monkey-patching in serverless environments
     // eslint-disable-next-line @typescript-eslint/no-require-imports
@@ -345,7 +346,9 @@ export async function generateBookingConfirmationPDF({
         reject(error)
       })
       
-      await generatePDFContent(doc, registrationId, bookingId, event, bookingDetails, verificationUrl)
+      // Dynamically import QR code generator only when needed
+      const { generateQRCodeBuffer } = await import('./qrCode')
+      await generatePDFContent(doc, registrationId, bookingId, event, bookingDetails, verificationUrl, generateQRCodeBuffer)
       doc.end()
     } catch (error) {
       // Restore original readFileSync on error
@@ -366,12 +369,13 @@ export async function generateBookingConfirmationPDF({
  * Automatically adjusts spacing to ensure everything fits on one page
  */
 async function generatePDFContent(
-  doc: PDFKit.PDFDocument,
+  doc: any, // eslint-disable-line @typescript-eslint/no-explicit-any -- PDFDocument instance from dynamically imported pdfkit
   registrationId: string,
   bookingId: string,
   event: Event,
   bookingDetails: BookingDetails,
-  verificationUrl: string
+  verificationUrl: string,
+  generateQRCodeBuffer: (text: string, size?: number) => Promise<Buffer>
 ): Promise<void> {
   try {
     // Sanitize all event and booking data before rendering

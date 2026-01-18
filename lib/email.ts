@@ -458,34 +458,103 @@ export async function sendBookingConfirmationEmail({
     try {
       const data = await apiInstance.sendTransacEmail(sendSmtpEmail)
       
-      // Check if Brevo returned a valid response with messageId
-      // Brevo returns an object with messageId if email was accepted for delivery
-      if (data && typeof data === 'object' && 'messageId' in data) {
-        // Email was accepted by Brevo - return success
-        // Note: Brevo accepts emails even if the address doesn't exist (for privacy)
-        // The email will bounce later, but we consider it "sent" if Brevo accepted it
+      // Log the response for debugging (only in development)
+      if (process.env.NODE_ENV === 'development') {
+        console.log('Brevo API response:', JSON.stringify(data, null, 2))
+      }
+      
+      // Check if Brevo returned a valid response
+      // Brevo can return different response formats:
+      // 1. Object with messageId (most common)
+      // 2. Object with messageId as a property
+      // 3. String messageId
+      // 4. Empty object or null (still considered success if no error)
+      
+      if (data === null || data === undefined) {
+        // Null/undefined response - likely an error
+        return {
+          success: false,
+          error: 'Email service returned no response. Please check your Brevo API configuration.',
+        }
+      }
+      
+      // Handle string responses (messageId as string) - check this first
+      if (typeof data === 'string') {
         return {
           success: true,
           pdfUrl: pdfUrl || undefined,
         }
       }
       
-      // If response doesn't have messageId, it might be an error response
-      // Check for error indicators
-      if (data && typeof data === 'object' && ('error' in data || 'code' in data)) {
-        const errorMsg = (data as { error?: string; message?: string; code?: string }).error || 
-                        (data as { error?: string; message?: string; code?: string }).message ||
-                        'Email service returned an error response'
+      // Check for error indicators first
+      if (typeof data === 'object' && data !== null) {
+        const responseData = data as Record<string, unknown>
+        
+        // Check for explicit error fields
+        if ('error' in responseData || 'code' in responseData) {
+          const errorCode = responseData.code
+          const errorMsg = 
+            (responseData.error as string) || 
+            (responseData.message as string) ||
+            (errorCode ? String(errorCode) : null) ||
+            'Email service returned an error response'
+          
+          // Check if it's actually an error code (4xx, 5xx) or just a status code
+          if (errorCode && typeof errorCode === 'number' && errorCode >= 400) {
+            return {
+              success: false,
+              error: String(errorMsg),
+            }
+          }
+          
+          // If error field exists but code is not an error code, might be a status field
+          // Check the actual error message content
+          const errorString = String(errorMsg).toLowerCase()
+          if (errorString.includes('error') || errorString.includes('invalid') || errorString.includes('failed')) {
+            return {
+              success: false,
+              error: String(errorMsg),
+            }
+          }
+        }
+        
+        // Check for success indicators
+        if ('messageId' in responseData) {
+          // Email was accepted by Brevo - return success
+          return {
+            success: true,
+            pdfUrl: pdfUrl || undefined,
+          }
+        }
+        
+        // If response is an object but has no error or messageId, check if it's empty
+        // Empty object from Brevo usually means success (email was queued)
+        if (Object.keys(responseData).length === 0) {
+          return {
+            success: true,
+            pdfUrl: pdfUrl || undefined,
+          }
+        }
+        
+        // If we have an object response with no error indicators, consider it success
+        // Brevo might return success responses in different formats
+        // Only fail if we explicitly see error indicators
         return {
-          success: false,
-          error: errorMsg,
+          success: true,
+          pdfUrl: pdfUrl || undefined,
         }
       }
       
-      // If we got null/undefined or unexpected response, fail
+      // If we got an unexpected response format, log it and return a more helpful error
+      // Always log unexpected responses for debugging
+      console.error('Unexpected Brevo response format:', {
+        type: typeof data,
+        data: JSON.stringify(data, null, 2),
+        hasMessageId: typeof data === 'object' && data !== null ? 'messageId' in (data as Record<string, unknown>) : false,
+      })
       return {
         success: false,
-        error: 'Email service returned an unexpected response. Please check your email address and try again.',
+        error: `Email service returned an unexpected response format. Response type: ${typeof data}. Please check your Brevo API configuration. If the problem persists, check server logs for the actual response.`,
       }
     } catch (error: unknown) {
       console.error('Brevo email error:', error)
@@ -868,28 +937,83 @@ export async function sendBookingCancellationEmail({
     try {
       const data = await apiInstance.sendTransacEmail(sendSmtpEmail)
       
-      // Check if Brevo returned a valid response with messageId
-      if (data && typeof data === 'object' && 'messageId' in data) {
-        // Email was accepted by Brevo
+      // Log the response for debugging (only in development)
+      if (process.env.NODE_ENV === 'development') {
+        console.log('Brevo API response (cancellation):', JSON.stringify(data, null, 2))
+      }
+      
+      // Check if Brevo returned a valid response
+      if (data === null || data === undefined) {
+        return {
+          success: false,
+          error: 'Email service returned no response. Please check your Brevo API configuration.',
+        }
+      }
+      
+      // Handle string responses (messageId as string) - check this first
+      if (typeof data === 'string') {
         return {
           success: true,
         }
       }
       
-      // If response doesn't have messageId, it might be an error response
-      if (data && typeof data === 'object' && ('error' in data || 'code' in data)) {
-        const errorMsg = (data as { error?: string; message?: string; code?: string }).error || 
-                        (data as { error?: string; message?: string; code?: string }).message ||
-                        'Email service returned an error response'
+      // Check for error indicators first
+      if (typeof data === 'object' && data !== null) {
+        const responseData = data as Record<string, unknown>
+        
+        // Check for explicit error fields
+        if ('error' in responseData || 'code' in responseData) {
+          const errorCode = responseData.code
+          const errorMsg = 
+            (responseData.error as string) || 
+            (responseData.message as string) ||
+            (errorCode ? String(errorCode) : null) ||
+            'Email service returned an error response'
+          
+          // Check if it's actually an error code (4xx, 5xx) or just a status code
+          if (errorCode && typeof errorCode === 'number' && errorCode >= 400) {
+            return {
+              success: false,
+              error: String(errorMsg),
+            }
+          }
+          
+          // If error field exists but code is not an error code, might be a status field
+          // Check the actual error message content
+          const errorString = String(errorMsg).toLowerCase()
+          if (errorString.includes('error') || errorString.includes('invalid') || errorString.includes('failed')) {
+            return {
+              success: false,
+              error: String(errorMsg),
+            }
+          }
+        }
+        
+        // Check for success indicators
+        if ('messageId' in responseData) {
+          return {
+            success: true,
+          }
+        }
+        
+        // Empty object from Brevo usually means success
+        if (Object.keys(responseData).length === 0) {
+          return {
+            success: true,
+          }
+        }
+        
+        // If we have an object response with no error indicators, consider it success
         return {
-          success: false,
-          error: errorMsg,
+          success: true,
         }
       }
       
+      // Unexpected response format
+      console.error('Unexpected Brevo response format (cancellation):', typeof data, data)
       return {
         success: false,
-        error: 'Email service returned an unexpected response. Please check your email address and try again.',
+        error: `Email service returned an unexpected response format. Response type: ${typeof data}. Please check your Brevo API configuration and try again.`,
       }
     } catch (error: unknown) {
       const errorObj = error as { response?: { status?: number; body?: unknown; data?: unknown }; statusCode?: number; message?: string }

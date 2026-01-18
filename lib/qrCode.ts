@@ -1,8 +1,7 @@
 /**
  * QR Code generation utility
+ * Uses dynamic imports for code splitting
  */
-
-import QRCode from 'qrcode'
 
 /**
  * Generate QR code as image buffer
@@ -14,6 +13,8 @@ export async function generateQRCodeBuffer(
   text: string,
   size: number = 300
 ): Promise<Buffer> {
+  // Dynamically import QRCode only when needed (code splitting)
+  const QRCode = (await import('qrcode')).default
   try {
     const qrCodeBuffer = await QRCode.toBuffer(text, {
       type: 'png',
@@ -40,6 +41,8 @@ export async function generateQRCodeDataURL(
   text: string,
   size: number = 300
 ): Promise<string> {
+  // Dynamically import QRCode only when needed (code splitting)
+  const QRCode = (await import('qrcode')).default
   try {
     const dataURL = await QRCode.toDataURL(text, {
       type: 'image/png',

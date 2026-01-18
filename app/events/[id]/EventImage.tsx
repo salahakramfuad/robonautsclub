@@ -32,6 +32,8 @@ export default function EventImage({ src, alt, priority = false }: EventImagePro
           fill
           className="object-cover"
           priority={priority}
+          quality={80}
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           onError={() => {}} // prevent infinite loop if fallback fails
         />
       </div>
@@ -49,6 +51,9 @@ export default function EventImage({ src, alt, priority = false }: EventImagePro
         fill
         className="object-cover"
         priority={priority}
+        quality={85}
+        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+        loading={priority ? undefined : 'lazy'}
         onError={handleError}
       />
     </div>

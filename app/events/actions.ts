@@ -1,5 +1,6 @@
 'use server'
 
+import { cache } from 'react'
 import { adminDb } from '@/lib/firebase-admin'
 import { Event } from '@/types/event'
 import { Course } from '@/types/course'
@@ -9,8 +10,9 @@ import { generateRegistrationId } from '@/lib/registrationId'
 /**
  * Get all events from Firestore (public - no auth required)
  * Used with ISR (Incremental Static Regeneration) for fast page loads
+ * Wrapped with cache() for request deduplication
  */
-export async function getPublicEvents(): Promise<Event[]> {
+export const getPublicEvents = cache(async (): Promise<Event[]> => {
   if (!adminDb) {
     console.error('Firebase Admin SDK not available. Cannot fetch events.')
     // Return empty array instead of throwing for public pages
@@ -79,13 +81,14 @@ export async function getPublicEvents(): Promise<Event[]> {
     // Return empty array instead of throwing for public pages
     return []
   }
-}
+})
 
 /**
  * Get a single event by ID (public - no auth required)
  * Used with ISR (Incremental Static Regeneration) for fast page loads
+ * Wrapped with cache() for request deduplication
  */
-export async function getPublicEvent(id: string): Promise<Event | null> {
+export const getPublicEvent = cache(async (id: string): Promise<Event | null> => {
   if (!adminDb) {
     console.error('Firebase Admin SDK not available. Cannot fetch event.')
     return null
@@ -138,7 +141,7 @@ export async function getPublicEvent(id: string): Promise<Event | null> {
     console.error('Error fetching event:', error)
     return null
   }
-}
+})
 
 /**
  * Create a booking for an event
@@ -321,8 +324,9 @@ export async function createBooking(formData: {
  * Get all courses from Firestore (public - no auth required)
  * Only returns non-archived courses
  * Used by Feed component for public display
+ * Wrapped with cache() for request deduplication
  */
-export async function getPublicCourses(): Promise<Course[]> {
+export const getPublicCourses = cache(async (): Promise<Course[]> => {
   if (!adminDb) {
     console.error('Firebase Admin SDK not available. Cannot fetch courses.')
     return []
@@ -380,4 +384,4 @@ export async function getPublicCourses(): Promise<Course[]> {
     console.error('Error fetching public courses:', error)
     return []
   }
-}
+})

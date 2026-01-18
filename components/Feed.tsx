@@ -1,5 +1,6 @@
 'use client'
 
+import { useMemo } from 'react'
 import Hero from './Hero'
 import CourseCard from './CourseCard'
 import FAQAccordion from './FAQAccordion'
@@ -17,7 +18,6 @@ import {
   Rocket,
   Star,
   Medal,
-  Flag,
 } from 'lucide-react'
 import Link from 'next/link'
 import { ArrowRight } from 'lucide-react'
@@ -74,16 +74,19 @@ const Feed = ({ initialCourses = [] }: FeedProps) => {
 
   // Convert Course type to CourseCard props format
   // Filter out archived courses and map to CourseCard format
-  const courses = initialCourses
-    .filter((course) => !course.isArchived) // Filter out archived courses (only show active)
-    .map((course) => ({
-      id: course.id, // Keep ID for React key
-      title: course.title,
-      level: course.level,
-      blurb: course.blurb,
-      href: course.href,
-      img: course.image,
-    }))
+  // Memoize to prevent unnecessary recalculations
+  const courses = useMemo(() => {
+    return initialCourses
+      .filter((course) => !course.isArchived) // Filter out archived courses (only show active)
+      .map((course) => ({
+        id: course.id, // Keep ID for React key
+        title: course.title,
+        level: course.level,
+        blurb: course.blurb,
+        href: course.href,
+        img: course.image,
+      }))
+  }, [initialCourses])
 
   const faqItems = [
     {
@@ -218,7 +221,7 @@ const Feed = ({ initialCourses = [] }: FeedProps) => {
       {/* Collaboration with Olympiads Section */}
       <section className="py-12 sm:py-16 md:py-20 lg:py-24 bg-linear-to-br from-indigo-50/50 via-blue-50/50 to-purple-50/30 relative">
         <div className="absolute top-0 left-0 right-0 h-px bg-linear-to-r from-transparent via-gray-200 to-transparent" />
-        <div className="max-w-[90rem] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 relative z-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 relative z-10">
           <SectionHeader
             title="Our Olympiad Participation"
             subtitle="Our teams have previously competed in well-known national and international robotics olympiads, gaining valuable hands-on competition experience that helps us train and mentor current members."

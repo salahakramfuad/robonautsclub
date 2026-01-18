@@ -71,6 +71,8 @@ export default function Hero() {
                     fill
                     className="object-contain rounded-3xl"
                     priority
+                    quality={85}
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                   />
                 </div>
               </div>

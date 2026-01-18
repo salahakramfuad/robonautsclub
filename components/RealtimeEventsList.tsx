@@ -1,5 +1,6 @@
 'use client'
 
+import { useMemo, memo } from 'react'
 import { useRealtimeEvents } from '@/hooks/useRealtimeEvents'
 import { parseEventDates, formatEventDates, isEventUpcoming, hasEventPassed, getFirstEventDate } from '@/lib/dateUtils'
 import Link from 'next/link'
@@ -140,7 +141,8 @@ interface RealtimeEventsListProps {
 }
 
 // Event Card Component (same as in events/page.tsx but for client component)
-const EventCard = ({ event }: { event: Event }) => {
+// Memoized to prevent unnecessary re-renders
+const EventCard = memo(({ event }: { event: Event }) => {
   const eventDates = parseEventDates(event.date)
   const firstDate = getFirstEventDate(event.date)
   const isUpcoming = isEventUpcoming(event.date)
@@ -297,7 +299,9 @@ const EventCard = ({ event }: { event: Event }) => {
       </div>
     </Link>
   )
-}
+})
+
+EventCard.displayName = 'EventCard'
 
 const SectionHeader = ({
   title,
@@ -332,36 +336,41 @@ export default function RealtimeEventsList({ initialEvents = [] }: RealtimeEvent
   const { events, loading, error } = useRealtimeEvents(true)
 
   // Use real-time events if available, otherwise fall back to initial events
-  const displayEvents = events.length > 0 ? events : initialEvents
+  const displayEvents = useMemo(() => {
+    return events.length > 0 ? events : initialEvents
+  }, [events, initialEvents])
 
   // Sort events: upcoming first, then past events
-  const sortedEvents = [...displayEvents].sort((a, b) => {
-    const dateA = getFirstEventDate(a.date)
-    const dateB = getFirstEventDate(b.date)
-    
-    if (!dateA && !dateB) return 0
-    if (!dateA) return 1
-    if (!dateB) return -1
+  // Memoize to prevent unnecessary re-sorting
+  const sortedEvents = useMemo(() => {
+    return [...displayEvents].sort((a, b) => {
+      const dateA = getFirstEventDate(a.date)
+      const dateB = getFirstEventDate(b.date)
+      
+      if (!dateA && !dateB) return 0
+      if (!dateA) return 1
+      if (!dateB) return -1
 
-    const aIsPast = hasEventPassed(a.date)
-    const bIsPast = hasEventPassed(b.date)
+      const aIsPast = hasEventPassed(a.date)
+      const bIsPast = hasEventPassed(b.date)
 
-    // Upcoming events first
-    if (aIsPast && !bIsPast) return 1
-    if (!aIsPast && bIsPast) return -1
+      // Upcoming events first
+      if (aIsPast && !bIsPast) return 1
+      if (!aIsPast && bIsPast) return -1
 
-    // Within same group, sort by date (newest first for past, earliest first for upcoming)
-    if (aIsPast) return dateB.getTime() - dateA.getTime()
-    return dateA.getTime() - dateB.getTime()
-  })
+      // Within same group, sort by date (newest first for past, earliest first for upcoming)
+      if (aIsPast) return dateB.getTime() - dateA.getTime()
+      return dateA.getTime() - dateB.getTime()
+    })
+  }, [displayEvents])
 
-  const upcomingEvents = sortedEvents.filter((event) => {
-    return isEventUpcoming(event.date)
-  })
+  const upcomingEvents = useMemo(() => {
+    return sortedEvents.filter((event) => isEventUpcoming(event.date))
+  }, [sortedEvents])
 
-  const pastEvents = sortedEvents.filter((event) => {
-    return hasEventPassed(event.date)
-  })
+  const pastEvents = useMemo(() => {
+    return sortedEvents.filter((event) => hasEventPassed(event.date))
+  }, [sortedEvents])
 
   if (error && displayEvents.length === 0) {
     return (

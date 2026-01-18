@@ -182,7 +182,7 @@ export default function BookingForm({ event }: { event: Event }) {
             htmlFor="email"
             className="block text-sm font-medium text-gray-700 mb-1"
           >
-            Email Address <span className="text-red-500">*</span>
+            Email Address (We will use this to send you the confirmation email) <span className="text-red-500">*</span>
           </label>
           <input
             type="email"

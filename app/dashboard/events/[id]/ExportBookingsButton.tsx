@@ -3,7 +3,6 @@
 import { Download } from 'lucide-react'
 import { useTransition } from 'react'
 import { Booking } from '@/types/booking'
-import * as XLSX from 'xlsx'
 
 interface ExportBookingsButtonProps {
   bookings: Booking[]
@@ -15,7 +14,12 @@ export default function ExportBookingsButton({ bookings, eventTitle }: ExportBoo
 
   const exportToExcel = () => {
     startTransition(() => {
-      try {
+      // Use IIFE to handle async code splitting
+      ;(async () => {
+        try {
+          // Dynamically import XLSX only when needed (code splitting)
+          const XLSX = await import('xlsx')
+        
         // Prepare data for Excel export
         const exportData = bookings.map((booking, index) => {
           // Format the date consistently
@@ -84,12 +88,13 @@ export default function ExportBookingsButton({ bookings, eventTitle }: ExportBoo
         const currentDate = new Date().toISOString().split('T')[0] // YYYY-MM-DD format
         const filename = `Bookings_${sanitizedEventTitle}_${currentDate}.xlsx`
 
-        // Write the file and trigger download
-        XLSX.writeFile(wb, filename)
-      } catch (error) {
-        console.error('Error exporting to Excel:', error)
-        alert('Failed to export bookings. Please try again.')
-      }
+          // Write the file and trigger download
+          XLSX.writeFile(wb, filename)
+        } catch (error) {
+          console.error('Error exporting to Excel:', error)
+          alert('Failed to export bookings. Please try again.')
+        }
+      })()
     })
   }
 
