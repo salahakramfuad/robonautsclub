@@ -4,6 +4,7 @@ import LogoutButton from './LogoutButton'
 import Sidebar from './Sidebar'
 import AutoRefresh from './AutoRefresh'
 import TokenExpirationChecker from './TokenExpirationChecker'
+import SessionTimer from './SessionTimer'
 import Notifications from './Notifications'
 
 // Force dynamic rendering since this layout uses cookies for authentication
@@ -21,6 +22,7 @@ export default async function DashboardLayout({
     <div className="min-h-screen bg-linear-to-br from-gray-50 to-gray-100">
       <AutoRefresh />
       <TokenExpirationChecker />
+      <SessionTimer />
       {/* Top Navigation Bar */}
       <nav className="bg-white border-b border-gray-200 shadow-sm sticky top-0 z-10">
         <div className="px-3 sm:px-4 lg:px-6 xl:px-8">

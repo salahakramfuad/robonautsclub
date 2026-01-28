@@ -18,17 +18,20 @@ export default function LogoutButton() {
         await signOut(auth)
       }
       
-      // Clear auth token and user info cookies
+      // Clear auth token, user info, and session-start cookies
       document.cookie = 'auth-token=; path=/; max-age=0'
       document.cookie = 'user-info=; path=/; max-age=0'
+      document.cookie = 'session-start=; path=/; max-age=0'
       
       // Redirect to login
-      router.push('/')
+      router.push('/login')
       router.refresh()
     } catch (error) {
       console.error('Logout error:', error)
       // Still redirect even if there's an error
       document.cookie = 'auth-token=; path=/; max-age=0'
+      document.cookie = 'user-info=; path=/; max-age=0'
+      document.cookie = 'session-start=; path=/; max-age=0'
       router.push('/login')
       router.refresh()
     } finally {

@@ -116,7 +116,7 @@ export async function requireAuth() {
  * This should be called after successful login
  */
 export function setAuthToken(token: string) {
-  document.cookie = `auth-token=${token}; path=/; max-age=86400; SameSite=Lax` // 24 hours
+  document.cookie = `auth-token=${token}; path=/; max-age=3600; SameSite=Lax` // 1 hour
 }
 
 /**
