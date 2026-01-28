@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, memo } from 'react'
+import { useMemo, memo, useState } from 'react'
 import { useRealtimeEvents } from '@/hooks/useRealtimeEvents'
 import { parseEventDates, formatEventDates, isEventUpcoming, hasEventPassed, getFirstEventDate } from '@/lib/dateUtils'
 import Link from 'next/link'
@@ -140,13 +140,17 @@ interface RealtimeEventsListProps {
   initialEvents?: Event[]
 }
 
+const FALLBACK_IMAGE = '/robot.gif'
+
 // Event Card Component (same as in events/page.tsx but for client component)
 // Memoized to prevent unnecessary re-renders
 const EventCard = memo(({ event }: { event: Event }) => {
+  const [imageError, setImageError] = useState(false)
   const eventDates = parseEventDates(event.date)
   const firstDate = getFirstEventDate(event.date)
   const isUpcoming = isEventUpcoming(event.date)
   const status = isUpcoming ? 'Upcoming' : 'Completed'
+  const imageSrc = event.image && !imageError ? event.image : FALLBACK_IMAGE
   
   // Calculate time until event in Bangladesh Standard Time
   let timeDisplay: string | null = null
@@ -208,25 +212,15 @@ const EventCard = memo(({ event }: { event: Event }) => {
 
         {/* Image/Visual Section */}
         <div className="relative h-40 sm:h-48 bg-linear-to-br from-indigo-400 via-blue-400 to-purple-400 overflow-hidden">
-          {event.image ? (
-            <>
-              <Image
-                src={event.image}
-                alt={event.title}
-                fill
-                className="object-cover group-hover:scale-105 transition-transform duration-300"
-                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-              />
-              <div className="absolute inset-0 bg-black/10 group-hover:bg-black/20 transition-colors" />
-            </>
-          ) : (
-            <>
-              <div className="absolute inset-0 bg-black/10 group-hover:bg-black/20 transition-colors" />
-              <div className="absolute inset-0 flex items-center justify-center">
-                <Calendar className="w-20 h-20 text-white/80" />
-              </div>
-            </>
-          )}
+          <Image
+            src={imageSrc}
+            alt={event.title}
+            fill
+            className="object-cover group-hover:scale-105 transition-transform duration-300"
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+            onError={() => setImageError(true)}
+          />
+          <div className="absolute inset-0 bg-black/10 group-hover:bg-black/20 transition-colors" />
           {isUpcoming && timeDisplay && (
             <div className="absolute bottom-4 left-4 bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-lg z-10">
               <span className="text-sm font-bold text-indigo-700">
