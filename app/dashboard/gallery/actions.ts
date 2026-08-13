@@ -27,6 +27,7 @@ async function fetchDashboardGalleryGroupsFromDb(): Promise<GalleryGroup[]> {
 
 const getCachedDashboardGalleryGroups = unstable_cache(fetchDashboardGalleryGroupsFromDb, [DASHBOARD_GALLERY_LIST_TAG], {
   tags: [DASHBOARD_GALLERY_LIST_TAG],
+  revalidate: 600,
 })
 
 function toIso(v: unknown): string {

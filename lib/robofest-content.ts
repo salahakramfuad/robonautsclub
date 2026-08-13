@@ -632,7 +632,7 @@ async function fetchRobofestContentFromDb(): Promise<RobofestContent> {
 const getCachedRobofestContent = unstable_cache(
   fetchRobofestContentFromDb,
   [ROBOFEST_CONTENT_CACHE_TAG],
-  { tags: [ROBOFEST_CONTENT_CACHE_TAG] },
+  { tags: [ROBOFEST_CONTENT_CACHE_TAG], revalidate: 900 },
 );
 
 /** Public/dashboard read — cached with seed fallback. */

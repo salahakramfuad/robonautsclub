@@ -4,20 +4,28 @@ import { Download } from 'lucide-react'
 import { useTransition } from 'react'
 import { Booking } from '@/types/booking'
 import { Button } from '@/components/ui/button'
+import { getBookingsForExport } from '../../actions'
 
 interface ExportBookingsButtonProps {
-  bookings: Booking[]
+  eventId: string
   eventTitle: string
+  /** Shown count / enable button when table has any rows (or known registrations). */
+  hasBookings: boolean
 }
 
-export default function ExportBookingsButton({ bookings, eventTitle }: ExportBookingsButtonProps) {
+export default function ExportBookingsButton({
+  eventId,
+  eventTitle,
+  hasBookings,
+}: ExportBookingsButtonProps) {
   const [isPending, startTransition] = useTransition()
 
   const formatBookedAt = (booking: Booking) => {
     let formattedDate = 'N/A'
     if (booking.createdAt) {
       try {
-        const bookedDate = booking.createdAt instanceof Date ? booking.createdAt : new Date(booking.createdAt)
+        const bookedDate =
+          booking.createdAt instanceof Date ? booking.createdAt : new Date(booking.createdAt)
         if (!isNaN(bookedDate.getTime())) {
           formattedDate = bookedDate.toLocaleString('en-US', {
             year: 'numeric',
@@ -40,62 +48,53 @@ export default function ExportBookingsButton({ bookings, eventTitle }: ExportBoo
       .replace(/\s+/g, '_')
       .substring(0, 50)
 
+  const loadAllBookings = async (): Promise<Booking[]> => getBookingsForExport(eventId)
+
   const exportToExcel = () => {
     startTransition(() => {
-      // Use IIFE to handle async code splitting
       ;(async () => {
         try {
-          // Dynamically import XLSX only when needed (code splitting)
-          const XLSX = await import('xlsx')
-        
-        // Prepare data for Excel export
-        const exportData = bookings.map((booking, index) => {
-          return {
-            'No.': index + 1,
-            'Registration ID': booking.registrationId || 'N/A',
-            'Name': booking.name,
-            'Category': booking.category || 'Unspecified',
-            'School': booking.school,
-            'Email': booking.email,
-            'Phone': booking.phone || 'N/A',
-            'Amount Paid (BDT)': booking.amountPaid || '',
-            'Payment Status': booking.paymentStatus || 'unpaid',
-            'Additional Information': booking.information || '',
-            'Booked At': formatBookedAt(booking),
-          }
-        })
+          const [XLSX, bookings] = await Promise.all([import('xlsx'), loadAllBookings()])
 
-        // Create a new workbook
-        const wb = XLSX.utils.book_new()
+          const exportData = bookings.map((booking, index) => {
+            return {
+              'No.': index + 1,
+              'Registration ID': booking.registrationId || 'N/A',
+              Name: booking.name,
+              Category: booking.category || 'Unspecified',
+              School: booking.school,
+              Email: booking.email,
+              Phone: booking.phone || 'N/A',
+              'Amount Paid (BDT)': booking.amountPaid || '',
+              'Payment Status': booking.paymentStatus || 'unpaid',
+              'Additional Information': booking.information || '',
+              'Booked At': formatBookedAt(booking),
+            }
+          })
 
-        // Create a worksheet from the data
-        const ws = XLSX.utils.json_to_sheet(exportData)
+          const wb = XLSX.utils.book_new()
+          const ws = XLSX.utils.json_to_sheet(exportData)
 
-        // Set column widths for better readability
-        const columnWidths = [
-          { wch: 8 },  // No.
-          { wch: 20 }, // Registration ID
-          { wch: 25 }, // Name
-          { wch: 18 }, // Category
-          { wch: 30 }, // School
-          { wch: 35 }, // Email
-          { wch: 18 }, // Phone
-          { wch: 18 }, // Amount Paid (BDT)
-          { wch: 18 }, // Payment Status
-          { wch: 50 }, // Additional Information
-          { wch: 20 }, // Booked At
-        ]
-        ws['!cols'] = columnWidths
+          ws['!cols'] = [
+            { wch: 8 },
+            { wch: 20 },
+            { wch: 25 },
+            { wch: 18 },
+            { wch: 30 },
+            { wch: 35 },
+            { wch: 18 },
+            { wch: 18 },
+            { wch: 18 },
+            { wch: 50 },
+            { wch: 20 },
+          ]
 
-        // Add the worksheet to the workbook
-        XLSX.utils.book_append_sheet(wb, ws, 'Registrations')
+          XLSX.utils.book_append_sheet(wb, ws, 'Registrations')
 
-        // Generate filename with event title and current date
-        const sanitizedEventTitle = getSanitizedTitle()
-        const currentDate = new Date().toISOString().split('T')[0] // YYYY-MM-DD format
-        const filename = `Registrations_${sanitizedEventTitle}_${currentDate}.xlsx`
+          const sanitizedEventTitle = getSanitizedTitle()
+          const currentDate = new Date().toISOString().split('T')[0]
+          const filename = `Registrations_${sanitizedEventTitle}_${currentDate}.xlsx`
 
-          // Write the file and trigger download
           XLSX.writeFile(wb, filename)
         } catch (error) {
           console.error('Error exporting to Excel:', error)
@@ -109,7 +108,11 @@ export default function ExportBookingsButton({ bookings, eventTitle }: ExportBoo
     startTransition(() => {
       ;(async () => {
         try {
-          const [{ jsPDF }, autoTableModule] = await Promise.all([import('jspdf'), import('jspdf-autotable')])
+          const [{ jsPDF }, autoTableModule, bookings] = await Promise.all([
+            import('jspdf'),
+            import('jspdf-autotable'),
+            loadAllBookings(),
+          ])
           const autoTable = autoTableModule.default
 
           const doc = new jsPDF({ orientation: 'landscape', unit: 'pt', format: 'a4' })
@@ -185,7 +188,7 @@ export default function ExportBookingsButton({ bookings, eventTitle }: ExportBoo
     })
   }
 
-  if (bookings.length === 0) {
+  if (!hasBookings) {
     return null
   }
 
@@ -196,7 +199,7 @@ export default function ExportBookingsButton({ bookings, eventTitle }: ExportBoo
         onClick={exportToExcel}
         disabled={isPending}
         className="bg-green-600 hover:bg-green-700 text-white shadow-sm hover:shadow-md"
-        title="Download registrations as Excel file"
+        title="Download all registrations as Excel file"
       >
         <Download className="w-4 h-4" />
         {isPending ? 'Exporting...' : 'Export to Excel'}
@@ -206,7 +209,7 @@ export default function ExportBookingsButton({ bookings, eventTitle }: ExportBoo
         onClick={exportToPdf}
         disabled={isPending}
         className="bg-red-600 hover:bg-red-700 text-white shadow-sm hover:shadow-md"
-        title="Download registrations as PDF file"
+        title="Download all registrations as PDF file"
       >
         <Download className="w-4 h-4" />
         {isPending ? 'Exporting...' : 'Export as PDF'}

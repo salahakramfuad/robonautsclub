@@ -458,6 +458,16 @@ pnpm lint         # Run ESLint
 - Configure reverse proxy (Nginx/Apache)
 - Set up SSL certificate (Let's Encrypt)
 
+### Firestore indexes (staging / production)
+
+Robofest dashboard pagination needs composite indexes defined in [`firestore.indexes.json`](firestore.indexes.json). After merging index changes, deploy them before relying on filtered/paginated registration queries:
+
+```bash
+firebase deploy --only firestore:indexes
+```
+
+Prefer the Firebase emulator or a staging project for local `pnpm dev` against Firestore so dashboard traffic does not burn production read quota.
+
 ### Environment Variables for Production
 
 ⚠️ **Important**: Never commit `.env.local` to version control. Always set environment variables in your hosting platform's dashboard.
@@ -542,8 +552,8 @@ The system uses Firebase Custom Claims for role management:
   - Course creation/update/deletion/archiving
   - User creation/update/deletion (Super Admin only)
   - Profile updates
-- **Auto-Mark as Read**: All notifications marked as read when dropdown is opened
-- **Real-time Updates**: Notifications refresh every 30 seconds
+- **Mark as read**: Per-item or “Mark all read” for the loaded list only (opening the bell does not scan the full collection)
+- **On-demand load**: Notifications fetch when the panel opens (no polling)
 - **Visible to**: All admins and super admins
 
 ### User Management (Super Admin Only)

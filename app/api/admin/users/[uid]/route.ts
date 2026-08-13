@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { adminAuth, adminDb } from '@/lib/firebase-admin'
 import { requireSuperAdmin } from '@/lib/auth'
+import { revalidateAdminUsersCache } from '@/lib/admin-users-cache'
 
 /**
  * User Management API Routes - Individual User Operations
@@ -178,6 +179,7 @@ export async function PUT(
 
     // Update user
     const user = await adminAuth.updateUser(uid, updateData)
+    revalidateAdminUsersCache()
 
     // Get role from custom claims
     const role = (user.customClaims?.role as 'superAdmin' | 'admin' | undefined) || 'admin'
@@ -303,6 +305,7 @@ export async function DELETE(
 
     // Delete user
     await adminAuth.deleteUser(uid)
+    revalidateAdminUsersCache()
 
     // Create notification for user deletion
     if (adminDb) {

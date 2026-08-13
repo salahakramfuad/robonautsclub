@@ -1,6 +1,6 @@
 'use server'
 
-import { revalidatePath, revalidateTag } from 'next/cache'
+import { revalidatePath, revalidateTag, unstable_cache } from 'next/cache'
 import { requireAuth } from '@/lib/auth'
 import { adminDb } from '@/lib/firebase-admin'
 import {
@@ -14,6 +14,32 @@ import { getRobofestCampusAmbassadorSchools } from '@/lib/robofest-campus-ambass
 import { normalizeSchoolName } from '@/lib/pendingSchool'
 
 const PUBLIC_SCHOOLS_TAG = 'public-schools'
+const DASHBOARD_SCHOOLS_TAG = 'dashboard-schools'
+
+const SCHOOL_LIST_FIELDS = [
+  'name',
+  'city',
+  'isActive',
+  'status',
+  'source',
+  'requestedByName',
+  'requestedByEmail',
+  'requestedAt',
+  'createdAt',
+  'updatedAt',
+] as const
+
+function isQuotaExceededError(error: unknown): boolean {
+  if (!error || typeof error !== 'object') return false
+  const err = error as { code?: number | string; message?: string; details?: string }
+  return (
+    err.code === 8 ||
+    err.code === '8' ||
+    err.code === 'resource-exhausted' ||
+    /RESOURCE_EXHAUSTED|Quota exceeded/i.test(String(err.message || '')) ||
+    /Quota exceeded/i.test(String(err.details || ''))
+  )
+}
 
 function mapSchoolDoc(
   id: string,
@@ -65,11 +91,14 @@ function mapSchoolDoc(
   }
 }
 
-export async function getSchoolDirectory(includeInactive = true): Promise<SchoolDirectoryEntry[]> {
-  await requireAuth()
-  if (!adminDb) return []
-
-  const snapshot = await adminDb.collection(SCHOOL_DIRECTORY_COLLECTION).get()
+async function fetchSchoolDirectoryFromDb(
+  includeInactive: boolean,
+): Promise<SchoolDirectoryEntry[]> {
+  const db = adminDb!
+  const snapshot = await db
+    .collection(SCHOOL_DIRECTORY_COLLECTION)
+    .select(...SCHOOL_LIST_FIELDS)
+    .get()
   const schools: SchoolDirectoryEntry[] = []
   snapshot.docs.forEach((doc) => {
     const mapped = mapSchoolDoc(doc.id, doc.data() as Record<string, unknown>)
@@ -78,6 +107,25 @@ export async function getSchoolDirectory(includeInactive = true): Promise<School
     schools.push(mapped)
   })
   return schools.sort((a, b) => a.name.localeCompare(b.name))
+}
+
+export async function getSchoolDirectory(
+  includeInactive = true,
+): Promise<SchoolDirectoryEntry[]> {
+  await requireAuth()
+  if (!adminDb) return []
+
+  try {
+    return await unstable_cache(
+      () => fetchSchoolDirectoryFromDb(includeInactive),
+      [DASHBOARD_SCHOOLS_TAG, includeInactive ? 'all' : 'active'],
+      { tags: [DASHBOARD_SCHOOLS_TAG, PUBLIC_SCHOOLS_TAG], revalidate: 600 },
+    )()
+  } catch (error) {
+    console.error('Error fetching school directory:', error)
+    if (isQuotaExceededError(error)) return []
+    return []
+  }
 }
 
 export async function createSchoolDirectoryEntry(input: SchoolDirectoryWriteInput): Promise<{ success: boolean; error?: string }> {
@@ -115,6 +163,7 @@ export async function createSchoolDirectoryEntry(input: SchoolDirectoryWriteInpu
   revalidatePath('/events')
   revalidatePath('/robofest')
   revalidateTag(PUBLIC_SCHOOLS_TAG, 'max')
+  revalidateTag(DASHBOARD_SCHOOLS_TAG, 'max')
   return { success: true }
 }
 
@@ -150,6 +199,7 @@ export async function updateSchoolDirectoryEntry(
   revalidatePath('/events')
   revalidatePath('/robofest')
   revalidateTag(PUBLIC_SCHOOLS_TAG, 'max')
+  revalidateTag(DASHBOARD_SCHOOLS_TAG, 'max')
   return { success: true }
 }
 
@@ -200,6 +250,7 @@ export async function confirmPendingSchool(
   revalidatePath('/events')
   revalidatePath('/robofest')
   revalidateTag(PUBLIC_SCHOOLS_TAG, 'max')
+  revalidateTag(DASHBOARD_SCHOOLS_TAG, 'max')
   return { success: true }
 }
 
@@ -224,6 +275,8 @@ export async function rejectPendingSchool(
   await ref.delete()
 
   revalidatePath('/dashboard/schools')
+  revalidateTag(PUBLIC_SCHOOLS_TAG, 'max')
+  revalidateTag(DASHBOARD_SCHOOLS_TAG, 'max')
   return { success: true }
 }
 
@@ -279,5 +332,6 @@ export async function seedEnglishMediumSchools(): Promise<{ success: boolean; me
   revalidatePath('/events')
   revalidatePath('/robofest')
   revalidateTag(PUBLIC_SCHOOLS_TAG, 'max')
+  revalidateTag(DASHBOARD_SCHOOLS_TAG, 'max')
   return { success: true, message: created > 0 ? `Added ${created} schools.` : 'Directory already up to date.' }
 }

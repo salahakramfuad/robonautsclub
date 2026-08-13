@@ -217,9 +217,16 @@ export default function EventDetailsClient({ event, bookings }: Props) {
             <h3 className="text-lg sm:text-xl font-semibold text-slate-900 flex items-center gap-2">
               <Users className="w-4 h-4 sm:w-5 sm:h-5 text-cyan-700" />
               Registrations
-              <span className="text-xs sm:text-sm font-normal text-slate-500">({filteredBookings.length})</span>
+              <span className="text-xs sm:text-sm font-normal text-slate-500">
+                ({filteredBookings.length}
+                {bookings.length >= 50 ? ', latest 50' : ''})
+              </span>
             </h3>
-            <ExportBookingsButton bookings={bookings} eventTitle={event.title} />
+            <ExportBookingsButton
+              eventId={event.id}
+              eventTitle={event.title}
+              hasBookings={bookings.length > 0}
+            />
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <input

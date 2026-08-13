@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { adminAuth, adminDb } from '@/lib/firebase-admin'
 import { requireSuperAdmin } from '@/lib/auth'
+import {
+  listAdminUsersCached,
+  revalidateAdminUsersCache,
+} from '@/lib/admin-users-cache'
 
 /**
  * User Management API Routes
@@ -24,24 +28,7 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    // List all users
-    const listUsersResult = await adminAuth.listUsers(1000) // Max 1000 users per page
-    
-    const users = listUsersResult.users.map((user) => {
-      // Get role from custom claims
-      const role = (user.customClaims?.role as 'superAdmin' | 'admin' | undefined) || 'admin'
-      
-      return {
-        uid: user.uid,
-        email: user.email || '',
-        displayName: user.displayName || '',
-        emailVerified: user.emailVerified,
-        role,
-        createdAt: user.metadata.creationTime,
-        lastSignIn: user.metadata.lastSignInTime,
-        disabled: user.disabled,
-      }
-    })
+    const users = await listAdminUsersCached()
 
     return NextResponse.json({
       success: true,
@@ -141,6 +128,8 @@ export async function POST(request: NextRequest) {
         // Silently fail
       }
     }
+
+    revalidateAdminUsersCache()
 
     return NextResponse.json({
       success: true,

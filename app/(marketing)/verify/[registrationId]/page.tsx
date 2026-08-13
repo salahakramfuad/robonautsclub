@@ -1,9 +1,7 @@
 import { CheckCircle, XCircle, Calendar, MapPin, Clock, User, Mail, Phone, School } from 'lucide-react'
 import { formatEventDateLabel } from '@/lib/dateUtils'
 import { generateQRCodeDataURL } from '@/lib/qrCode'
-import { adminDb } from '@/lib/firebase-admin'
-import type { Booking } from '@/types/booking'
-import type { Event } from '@/types/event'
+import { getBookingByRegistrationId } from '@/lib/verify-registration'
 import { format } from 'date-fns'
 import Image from 'next/image'
 import { Metadata } from 'next'
@@ -17,58 +15,6 @@ export const dynamic = 'force-dynamic'
 
 interface VerificationPageProps {
   params: Promise<{ registrationId: string }>
-}
-
-async function getBookingByRegistrationId(registrationId: string): Promise<{
-  booking: Booking | null
-  event: Event | null
-}> {
-  try {
-    if (!adminDb) {
-      console.error('Firebase Admin SDK not available')
-      return { booking: null, event: null }
-    }
-
-    // Query bookings collection by registrationId
-    const bookingsSnapshot = await adminDb
-      .collection('bookings')
-      .where('registrationId', '==', registrationId)
-      .limit(1)
-      .get()
-
-    if (bookingsSnapshot.empty) {
-      return { booking: null, event: null }
-    }
-
-    const bookingDoc = bookingsSnapshot.docs[0]
-    const bookingData = bookingDoc.data()
-
-    const booking: Booking = {
-      id: bookingDoc.id,
-      ...bookingData,
-      createdAt: bookingData.createdAt?.toDate?.() || bookingData.createdAt,
-    } as Booking
-
-    // Fetch event details
-    const eventDoc = await adminDb.collection('events').doc(booking.eventId).get()
-
-    if (!eventDoc.exists) {
-      return { booking, event: null }
-    }
-
-    const eventData = eventDoc.data()!
-    const event: Event = {
-      id: eventDoc.id,
-      ...eventData,
-      createdAt: eventData.createdAt?.toDate?.() || eventData.createdAt,
-      updatedAt: eventData.updatedAt?.toDate?.() || eventData.updatedAt,
-    } as Event
-
-    return { booking, event }
-  } catch (error) {
-    console.error('Error fetching booking:', error)
-    return { booking: null, event: null }
-  }
 }
 
 export async function generateMetadata({

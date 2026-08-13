@@ -38,9 +38,26 @@ function newsSortTime(a: NewsArticle): number {
   return Number.isNaN(t) ? 0 : t
 }
 
+const NEWS_LIST_FIELDS = [
+  'title',
+  'slug',
+  'coverImageUrl',
+  'images',
+  'published',
+  'displayDate',
+  'publishedAt',
+  'createdAt',
+  'updatedAt',
+  'createdBy',
+] as const
+
 async function fetchPublishedNewsFromDb(): Promise<NewsArticle[]> {
   const db = adminDb!
-  const snap = await db.collection('news').where('published', '==', true).get()
+  const snap = await db
+    .collection('news')
+    .where('published', '==', true)
+    .select(...NEWS_LIST_FIELDS)
+    .get()
   const items: NewsArticle[] = []
   snap.forEach((doc) => {
     items.push(mapNewsDoc(doc.id, doc.data() as Record<string, unknown>))

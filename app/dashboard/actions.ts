@@ -1,6 +1,7 @@
 'use server'
 
 import { revalidatePath, revalidateTag, unstable_cache } from 'next/cache'
+import type { Query, QueryDocumentSnapshot } from 'firebase-admin/firestore'
 import { requireAuth, isSuperAdmin } from '@/lib/auth'
 import { adminDb } from '@/lib/firebase-admin'
 import { adminAuth } from '@/lib/firebase-admin'
@@ -286,6 +287,7 @@ export async function getEvent(id: string): Promise<Event | null> {
       [DASHBOARD_EVENT_DETAIL_TAG_PREFIX, id],
       {
         tags: [getEventDetailTag(id)],
+        revalidate: 600,
       }
     )()
   } catch (error) {
@@ -679,39 +681,34 @@ export async function deleteEvent(eventId: string): Promise<{ success: boolean; 
   }
 }
 
+const EVENT_BOOKINGS_DETAIL_LIMIT = 50
+
 /**
  * Get bookings for a specific event
  */
-async function fetchBookingsForEventFromDb(eventId: string): Promise<Booking[]> {
-  const db = adminDb!
-  const bookingsSnapshot = await db
-    .collection('bookings')
-    .where('eventId', '==', eventId)
-    .get()
+function mapBookingDoc(doc: QueryDocumentSnapshot): Booking {
+  const data = doc.data()
+  const createdAt = data.createdAt?.toDate
+    ? data.createdAt.toDate().toISOString()
+    : data.createdAt instanceof Date
+      ? data.createdAt.toISOString()
+      : data.createdAt
+  const paidAt = data.paidAt?.toDate
+    ? data.paidAt.toDate().toISOString()
+    : data.paidAt instanceof Date
+      ? data.paidAt.toISOString()
+      : data.paidAt
 
-  const bookings: Booking[] = []
-  bookingsSnapshot.forEach((doc) => {
-    const data = doc.data()
-    const createdAt = data.createdAt?.toDate
-      ? data.createdAt.toDate().toISOString()
-      : data.createdAt instanceof Date
-        ? data.createdAt.toISOString()
-        : data.createdAt
-    const paidAt = data.paidAt?.toDate
-      ? data.paidAt.toDate().toISOString()
-      : data.paidAt instanceof Date
-        ? data.paidAt.toISOString()
-        : data.paidAt
+  return {
+    id: doc.id,
+    ...data,
+    createdAt,
+    paidAt,
+  } as Booking
+}
 
-    bookings.push({
-      id: doc.id,
-      ...data,
-      createdAt,
-      paidAt,
-    } as Booking)
-  })
-
-  bookings.sort((a, b) => {
+function sortBookingsNewestFirst(bookings: Booking[]): Booking[] {
+  return bookings.sort((a, b) => {
     if (!a.createdAt && !b.createdAt) return 0
     if (!a.createdAt) return 1
     if (!b.createdAt) return -1
@@ -720,10 +717,28 @@ async function fetchBookingsForEventFromDb(eventId: string): Promise<Booking[]> 
     const dateB = new Date(b.createdAt).getTime()
     return dateB - dateA
   })
-
-  return bookings
 }
 
+async function fetchBookingsForEventFromDb(
+  eventId: string,
+  limit?: number,
+): Promise<Booking[]> {
+  const db = adminDb!
+  let query: Query = db.collection('bookings').where('eventId', '==', eventId)
+  if (typeof limit === 'number' && limit > 0) {
+    query = query.limit(limit)
+  }
+  const bookingsSnapshot = await query.get()
+
+  const bookings: Booking[] = []
+  bookingsSnapshot.forEach((doc) => {
+    bookings.push(mapBookingDoc(doc))
+  })
+
+  return sortBookingsNewestFirst(bookings)
+}
+
+/** Detail table: capped list so event pages stay cheap. */
 export async function getBookings(eventId: string): Promise<Booking[]> {
   await requireAuth()
 
@@ -734,15 +749,34 @@ export async function getBookings(eventId: string): Promise<Booking[]> {
 
   try {
     return await unstable_cache(
-      async (): Promise<Booking[]> => fetchBookingsForEventFromDb(eventId),
-      [DASHBOARD_EVENT_BOOKINGS_TAG_PREFIX, eventId],
+      async (): Promise<Booking[]> =>
+        fetchBookingsForEventFromDb(eventId, EVENT_BOOKINGS_DETAIL_LIMIT),
+      [DASHBOARD_EVENT_BOOKINGS_TAG_PREFIX, eventId, 'limit', String(EVENT_BOOKINGS_DETAIL_LIMIT)],
       {
         tags: [getEventBookingsTag(eventId)],
+        revalidate: 300,
       }
     )()
   } catch (error) {
     console.error('Error fetching bookings:', error)
     throw new Error('Failed to fetch bookings')
+  }
+}
+
+/** Full export path — uncached full fetch (detail view stays capped). */
+export async function getBookingsForExport(eventId: string): Promise<Booking[]> {
+  await requireAuth()
+
+  if (!adminDb) {
+    console.warn('Firebase Admin SDK not available. Cannot fetch bookings.')
+    return []
+  }
+
+  try {
+    return await fetchBookingsForEventFromDb(eventId)
+  } catch (error) {
+    console.error('Error fetching bookings for export:', error)
+    throw new Error('Failed to fetch bookings for export')
   }
 }
 
@@ -1212,20 +1246,8 @@ function toIso(value: unknown): string {
 async function getDashboardMembers(session: Session): Promise<DashboardMember[]> {
   if (session.role !== 'superAdmin' || !adminAuth) return []
 
-  const listUsersResult = await adminAuth.listUsers(1000)
-  return listUsersResult.users.map((user) => {
-    const role = (user.customClaims?.role as 'superAdmin' | 'admin' | undefined) || 'admin'
-    return {
-      uid: user.uid,
-      email: user.email || '',
-      displayName: user.displayName || '',
-      emailVerified: user.emailVerified,
-      role,
-      createdAt: user.metadata.creationTime,
-      lastSignIn: user.metadata.lastSignInTime,
-      disabled: user.disabled,
-    }
-  })
+  const { listAdminUsersCached } = await import('@/lib/admin-users-cache')
+  return listAdminUsersCached()
 }
 
 async function getDashboardNotifications(session: Session): Promise<DashboardNotification[]> {

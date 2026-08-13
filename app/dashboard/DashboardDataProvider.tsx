@@ -44,7 +44,13 @@ export default function DashboardDataProvider({ initialData, userId: _userId, ch
   }
 
   const markAllNotificationsAsRead = async () => {
-    await fetch('/api/notifications/mark-all-read', { method: 'POST', credentials: 'include' })
+    const ids = notifications.filter((item) => !item.isRead).map((item) => item.id)
+    await fetch('/api/notifications/mark-all-read', {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ids }),
+    })
     setNotifications((prev) => prev.map((item) => ({ ...item, isRead: true })))
   }
 

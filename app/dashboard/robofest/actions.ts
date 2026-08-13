@@ -11,6 +11,7 @@ import {
   ROBOFEST_REGISTRATIONS_COLLECTION,
   getDefaultRobofestContent,
   getRobofestCategoryByName,
+  getRobofestContent,
   getRobofestContentFresh,
   mapRobofestContentDoc,
   sanitizeRobofestAwardCategories,
@@ -36,8 +37,22 @@ import {
   type RobofestCampusAmbassador,
   type RobofestCampusAmbassadorWriteInput,
 } from '@/lib/robofest-campus-ambassadors'
-import { listRobofestCampusAmbassadorsFromDb } from '@/lib/robofest-campus-ambassadors-db'
-import { loadRobofestRegistrationsCached } from './registrations-data'
+import {
+  listRobofestCampusAmbassadorsCached,
+  DASHBOARD_ROBOFEST_AMBASSADORS_TAG,
+} from '@/lib/robofest-campus-ambassadors-db'
+import {
+  loadRobofestRegistrationsForExport,
+  loadRobofestRegistrationsPage,
+  loadRobofestRegistrationStatusCounts,
+  ROBOFEST_REGISTRATIONS_PAGE_SIZE,
+} from './registrations-data'
+import type {
+  RobofestRegistrationCursor,
+  RobofestRegistrationListFilters,
+  RobofestRegistrationPage,
+  RobofestRegistrationStatusCounts,
+} from './registrations-types'
 
 function revalidateRobofestPublic() {
   revalidateTag(ROBOFEST_CONTENT_CACHE_TAG, 'max')
@@ -48,6 +63,7 @@ function revalidateRobofestPublic() {
 
 function revalidateRobofestAmbassadors() {
   revalidateTag(PUBLIC_ROBOFEST_AMBASSADORS_TAG, 'max')
+  revalidateTag(DASHBOARD_ROBOFEST_AMBASSADORS_TAG, 'max')
   revalidatePath('/dashboard/robofest')
   revalidatePath('/robofest')
   revalidatePath('/robofest', 'layout')
@@ -55,7 +71,7 @@ function revalidateRobofestAmbassadors() {
 
 export async function getRobofestDashboardContent(): Promise<RobofestContent> {
   await requireAuth()
-  return getRobofestContentFresh()
+  return getRobofestContent()
 }
 
 export async function updateRobofestContent(
@@ -180,9 +196,62 @@ export async function updateRobofestContent(
   }
 }
 
+export async function getRobofestRegistrationsPage(input: {
+  filters: RobofestRegistrationListFilters
+  cursor?: RobofestRegistrationCursor | null
+  pageSize?: number
+}): Promise<RobofestRegistrationPage> {
+  await requireAuth()
+  try {
+    return await loadRobofestRegistrationsPage(input)
+  } catch (error) {
+    console.error('[robofest-dashboard] list registrations page failed:', error)
+    return { items: [], nextCursor: null, hasMore: false }
+  }
+}
+
+export async function getRobofestRegistrationStatusCounts(): Promise<RobofestRegistrationStatusCounts> {
+  await requireAuth()
+  try {
+    return await loadRobofestRegistrationStatusCounts()
+  } catch (error) {
+    console.error('[robofest-dashboard] status counts failed:', error)
+    return { pending: 0, confirmed: 0, cancelled: 0 }
+  }
+}
+
+export async function getRobofestRegistrationsForExport(
+  filters: RobofestRegistrationListFilters,
+): Promise<{ success: boolean; items?: RobofestRegistration[]; error?: string }> {
+  await requireAuth()
+  try {
+    const items = await loadRobofestRegistrationsForExport(filters)
+    return { success: true, items }
+  } catch (error) {
+    console.error('[robofest-dashboard] export list failed:', error)
+    return {
+      success: false,
+      error: 'Failed to load registrations for export. Please try again.',
+    }
+  }
+}
+
+/** @deprecated Prefer getRobofestRegistrationsPage */
 export async function getRobofestRegistrations(): Promise<RobofestRegistration[]> {
   await requireAuth()
-  return loadRobofestRegistrationsCached()
+  const page = await loadRobofestRegistrationsPage({
+    filters: { status: 'pending' },
+    pageSize: ROBOFEST_REGISTRATIONS_PAGE_SIZE,
+  })
+  return page.items
+}
+
+export async function getRobofestSchoolOptions(): Promise<string[]> {
+  await requireAuth()
+  const { getPublicEnglishMediumSchools } = await import(
+    '@/app/(marketing)/events/actions'
+  )
+  return getPublicEnglishMediumSchools()
 }
 
 export async function updateRobofestRegistrationStatus(
@@ -458,7 +527,7 @@ export async function getRobofestCampusAmbassadors(): Promise<
       await batch.commit()
     }
   }
-  return listRobofestCampusAmbassadorsFromDb(true)
+  return listRobofestCampusAmbassadorsCached(true)
 }
 
 export async function createRobofestCampusAmbassador(
@@ -478,10 +547,8 @@ export async function createRobofestCampusAmbassador(
     return { success: false, error: 'Enter a valid email.' }
   }
 
-  const existing = await adminDb
-    .collection(ROBOFEST_CAMPUS_AMBASSADORS_COLLECTION)
-    .get()
-  const id = nextRobofestCampusAmbassadorId(existing.docs.map((d) => d.id))
+  const existing = await listRobofestCampusAmbassadorsCached(true)
+  const id = nextRobofestCampusAmbassadorId(existing.map((a) => a.id))
   const now = new Date()
 
   await adminDb.collection(ROBOFEST_CAMPUS_AMBASSADORS_COLLECTION).doc(id).set({

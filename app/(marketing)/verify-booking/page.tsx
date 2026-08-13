@@ -1,10 +1,10 @@
 import { CheckCircle, XCircle, Calendar, MapPin, Clock, User, Mail, Phone, School, ShieldCheck, QrCode } from 'lucide-react'
 import { formatEventDateLabel } from '@/lib/dateUtils'
 import { generateQRCodeDataURL } from '@/lib/qrCode'
-import { adminDb } from '@/lib/firebase-admin'
 import type { Booking } from '@/types/booking'
 import type { Event } from '@/types/event'
 import type { RobofestContent, RobofestRegistration } from '@/lib/robofest-content'
+import { getBookingByRegistrationId } from '@/lib/verify-registration'
 import { format } from 'date-fns'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -73,49 +73,16 @@ type VerificationLookup =
     }
   | { kind: 'none' }
 
-async function getBookingByRegistrationId(
+async function lookupRegistration(
   registrationId: string,
 ): Promise<VerificationLookup> {
   try {
-    if (!adminDb) {
-      return { kind: 'none' }
-    }
-
     if (!registrationId || registrationId.trim() === '') {
       return { kind: 'none' }
     }
 
-    // Query bookings collection by registrationId
-    const bookingsSnapshot = await adminDb
-      .collection('bookings')
-      .where('registrationId', '==', registrationId.trim())
-      .limit(1)
-      .get()
-
-    if (!bookingsSnapshot.empty) {
-      const bookingDoc = bookingsSnapshot.docs[0]
-      const bookingData = bookingDoc.data()!
-
-      const booking: Booking = {
-        id: bookingDoc.id,
-        ...bookingData,
-        createdAt: bookingData.createdAt?.toDate?.() || bookingData.createdAt,
-      } as Booking
-
-      const eventDoc = await adminDb.collection('events').doc(booking.eventId).get()
-
-      if (!eventDoc.exists) {
-        return { kind: 'none' }
-      }
-
-      const eventData = eventDoc.data()!
-      const event: Event = {
-        id: eventDoc.id,
-        ...eventData,
-        createdAt: eventData.createdAt?.toDate?.() || eventData.createdAt,
-        updatedAt: eventData.updatedAt?.toDate?.() || eventData.updatedAt,
-      } as Event
-
+    const { booking, event } = await getBookingByRegistrationId(registrationId)
+    if (booking && event) {
       return { kind: 'event', booking, event }
     }
 
@@ -123,13 +90,13 @@ async function getBookingByRegistrationId(
     const { getRobofestRegistrationByRegistrationId } = await import(
       '@/lib/robofest-registration'
     )
-    const { getRobofestContentFresh } = await import('@/lib/robofest-content')
+    const { getRobofestContent } = await import('@/lib/robofest-content')
     const robofestReg = await getRobofestRegistrationByRegistrationId(registrationId)
     if (!robofestReg || robofestReg.status === 'cancelled') {
       return { kind: 'none' }
     }
 
-    const content = await getRobofestContentFresh()
+    const content = await getRobofestContent()
     return { kind: 'robofest', registration: robofestReg, content }
   } catch {
     return { kind: 'none' }
@@ -194,7 +161,7 @@ export default async function VerifyBookingPage({ searchParams }: VerificationPa
     )
   }
 
-  const result = await getBookingByRegistrationId(registrationId)
+  const result = await lookupRegistration(registrationId)
   const isValid = result.kind !== 'none'
   
   // Generate base URL for QR code display

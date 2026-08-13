@@ -23,29 +23,8 @@ type User = {
 
 async function getUsers(): Promise<User[]> {
   try {
-    const { adminAuth } = await import('@/lib/firebase-admin')
-    
-    if (!adminAuth) {
-      return []
-    }
-
-    // List all users using Admin SDK directly
-    const listUsersResult = await adminAuth.listUsers(1000)
-    
-    return listUsersResult.users.map((user) => {
-      const role = (user.customClaims?.role as 'superAdmin' | 'admin' | undefined) || 'admin'
-      
-      return {
-        uid: user.uid,
-        email: user.email || '',
-        displayName: user.displayName || '',
-        emailVerified: user.emailVerified,
-        role,
-        createdAt: user.metadata.creationTime,
-        lastSignIn: user.metadata.lastSignInTime,
-        disabled: user.disabled,
-      }
-    })
+    const { listAdminUsersCached } = await import('@/lib/admin-users-cache')
+    return listAdminUsersCached()
   } catch (error) {
     console.error('Error fetching users:', error)
     return []

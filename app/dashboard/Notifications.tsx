@@ -46,30 +46,11 @@ export default function Notifications() {
   }, [])
 
   // Fetch only when the panel opens — no mount/interval polling (fewer edge/API hits).
+  // Do not auto mark-all-read on open (that scanned many notification docs).
   useEffect(() => {
     if (!isOpen) return
     void loadNotifications()
   }, [isOpen, loadNotifications])
-
-  useEffect(() => {
-    if (isOpen && unreadCount > 0) {
-      const markAllAsRead = async () => {
-        try {
-          await fetch('/api/notifications/mark-all-read', {
-            method: 'POST',
-            credentials: 'include',
-          })
-
-          setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })))
-          setUnreadCount(0)
-        } catch {
-          /* ignore */
-        }
-      }
-
-      markAllAsRead()
-    }
-  }, [isOpen, unreadCount])
 
   const markAsRead = async (notificationId: string) => {
     try {
@@ -82,6 +63,23 @@ export default function Notifications() {
         prev.map((n) => (n.id === notificationId ? { ...n, isRead: true } : n)),
       )
       setUnreadCount((prev) => Math.max(0, prev - 1))
+    } catch {
+      /* ignore */
+    }
+  }
+
+  const markLoadedAsRead = async () => {
+    const unreadIds = notifications.filter((n) => !n.isRead).map((n) => n.id)
+    if (unreadIds.length === 0) return
+    try {
+      await fetch('/api/notifications/mark-all-read', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ids: unreadIds }),
+      })
+      setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })))
+      setUnreadCount(0)
     } catch {
       /* ignore */
     }
@@ -142,9 +140,9 @@ export default function Notifications() {
         sideOffset={8}
         className="w-80 sm:w-96 p-0 rounded-xl shadow-2xl border-gray-200 max-h-[600px] flex flex-col overflow-hidden"
       >
-        <div className="px-4 py-3 border-b border-gray-200 bg-linear-to-r from-cyan-50 to-blue-50 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Bell className="size-5 text-cyan-700" />
+        <div className="px-4 py-3 border-b border-gray-200 bg-linear-to-r from-cyan-50 to-blue-50 flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2 min-w-0">
+            <Bell className="size-5 text-cyan-700 shrink-0" />
             <h3 className="font-semibold text-gray-900">Notifications</h3>
             {unreadCount > 0 && (
               <Badge variant="destructive" className="rounded-full px-2 py-0.5 text-xs">
@@ -152,6 +150,17 @@ export default function Notifications() {
               </Badge>
             )}
           </div>
+          {notifications.some((n) => !n.isRead) && (
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => void markLoadedAsRead()}
+              className="shrink-0 text-cyan-700 hover:text-cyan-800 hover:bg-cyan-50"
+            >
+              Mark all read
+            </Button>
+          )}
         </div>
 
         <ScrollArea className="flex-1 max-h-[440px]">

@@ -1,6 +1,12 @@
 'use client'
 
-import { useMemo, useState, type ChangeEvent, type FormEvent } from 'react'
+import {
+  useEffect,
+  useMemo,
+  useState,
+  type ChangeEvent,
+  type FormEvent,
+} from 'react'
 import { useRouter } from 'next/navigation'
 import { Plus, X } from 'lucide-react'
 import type { RobofestContent } from '@/lib/robofest-content'
@@ -22,7 +28,10 @@ import {
   PRIVATE_CANDIDATE_OPTION,
   SCHOOL_NOT_FOUND_OPTION,
 } from '@/lib/schoolDirectory'
-import { createRobofestRegistrationManual } from './actions'
+import {
+  createRobofestRegistrationManual,
+  getRobofestSchoolOptions,
+} from './actions'
 import {
   Sheet,
   SheetContent,
@@ -86,16 +95,41 @@ export default function CreateRobofestRegistrationForm({
   content,
   schools,
   campusAmbassadors,
+  canViewPayments = true,
+  canSendMail = true,
+  onCreated,
 }: {
   content: RobofestContent
   schools: string[]
   campusAmbassadors: RobofestCampusAmbassador[]
+  canViewPayments?: boolean
+  canSendMail?: boolean
+  onCreated?: () => void
 }) {
   const router = useRouter()
   const [isOpen, setIsOpen] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState('')
   const [message, setMessage] = useState('')
+  const [schoolOptions, setSchoolOptions] = useState(schools)
+  const [schoolsLoading, setSchoolsLoading] = useState(false)
+
+  useEffect(() => {
+    if (!isOpen) return
+    if (schoolOptions.length > 0) return
+    let cancelled = false
+    setSchoolsLoading(true)
+    void getRobofestSchoolOptions()
+      .then((list) => {
+        if (!cancelled) setSchoolOptions(list)
+      })
+      .finally(() => {
+        if (!cancelled) setSchoolsLoading(false)
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [isOpen, schoolOptions.length])
 
   const categories = useMemo(
     () => content.categories.filter((c) => c.active !== false),
@@ -126,10 +160,10 @@ export default function CreateRobofestRegistrationForm({
       teamMembers: [emptyMember()],
       campusAmbassadorId: '',
       notes: '',
-      paymentMode: 'paid_offline',
-      amountPaid: String(total),
+      paymentMode: canViewPayments ? 'paid_offline' : 'waived',
+      amountPaid: canViewPayments ? String(total) : '0',
       trxId: '',
-      sendEmail: true,
+      sendEmail: canSendMail,
     }
   }
 
@@ -248,7 +282,7 @@ export default function CreateRobofestRegistrationForm({
             ? amountPaid
             : undefined,
         trxId: form.trxId || undefined,
-        sendEmail: form.sendEmail,
+        sendEmail: canSendMail && form.sendEmail,
       })
 
       if (!result.success) {
@@ -262,6 +296,7 @@ export default function CreateRobofestRegistrationForm({
             result.registrationId ? ` (${result.registrationId})` : ''
           }${result.teamNumber ? ` · Team ${result.teamNumber}` : ''}.`,
       )
+      onCreated?.()
       router.refresh()
       setTimeout(() => handleOpenChange(false), 800)
     } catch {
@@ -436,7 +471,12 @@ export default function CreateRobofestRegistrationForm({
                 required
               >
                 <option value="">Institution</option>
-                {schools.map((school) => (
+                {schoolsLoading ? (
+                  <option value="" disabled>
+                    Loading schools…
+                  </option>
+                ) : null}
+                {schoolOptions.map((school) => (
                   <option key={school} value={school}>
                     {school}
                   </option>
@@ -498,82 +538,96 @@ export default function CreateRobofestRegistrationForm({
             />
           </div>
 
-          <div className="rounded-lg border border-gray-100 p-3 space-y-3">
-            <p className="text-sm font-medium text-gray-800">Payment</p>
-            <div className="flex flex-wrap gap-4 text-sm">
-              <label className="flex items-center gap-2">
-                <input
-                  type="radio"
-                  name="paymentMode"
-                  checked={form.paymentMode === 'paid_offline'}
-                  onChange={() =>
-                    setForm((prev) => ({
-                      ...prev,
-                      paymentMode: 'paid_offline',
-                      amountPaid: String(suggestedTotal),
-                    }))
-                  }
-                />
-                Paid offline
-              </label>
-              <label className="flex items-center gap-2">
-                <input
-                  type="radio"
-                  name="paymentMode"
-                  checked={form.paymentMode === 'waived'}
-                  onChange={() =>
-                    setForm((prev) => ({ ...prev, paymentMode: 'waived' }))
-                  }
-                />
-                Waived (n/a)
-              </label>
-            </div>
-            {form.paymentMode === 'paid_offline' ? (
-              <div className="grid grid-cols-2 gap-2">
-                <div className="space-y-1">
-                  <label className="text-xs text-gray-500">
-                    Amount (BDT) · suggested {suggestedTotal}
-                  </label>
-                  <Input
-                    type="number"
-                    min={0}
-                    value={form.amountPaid}
-                    onChange={(e) =>
+          {canViewPayments ? (
+            <div className="rounded-lg border border-gray-100 p-3 space-y-3">
+              <p className="text-sm font-medium text-gray-800">Payment</p>
+              <div className="flex flex-wrap gap-4 text-sm">
+                <label className="flex items-center gap-2">
+                  <input
+                    type="radio"
+                    name="paymentMode"
+                    checked={form.paymentMode === 'paid_offline'}
+                    onChange={() =>
                       setForm((prev) => ({
                         ...prev,
-                        amountPaid: e.target.value,
+                        paymentMode: 'paid_offline',
+                        amountPaid: String(suggestedTotal),
                       }))
                     }
-                    required
                   />
-                </div>
-                <div className="space-y-1">
-                  <label className="text-xs text-gray-500">
-                    Trx / reference (optional)
-                  </label>
-                  <Input
-                    value={form.trxId}
-                    onChange={(e) =>
-                      setForm((prev) => ({ ...prev, trxId: e.target.value }))
+                  Paid offline
+                </label>
+                <label className="flex items-center gap-2">
+                  <input
+                    type="radio"
+                    name="paymentMode"
+                    checked={form.paymentMode === 'waived'}
+                    onChange={() =>
+                      setForm((prev) => ({ ...prev, paymentMode: 'waived' }))
                     }
                   />
-                </div>
+                  Waived (n/a)
+                </label>
               </div>
-            ) : null}
-          </div>
+              {form.paymentMode === 'paid_offline' ? (
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="space-y-1">
+                    <label className="text-xs text-gray-500">
+                      Amount (BDT) · suggested {suggestedTotal}
+                    </label>
+                    <Input
+                      type="number"
+                      min={0}
+                      value={form.amountPaid}
+                      onChange={(e) =>
+                        setForm((prev) => ({
+                          ...prev,
+                          amountPaid: e.target.value,
+                        }))
+                      }
+                      required
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-xs text-gray-500">
+                      Trx / reference (optional)
+                    </label>
+                    <Input
+                      value={form.trxId}
+                      onChange={(e) =>
+                        setForm((prev) => ({ ...prev, trxId: e.target.value }))
+                      }
+                    />
+                  </div>
+                </div>
+              ) : null}
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground rounded-lg border border-gray-100 p-3">
+              New registrations are created as fee waived. You do not have
+              permission to set or view paid amounts.
+            </p>
+          )}
 
-          <label className="flex items-start gap-3 rounded-lg border border-gray-100 px-3 py-3 cursor-pointer">
-            <Checkbox
-              checked={form.sendEmail}
-              onCheckedChange={(checked) =>
-                setForm((prev) => ({ ...prev, sendEmail: checked === true }))
-              }
-              className="mt-0.5"
-            />
-            <span className="text-sm text-gray-700">
-              Send confirmation email to team members with valid emails
-            </span>
-          </label>
+          {canSendMail ? (
+            <label className="flex items-start gap-3 rounded-lg border border-gray-100 px-3 py-3 cursor-pointer">
+              <Checkbox
+                checked={form.sendEmail}
+                onCheckedChange={(checked) =>
+                  setForm((prev) => ({ ...prev, sendEmail: checked === true }))
+                }
+                className="mt-0.5"
+              />
+              <span className="text-sm text-gray-700">
+                Send confirmation email to team members with valid emails
+              </span>
+            </label>
+          ) : (
+            <p className="text-sm text-muted-foreground rounded-lg border border-gray-100 p-3">
+              Confirmation email will not be sent. You do not have permission to
+              send emails from the dashboard.
+            </p>
+          )}
 
           <div className="flex gap-2 pt-2 pb-4">
             <Button type="submit" disabled={isSubmitting} className="flex-1">

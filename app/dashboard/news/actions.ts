@@ -15,9 +15,22 @@ import { PUBLIC_NEWS_TAG } from '@/lib/public-cache-tags'
 
 const DASHBOARD_NEWS_LIST_TAG = 'dashboard-news-list'
 
+const NEWS_LIST_FIELDS = [
+  'title',
+  'slug',
+  'coverImageUrl',
+  'images',
+  'published',
+  'displayDate',
+  'publishedAt',
+  'createdAt',
+  'updatedAt',
+  'createdBy',
+] as const
+
 async function fetchNewsArticlesFromDb(): Promise<NewsArticle[]> {
   const db = adminDb!
-  const snap = await db.collection('news').get()
+  const snap = await db.collection('news').select(...NEWS_LIST_FIELDS).get()
   const items: NewsArticle[] = []
   snap.forEach((doc) => {
     items.push(mapNewsDoc(doc.id, doc.data() as Record<string, unknown>))
@@ -32,6 +45,7 @@ async function fetchNewsArticlesFromDb(): Promise<NewsArticle[]> {
 
 const getCachedNewsArticles = unstable_cache(fetchNewsArticlesFromDb, [DASHBOARD_NEWS_LIST_TAG], {
   tags: [DASHBOARD_NEWS_LIST_TAG],
+  revalidate: 600,
 })
 
 function toIso(v: unknown): string | null {

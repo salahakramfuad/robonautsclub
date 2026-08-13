@@ -197,6 +197,7 @@ export const getPublicEnglishMediumSchools = cache(async (): Promise<string[]> =
       async (): Promise<string[]> => {
         const snapshot = await db
           .collection(SCHOOL_DIRECTORY_COLLECTION)
+          .select('name', 'isActive', 'status')
           .get()
         return snapshot.docs
           .map((doc) => {
@@ -263,6 +264,7 @@ async function hasExistingRegistration(
     .collection('bookings')
     .where('eventId', '==', eventId)
     .where('email', '==', normalizedEmail)
+    .limit(1)
     .get()
 
   return !existingBookings.empty
