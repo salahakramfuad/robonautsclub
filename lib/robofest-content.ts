@@ -721,6 +721,37 @@ function cityDateNeedle(city: string): string | null {
   return null;
 }
 
+function cityVenueNeedles(city: string): string[] {
+  const normalized = city.trim().toLowerCase();
+  if (!normalized) return [];
+  if (
+    normalized.startsWith("chit") ||
+    normalized.includes("ctg") ||
+    normalized.includes("chattogram")
+  ) {
+    return ["chittagong", "chattogram", "ctg"];
+  }
+  if (normalized.startsWith("dha") || normalized.includes("dhk")) {
+    return ["dhaka", "dhk"];
+  }
+  return [normalized];
+}
+
+function lineMatchesCity(line: string, city: string): boolean {
+  const lower = line.toLowerCase();
+  return cityVenueNeedles(city).some((needle) => lower.includes(needle));
+}
+
+function namesMultipleRoundCities(label: string): boolean {
+  const lower = label.toLowerCase();
+  const hasDhaka = lower.includes("dhaka") || /\bdhk\b/.test(lower);
+  const hasCtg =
+    lower.includes("chittagong") ||
+    lower.includes("chattogram") ||
+    /\bctg\b/.test(lower);
+  return hasDhaka && hasCtg;
+}
+
 /** Division date for PDF/email/verify — prefers CTG/DHK labels from content. */
 export function resolveRobofestRoundDateLabel(
   content: RobofestContent,
@@ -742,25 +773,23 @@ export function resolveRobofestRoundDateLabel(
   return content.dateLabel || "TBA";
 }
 
-/** Division venue for PDF/email/verify. */
+/** Division venue for PDF/email/verify. Prefers public venue lines over round labels. */
 export function resolveRobofestRoundVenueLabel(
   content: RobofestContent,
   city: string,
 ): string {
-  const round = getRobofestRoundForCity(content, city);
-  const fromRound = round?.venueLabel?.trim() || "";
-  if (fromRound && !fromRound.includes("·")) return fromRound;
-
-  const cityLower = city.trim().toLowerCase();
-  if (cityLower && content.venueLines?.length) {
+  if (city.trim() && content.venueLines?.length) {
     const fromLines = content.venueLines.find((line) =>
-      line.toLowerCase().includes(cityLower),
+      lineMatchesCity(line, city),
     );
     if (fromLines?.trim()) return fromLines.trim();
   }
 
-  if (fromRound) return fromRound;
-  return content.venueLabel || "TBA";
+  const round = getRobofestRoundForCity(content, city);
+  const fromRound = round?.venueLabel?.trim() || "";
+  if (fromRound && !namesMultipleRoundCities(fromRound)) return fromRound;
+
+  return "TBA";
 }
 
 export function getRobofestCategoryHref(slug: string): string {
