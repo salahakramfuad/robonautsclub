@@ -644,10 +644,8 @@ async function generatePDFContent(
   y = drawRow('Event Name', sanitizeTextForPDF(sanitizedEvent.title || 'Event'), y)
   y = drawRow('Date', sanitizeTextForPDF(formattedDate || 'TBA'), y)
   if (sanitizedEvent.time) y = drawRow('Time', sanitizedEvent.time, y)
-  if (!isTeamRegistration) {
-    const venue = sanitizedEvent.venue || sanitizedEvent.location
-    if (venue) y = drawRow('Venue', venue, y)
-  }
+  const venue = sanitizedEvent.venue || sanitizedEvent.location
+  if (venue) y = drawRow('Venue', venue, y)
   if (sanitizedEvent.eligibility) y = drawRow('Eligibility', sanitizedEvent.eligibility, y)
 
   y += theme.metric.sectionGap - theme.metric.rowGap
