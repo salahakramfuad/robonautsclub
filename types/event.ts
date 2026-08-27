@@ -62,6 +62,8 @@ export type Event = {
   defaultRegistrationFields?: EventDefaultRegistrationFields
   /** Assigned certificate template from Certificates dashboard. */
   certificateTemplateId?: string | null
+  /** Optional card link override (e.g. hardcoded Robofest → /robofest). Defaults to /events/[id]. */
+  href?: string
   // Firestore metadata
   createdAt: Date | string
   updatedAt: Date | string
