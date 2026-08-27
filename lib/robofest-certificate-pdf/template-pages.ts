@@ -3,7 +3,7 @@ import type {
   RobofestContent,
   RobofestRegistration,
 } from '@/lib/robofest-content'
-import { resolveRobofestRoundVenueLabel } from '@/lib/robofest-content'
+import { resolveRobofestRoundVenueLabel } from '@/lib/robofest-venue'
 import { resolveRobofestAwardCategory } from '@/lib/robofest-award-categories'
 import type { CertificateRenderValues } from '@/lib/certificate-template-pdf'
 import { resolveCertificateAwardFields } from '@/lib/certificate-templates'

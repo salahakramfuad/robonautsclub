@@ -49,6 +49,16 @@ export {
   resolveRobofestFee,
 } from "@/lib/robofest-fee";
 
+export {
+  getRobofestRoundForCity,
+  resolveRobofestRoundDateLabel,
+  formatRobofestVenueDisplay,
+  findVenueLineForCity,
+  syncRobofestVenueFields,
+  validateRobofestVenueConsistency,
+  resolveRobofestRoundVenueLabel,
+} from "@/lib/robofest-venue";
+
 export const ROBOFEST_CONTENT_COLLECTION = "robofestContent";
 export const ROBOFEST_CONTENT_DOC_ID = "settings";
 export const ROBOFEST_CONTENT_CACHE_TAG = "robofest-content-v2";
@@ -700,149 +710,6 @@ export function getRobofestCategoryByName(
   return getActiveRobofestCategories(content).find(
     (category) => category.name.trim().toLowerCase() === normalized,
   );
-}
-
-/** Look up a local-round entry by division/city name (case-insensitive). */
-export function getRobofestRoundForCity(
-  content: RobofestContent,
-  city: string,
-): RobofestRoundContent | undefined {
-  const normalized = city.trim().toLowerCase();
-  if (!normalized) return undefined;
-  return (content.rounds || []).find(
-    (round) => round.city.trim().toLowerCase() === normalized,
-  );
-}
-
-function cityDateNeedle(city: string): string | null {
-  const normalized = city.trim().toLowerCase();
-  if (normalized.startsWith("chit") || normalized.includes("ctg")) return "CTG";
-  if (normalized.startsWith("dha") || normalized.includes("dhk")) return "DHK";
-  return null;
-}
-
-function cityVenueNeedles(city: string): string[] {
-  const normalized = city.trim().toLowerCase();
-  if (!normalized) return [];
-  if (
-    normalized.startsWith("chit") ||
-    normalized.includes("ctg") ||
-    normalized.includes("chattogram")
-  ) {
-    return ["chittagong", "chattogram", "ctg"];
-  }
-  if (normalized.startsWith("dha") || normalized.includes("dhk")) {
-    return ["dhaka", "dhk"];
-  }
-  return [normalized];
-}
-
-function lineMatchesCity(line: string, city: string): boolean {
-  const lower = line.toLowerCase();
-  return cityVenueNeedles(city).some((needle) => lower.includes(needle));
-}
-
-function namesMultipleRoundCities(label: string): boolean {
-  const lower = label.toLowerCase();
-  const hasDhaka = lower.includes("dhaka") || /\bdhk\b/.test(lower);
-  const hasCtg =
-    lower.includes("chittagong") ||
-    lower.includes("chattogram") ||
-    /\bctg\b/.test(lower);
-  return hasDhaka && hasCtg;
-}
-
-/** Division date for PDF/email/verify — prefers CTG/DHK labels from content. */
-export function resolveRobofestRoundDateLabel(
-  content: RobofestContent,
-  city: string,
-): string {
-  const round = getRobofestRoundForCity(content, city);
-  const fromRound = round?.dates?.trim() || "";
-  if (/\((CTG|DHK)\)/i.test(fromRound)) return fromRound;
-
-  const needle = cityDateNeedle(city);
-  if (needle && content.dateLines?.length) {
-    const fromLines = content.dateLines.find((line) =>
-      line.toUpperCase().includes(needle),
-    );
-    if (fromLines?.trim()) return fromLines.trim();
-  }
-
-  if (fromRound) return fromRound;
-  return content.dateLabel || "TBA";
-}
-
-/** Division venue for PDF/email/verify. Prefers public venue lines over round labels. */
-export function formatRobofestVenueDisplay(line: string): string {
-  const trimmed = line.trim();
-  if (!trimmed) return "";
-  const separator = trimmed.indexOf(" - ");
-  if (separator > 0) return trimmed.slice(separator + 3).trim();
-  return trimmed;
-}
-
-export function findVenueLineForCity(
-  content: RobofestContent,
-  city: string,
-): string | undefined {
-  if (!city.trim() || !content.venueLines?.length) return undefined;
-  return content.venueLines.find((line) => lineMatchesCity(line, city))?.trim();
-}
-
-/** Keep round venue labels aligned with venue lines (school name only). */
-export function syncRobofestVenueFields(
-  content: RobofestContent,
-): RobofestContent {
-  const rounds = (content.rounds || []).map((round) => {
-    const line = findVenueLineForCity(content, round.city);
-    if (!line) return round;
-    return {
-      ...round,
-      venueLabel: formatRobofestVenueDisplay(line),
-    };
-  });
-  const schoolNames = (content.venueLines || [])
-    .map((line) => formatRobofestVenueDisplay(line))
-    .filter(Boolean);
-  const combinedVenue =
-    schoolNames.length > 0 ? schoolNames.join(" · ") : content.venueLabel;
-  return {
-    ...content,
-    rounds,
-    venueLabel: combinedVenue,
-    venueDetail: combinedVenue,
-  };
-}
-
-export function validateRobofestVenueConsistency(
-  content: RobofestContent,
-): { ok: true } | { ok: false; error: string } {
-  for (const round of content.rounds || []) {
-    const city = round.city.trim();
-    if (!city) continue;
-    if (!findVenueLineForCity(content, city)) {
-      return {
-        ok: false,
-        error: `Venue lines must include an entry for the ${city} division (e.g. "${city} - Venue name").`,
-      };
-    }
-  }
-  return { ok: true };
-}
-
-export function resolveRobofestRoundVenueLabel(
-  content: RobofestContent,
-  city: string,
-): string {
-  const line = findVenueLineForCity(content, city);
-  if (line) return formatRobofestVenueDisplay(line);
-
-  const round = getRobofestRoundForCity(content, city);
-  const fromRound = round?.venueLabel?.trim() || "";
-  if (fromRound && !namesMultipleRoundCities(fromRound)) return fromRound;
-
-  return "TBA";
 }
 
 export function getRobofestCategoryHref(slug: string): string {

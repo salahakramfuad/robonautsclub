@@ -1,18 +1,25 @@
 'use client'
 
 import { format } from 'date-fns'
-import { Download, Mail } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Download, Mail } from 'lucide-react'
 import type {
   RobofestContent,
   RobofestRegistration,
   RobofestRegistrationStatus,
 } from '@/lib/robofest-content'
-import { resolveRobofestRoundVenueLabel } from '@/lib/robofest-content'
+import { resolveRobofestRoundVenueLabel } from '@/lib/robofest-venue'
 import { formatAgeCategoryLabel } from '@/lib/robofest-registration-options'
 import { cn } from '@/lib/utils'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import {
   Table,
   TableBody,
@@ -23,6 +30,25 @@ import {
 } from '@/components/ui/table'
 import { CollapsibleTeamMembers } from './CollapsibleTeamMembers'
 import { statusBadgeClass } from './helpers'
+import { ROBOFEST_PAGE_SIZE_OPTIONS } from './useRobofestDashboard'
+
+function pageWindow(
+  current: number,
+  total: number | null,
+  maxButtons = 5,
+): number[] {
+  if (total == null || total < 1) return [current]
+  const size = Math.min(maxButtons, total)
+  let start = Math.max(1, current - Math.floor(size / 2))
+  let end = start + size - 1
+  if (end > total) {
+    end = total
+    start = Math.max(1, end - size + 1)
+  }
+  const pages: number[] = []
+  for (let p = start; p <= end; p += 1) pages.push(p)
+  return pages
+}
 
 export function RegistrationsTable({
   filtered,
@@ -38,7 +64,13 @@ export function RegistrationsTable({
   listPending,
   hasMore,
   registrationsLength,
-  loadMore,
+  pageSize,
+  pageIndex,
+  totalPages,
+  setPageSize,
+  goToPage,
+  goNextPage,
+  goPrevPage,
   setStatus,
   setMemberAward,
   resendEmail,
@@ -61,7 +93,13 @@ export function RegistrationsTable({
   listPending: boolean
   hasMore: boolean
   registrationsLength: number
-  loadMore: () => void
+  pageSize: number
+  pageIndex: number
+  totalPages: number | null
+  setPageSize: (size: number) => void
+  goToPage: (page: number) => void
+  goNextPage: () => void
+  goPrevPage: () => void
   setStatus: (id: string, status: RobofestRegistrationStatus) => void
   setMemberAward: (
     registrationDocId: string,
@@ -75,6 +113,9 @@ export function RegistrationsTable({
     memberIndex: number,
   ) => void
 }) {
+  const pages = pageWindow(pageIndex, totalPages)
+  const showNumberedPages = totalPages != null
+
   return (
     <Card className="border-slate-200 shadow-sm overflow-hidden w-full min-w-0">
       <CardContent className="p-0">
@@ -245,24 +286,28 @@ export function RegistrationsTable({
                       <div className="flex flex-wrap justify-end gap-1">
                         {canEdit ? (
                           <>
-                        <Button
-                          type="button"
-                          size="sm"
-                          variant="outline"
-                          disabled={pending || r.status === 'confirmed'}
-                          onClick={() => setStatus(r.id, 'confirmed')}
-                        >
-                          Confirm
-                        </Button>
-                        <Button
-                          type="button"
-                          size="sm"
-                          variant="outline"
-                          disabled={pending || r.status === 'cancelled'}
-                          onClick={() => setStatus(r.id, 'cancelled')}
-                        >
-                          Cancel
-                        </Button>
+                            {r.status !== 'confirmed' ? (
+                              <Button
+                                type="button"
+                                size="sm"
+                                variant="outline"
+                                disabled={pending}
+                                onClick={() => setStatus(r.id, 'confirmed')}
+                              >
+                                Confirm
+                              </Button>
+                            ) : null}
+                            {r.status !== 'cancelled' ? (
+                              <Button
+                                type="button"
+                                size="sm"
+                                variant="outline"
+                                disabled={pending}
+                                onClick={() => setStatus(r.id, 'cancelled')}
+                              >
+                                Cancel
+                              </Button>
+                            ) : null}
                           </>
                         ) : null}
                         {canSendMail ? (
@@ -296,9 +341,17 @@ export function RegistrationsTable({
                           type="button"
                           size="sm"
                           variant="outline"
-                          disabled={pending || !r.registrationId}
+                          disabled={
+                            pending ||
+                            !r.registrationId ||
+                            r.status === 'cancelled'
+                          }
                           onClick={() => downloadConfirmationPdf(r)}
-                          title="Download confirmation PDF"
+                          title={
+                            r.status === 'cancelled'
+                              ? 'Unavailable for cancelled registrations'
+                              : 'Download confirmation PDF'
+                          }
                         >
                           <Download className="w-3.5 h-3.5" />
                         </Button>
@@ -311,20 +364,79 @@ export function RegistrationsTable({
             </TableBody>
           </Table>
         </div>
-        {hasMore ? (
-          <div className="border-t border-slate-100 px-4 py-3 flex justify-center">
+
+        <div className="border-t border-slate-100 px-4 py-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center gap-2 text-sm text-slate-600">
+            <span className="whitespace-nowrap">Show on page</span>
+            <Select
+              value={String(pageSize)}
+              onValueChange={(value) => setPageSize(Number(value))}
+              disabled={listPending}
+            >
+              <SelectTrigger className="w-[4.5rem] h-8">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {ROBOFEST_PAGE_SIZE_OPTIONS.map((size) => (
+                  <SelectItem key={size} value={String(size)}>
+                    {size}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="flex items-center justify-end gap-1">
             <Button
               type="button"
               variant="outline"
-              size="sm"
-              disabled={listPending}
-              onClick={loadMore}
-              className="border-slate-200"
+              size="icon"
+              className="h-8 w-8"
+              disabled={listPending || pageIndex <= 1}
+              onClick={goPrevPage}
+              aria-label="Previous page"
             >
-              {listPending ? 'Loading…' : 'Load more'}
+              <ChevronLeft className="w-4 h-4" />
+            </Button>
+
+            {showNumberedPages ? (
+              pages.map((page) => (
+                <Button
+                  key={page}
+                  type="button"
+                  variant={page === pageIndex ? 'default' : 'outline'}
+                  size="sm"
+                  className={cn(
+                    'h-8 min-w-8 px-2',
+                    page === pageIndex && 'bg-cyan-700 hover:bg-cyan-800',
+                  )}
+                  disabled={listPending}
+                  onClick={() => goToPage(page)}
+                  aria-label={`Go to page ${page}`}
+                >
+                  {page}
+                </Button>
+              ))
+            ) : (
+              <span className="px-2 text-sm text-slate-600 tabular-nums">
+                {pageIndex}
+              </span>
+            )}
+
+            <Button
+              type="button"
+              variant="outline"
+              size="icon"
+              className="h-8 w-8"
+              disabled={listPending || !hasMore}
+              onClick={goNextPage}
+              aria-label="Next page"
+            >
+              <ChevronRight className="w-4 h-4" />
             </Button>
           </div>
-        ) : null}
+        </div>
+
         {listPending && registrationsLength === 0 ? (
           <p className="text-center text-sm text-slate-500 py-6">Loading registrations…</p>
         ) : null}

@@ -28,6 +28,7 @@ export function RobofestRegistrationsTab({
   statusCounts,
   statusTone,
   filtersActive,
+  nameFilterActive,
   filtered,
   statusScopedCount,
   hasMore,
@@ -61,7 +62,13 @@ export function RobofestRegistrationsTab({
   pending,
   listPending,
   registrationsLength,
-  loadMore,
+  pageSize,
+  pageIndex,
+  totalPages,
+  setPageSize,
+  goToPage,
+  goNextPage,
+  goPrevPage,
   setStatus,
   setMemberAward,
   resendEmail,
@@ -73,6 +80,7 @@ export function RobofestRegistrationsTab({
   statusCounts: RobofestRegistrationStatusCounts
   statusTone: StatusTone
   filtersActive: boolean
+  nameFilterActive: boolean
   filtered: RobofestRegistration[]
   statusScopedCount: number
   hasMore: boolean
@@ -109,7 +117,13 @@ export function RobofestRegistrationsTab({
   pending: boolean
   listPending: boolean
   registrationsLength: number
-  loadMore: () => void
+  pageSize: number
+  pageIndex: number
+  totalPages: number | null
+  setPageSize: (size: number) => void
+  goToPage: (page: number) => void
+  goNextPage: () => void
+  goPrevPage: () => void
   setStatus: (id: string, status: RobofestRegistrationStatus) => void
   setMemberAward: (
     registrationDocId: string,
@@ -158,6 +172,7 @@ export function RobofestRegistrationsTab({
             statusTab={statusTab}
             statusTone={statusTone}
             filtersActive={filtersActive}
+            nameFilterActive={nameFilterActive}
             filteredCount={filtered.length}
             statusScopedCount={statusScopedCount}
             hasMore={hasMore}
@@ -208,7 +223,13 @@ export function RobofestRegistrationsTab({
           listPending={listPending}
           hasMore={hasMore}
           registrationsLength={registrationsLength}
-          loadMore={loadMore}
+          pageSize={pageSize}
+          pageIndex={pageIndex}
+          totalPages={totalPages}
+          setPageSize={setPageSize}
+          goToPage={goToPage}
+          goNextPage={goNextPage}
+          goPrevPage={goPrevPage}
           setStatus={setStatus}
           setMemberAward={setMemberAward}
           resendEmail={resendEmail}

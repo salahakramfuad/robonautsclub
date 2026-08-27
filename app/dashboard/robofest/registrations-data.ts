@@ -20,7 +20,7 @@ export type {
   RobofestRegistrationStatusCounts,
 } from './registrations-types'
 
-export const ROBOFEST_REGISTRATIONS_PAGE_SIZE = 20
+export const ROBOFEST_REGISTRATIONS_PAGE_SIZE = 10
 
 /** Soft cap for in-memory fallback while composite indexes are building. */
 const FALLBACK_SCAN_LIMIT = 500

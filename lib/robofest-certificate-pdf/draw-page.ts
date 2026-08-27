@@ -1,5 +1,5 @@
 import { format } from 'date-fns'
-import { resolveRobofestRoundVenueLabel } from '@/lib/robofest-content'
+import { resolveRobofestRoundVenueLabel } from '@/lib/robofest-venue'
 import type { RobofestAwardAccent } from '@/lib/robofest-award-categories'
 import { sanitizeTextForPDF } from '@/lib/textSanitizer'
 import {

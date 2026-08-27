@@ -1,6 +1,6 @@
 import { format } from 'date-fns'
 import type { RobofestContent, RobofestRegistration } from '@/lib/robofest-content'
-import { resolveRobofestRoundVenueLabel } from '@/lib/robofest-content'
+import { resolveRobofestRoundVenueLabel } from '@/lib/robofest-venue'
 import { formatAgeCategoryLabel } from '@/lib/robofest-registration-options'
 
 export type RobofestExportOptions = {

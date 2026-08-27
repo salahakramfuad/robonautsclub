@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useRef, useState, useTransition } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import type {
   RobofestRegistration,
@@ -19,6 +19,7 @@ import {
 } from '../actions'
 import type {
   RobofestRegistrationCursor,
+  RobofestRegistrationListFilters,
   RobofestRegistrationStatusCounts,
 } from '../registrations-types'
 import {
@@ -32,6 +33,8 @@ import {
   registrationMatchesNameFilter,
   statusEmptyCopy,
 } from './helpers'
+
+export const ROBOFEST_PAGE_SIZE_OPTIONS = [10, 20, 50] as const
 
 export function useRobofestDashboard({
   initialContent,
@@ -63,14 +66,17 @@ export function useRobofestDashboard({
   const [roundFilter, setRoundFilter] = useState('')
   const [ageCategoryFilter, setAgeCategoryFilter] = useState('')
   const [statusTab, setStatusTab] =
-    useState<RobofestRegistrationStatus>('pending')
+    useState<RobofestRegistrationStatus>('confirmed')
   const [nameFilter, setNameFilter] = useState('')
   const [exportPending, startExportTransition] = useTransition()
 
+  const [pageSize, setPageSizeState] = useState(10)
+  const [pageIndex, setPageIndex] = useState(1)
+  const [cursorStack, setCursorStack] = useState<
+    (RobofestRegistrationCursor | null)[]
+  >([null])
+
   const [registrations, setRegistrations] = useState(initialRegistrations)
-  const [nextCursor, setNextCursor] = useState<RobofestRegistrationCursor | null>(
-    initialNextCursor,
-  )
   const [hasMore, setHasMore] = useState(initialHasMore)
   const [statusCounts, setStatusCounts] =
     useState<RobofestRegistrationStatusCounts>(initialStatusCounts)
@@ -80,7 +86,8 @@ export function useRobofestDashboard({
   const serverFiltersActive = Boolean(
     categoryFilter || roundFilter || ageCategoryFilter,
   )
-  const filtersActive = Boolean(serverFiltersActive || nameFilter.trim())
+  const nameFilterActive = Boolean(nameFilter.trim())
+  const filtersActive = Boolean(serverFiltersActive || nameFilterActive)
 
   const listFilters = useMemo(
     () => ({
@@ -92,18 +99,133 @@ export function useRobofestDashboard({
     [statusTab, categoryFilter, roundFilter, ageCategoryFilter],
   )
 
-  const reloadFirstPage = (filters = listFilters) => {
-    startListTransition(async () => {
-      const [page, counts] = await Promise.all([
-        getRobofestRegistrationsPage({ filters }),
-        getRobofestRegistrationStatusCounts(),
-      ])
-      setRegistrations(page.items)
-      setNextCursor(page.nextCursor)
-      setHasMore(page.hasMore)
-      setStatusCounts(counts)
-    })
-  }
+  const totalPages = useMemo(() => {
+    if (serverFiltersActive) return null
+    return Math.max(1, Math.ceil(statusScopedCount / pageSize) || 1)
+  }, [serverFiltersActive, statusScopedCount, pageSize])
+
+  const applyPageResult = useCallback(
+    (
+      page: number,
+      stack: (RobofestRegistrationCursor | null)[],
+      result: {
+        items: RobofestRegistration[]
+        nextCursor: RobofestRegistrationCursor | null
+        hasMore: boolean
+      },
+    ) => {
+      setRegistrations(result.items)
+      setHasMore(result.hasMore)
+      setPageIndex(page)
+      if (result.nextCursor) {
+        setCursorStack([...stack.slice(0, page), result.nextCursor])
+      } else {
+        setCursorStack(stack.slice(0, page))
+      }
+    },
+    [],
+  )
+
+  const fetchPageAt = useCallback(
+    async (
+      page: number,
+      stack: (RobofestRegistrationCursor | null)[],
+      filters: RobofestRegistrationListFilters,
+      size: number,
+    ) => {
+      const cursor = stack[page - 1] ?? null
+      return getRobofestRegistrationsPage({
+        filters,
+        cursor,
+        pageSize: size,
+      })
+    },
+    [],
+  )
+
+  const goToPage = useCallback(
+    (target: number, options?: { size?: number; filters?: RobofestRegistrationListFilters; refreshCounts?: boolean }) => {
+      if (target < 1 || listPending) return
+      const size = options?.size ?? pageSize
+      const filters = options?.filters ?? listFilters
+      const refreshCounts = options?.refreshCounts ?? false
+      const maxPage =
+        !options?.filters &&
+        !categoryFilter &&
+        !roundFilter &&
+        !ageCategoryFilter
+          ? Math.max(1, Math.ceil(statusCounts[filters.status] / size) || 1)
+          : null
+      const boundedTarget =
+        maxPage != null ? Math.min(target, maxPage) : target
+
+      startListTransition(async () => {
+        let stack =
+          options?.size || options?.filters
+            ? ([null] as (RobofestRegistrationCursor | null)[])
+            : [...cursorStack]
+
+        if (options?.size || options?.filters) {
+          stack = [null]
+        }
+
+        while (stack.length < boundedTarget) {
+          const pageNum = stack.length
+          const result = await fetchPageAt(pageNum, stack, filters, size)
+          if (!result.nextCursor) {
+            applyPageResult(pageNum, stack, result)
+            if (refreshCounts) {
+              setStatusCounts(await getRobofestRegistrationStatusCounts())
+            }
+            return
+          }
+          stack = [...stack.slice(0, pageNum), result.nextCursor]
+          if (pageNum === boundedTarget) {
+            applyPageResult(boundedTarget, stack, result)
+            if (refreshCounts) {
+              setStatusCounts(await getRobofestRegistrationStatusCounts())
+            }
+            return
+          }
+        }
+
+        const result = await fetchPageAt(boundedTarget, stack, filters, size)
+        applyPageResult(boundedTarget, stack, result)
+        if (refreshCounts) {
+          setStatusCounts(await getRobofestRegistrationStatusCounts())
+        }
+      })
+    },
+    [
+      listPending,
+      pageSize,
+      listFilters,
+      cursorStack,
+      fetchPageAt,
+      applyPageResult,
+      categoryFilter,
+      roundFilter,
+      ageCategoryFilter,
+      statusCounts,
+    ],
+  )
+
+  const reloadFirstPage = useCallback(
+    (filters = listFilters) => {
+      startListTransition(async () => {
+        const [page, counts] = await Promise.all([
+          getRobofestRegistrationsPage({
+            filters,
+            pageSize,
+          }),
+          getRobofestRegistrationStatusCounts(),
+        ])
+        applyPageResult(1, [null], page)
+        setStatusCounts(counts)
+      })
+    },
+    [listFilters, pageSize, applyPageResult],
+  )
 
   const skipFilterFetchRef = useRef(true)
 
@@ -114,27 +236,32 @@ export function useRobofestDashboard({
   useEffect(() => {
     if (skipFilterFetchRef.current) {
       skipFilterFetchRef.current = false
+      // Seed stack with page-1 next cursor from SSR when available
+      if (initialNextCursor) {
+        setCursorStack([null, initialNextCursor])
+      }
       return
     }
     reloadFirstPage(listFilters)
     // eslint-disable-next-line react-hooks/exhaustive-deps -- refetch when server filters change
   }, [statusTab, categoryFilter, roundFilter, ageCategoryFilter])
 
-  const loadMore = () => {
-    if (!hasMore || !nextCursor || listPending) return
-    startListTransition(async () => {
-      const page = await getRobofestRegistrationsPage({
-        filters: listFilters,
-        cursor: nextCursor,
-      })
-      setRegistrations((prev) => {
-        const seen = new Set(prev.map((r) => r.id))
-        const appended = page.items.filter((r) => !seen.has(r.id))
-        return [...prev, ...appended]
-      })
-      setNextCursor(page.nextCursor)
-      setHasMore(page.hasMore)
-    })
+  const goNextPage = () => {
+    if (!hasMore || listPending) return
+    goToPage(pageIndex + 1)
+  }
+
+  const goPrevPage = () => {
+    if (pageIndex <= 1 || listPending) return
+    goToPage(pageIndex - 1)
+  }
+
+  const setPageSize = (size: number) => {
+    if (!ROBOFEST_PAGE_SIZE_OPTIONS.includes(size as (typeof ROBOFEST_PAGE_SIZE_OPTIONS)[number])) {
+      return
+    }
+    setPageSizeState(size)
+    goToPage(1, { size, filters: listFilters, refreshCounts: true })
   }
 
   const filtered = useMemo(() => {
@@ -336,6 +463,10 @@ export function useRobofestDashboard({
       alert('Registration ID is missing.')
       return
     }
+    if (registration.status === 'cancelled') {
+      alert('Cannot download confirmation PDF for a cancelled registration.')
+      return
+    }
     startTransition(async () => {
       try {
         const response = await fetch(
@@ -449,14 +580,21 @@ export function useRobofestDashboard({
     setStatusTab,
     nameFilter,
     setNameFilter,
+    nameFilterActive,
     exportPending,
     registrations,
     hasMore,
+    pageSize,
+    pageIndex,
+    totalPages,
+    setPageSize,
+    goToPage,
+    goNextPage,
+    goPrevPage,
     statusCounts,
     statusScopedCount,
     filtersActive,
     reloadFirstPage,
-    loadMore,
     filtered,
     stats,
     clearFilters,

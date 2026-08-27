@@ -2,10 +2,8 @@
 
 import { Trophy } from 'lucide-react'
 import type { Dispatch, SetStateAction } from 'react'
-import {
-  syncRobofestVenueFields,
-  type RobofestContent,
-} from '@/lib/robofest-content'
+import type { RobofestContent } from '@/lib/robofest-content'
+import { syncRobofestVenueFields } from '@/lib/robofest-venue'
 import DatePicker from '@/app/dashboard/events/DatePicker'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'

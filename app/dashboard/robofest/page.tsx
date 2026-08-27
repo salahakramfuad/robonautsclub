@@ -12,11 +12,14 @@ export const dynamic = 'force-dynamic'
 
 export default async function RobofestDashboardPage() {
   const session = await requireTabAccess('robofest')
-  const defaultFilters = { status: 'pending' as const }
+  const defaultFilters = { status: 'confirmed' as const }
   const [content, registrationPage, statusCounts, schools, campusAmbassadors] =
     await Promise.all([
       getRobofestDashboardContent(),
-      getRobofestRegistrationsPage({ filters: defaultFilters }),
+      getRobofestRegistrationsPage({
+        filters: defaultFilters,
+        pageSize: 10,
+      }),
       getRobofestRegistrationStatusCounts(),
       getPublicEnglishMediumSchools(),
       getRobofestCampusAmbassadors(),

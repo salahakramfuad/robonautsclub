@@ -253,7 +253,7 @@ export async function getRobofestRegistrationsForExport(
 export async function getRobofestRegistrations(): Promise<RobofestRegistration[]> {
   await requireAuth()
   const page = await loadRobofestRegistrationsPage({
-    filters: { status: 'pending' },
+    filters: { status: 'confirmed' },
     pageSize: ROBOFEST_REGISTRATIONS_PAGE_SIZE,
   })
   return page.items

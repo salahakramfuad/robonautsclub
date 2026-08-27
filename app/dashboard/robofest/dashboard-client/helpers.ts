@@ -17,7 +17,7 @@ export const statusEmptyCopy: Record<
 > = {
   pending: {
     title: 'No pending registrations',
-    body: 'New teams awaiting review will appear here.',
+    body: 'No pending review queue — new public registrations are confirmed automatically.',
   },
   confirmed: {
     title: 'No confirmed registrations',
