@@ -54,9 +54,32 @@ function cityVenueNeedles(city: string): string[] {
   return [normalized]
 }
 
+function escapeRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+}
+
+/** Prefer "City - Venue" prefix; fall back to a whole-token city match. */
 function lineMatchesCity(line: string, city: string): boolean {
-  const lower = line.toLowerCase()
-  return cityVenueNeedles(city).some((needle) => lower.includes(needle))
+  const trimmed = line.trim()
+  if (!trimmed) return false
+  const lower = trimmed.toLowerCase()
+  const needles = cityVenueNeedles(city)
+  if (
+    needles.some(
+      (needle) =>
+        lower.startsWith(`${needle} - `) || lower.startsWith(`${needle} – `),
+    )
+  ) {
+    return true
+  }
+  // Avoid substring false positives (e.g. city name inside a school name).
+  return needles.some((needle) => {
+    const re = new RegExp(
+      `(^|[\\s,;/|])${escapeRegExp(needle)}(?=[\\s,;/|]|-|–|$)`,
+      'i',
+    )
+    return re.test(trimmed)
+  })
 }
 
 function namesMultipleRoundCities(label: string): boolean {
@@ -104,6 +127,15 @@ export function findVenueLineForCity(
   city: string,
 ): string | undefined {
   if (!city.trim() || !content.venueLines?.length) return undefined
+  const needles = cityVenueNeedles(city)
+  const prefixHit = content.venueLines.find((line) => {
+    const lower = line.trim().toLowerCase()
+    return needles.some(
+      (needle) =>
+        lower.startsWith(`${needle} - `) || lower.startsWith(`${needle} – `),
+    )
+  })
+  if (prefixHit) return prefixHit.trim()
   return content.venueLines.find((line) => lineMatchesCity(line, city))?.trim()
 }
 

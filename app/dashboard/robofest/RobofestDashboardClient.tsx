@@ -68,7 +68,7 @@ export default function RobofestDashboardClient({
         filtersActive={d.filtersActive}
         nameFilterActive={d.nameFilterActive}
         filtered={d.filtered}
-        statusScopedCount={d.statusScopedCount}
+        statusScopedCount={d.displayTotal}
         hasMore={d.hasMore}
         clearFilters={d.clearFilters}
         canCreate={canCreate}

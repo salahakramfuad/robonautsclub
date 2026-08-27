@@ -83,7 +83,8 @@ export function RegistrationsOverview({
                 <>
                   matching on this page
                   <span className="ml-1.5 text-sm font-medium text-slate-500">
-                    of {statusScopedCount} {statusTab} in this tab
+                    of {statusScopedCount} matching {statusTab}
+                    {hasMore ? ' · more pages' : ''}
                   </span>
                 </>
               ) : (
@@ -91,7 +92,8 @@ export function RegistrationsOverview({
                   {statusTab} registration
                   {filteredCount === 1 ? '' : 's'} on this page
                   <span className="ml-1.5 text-sm font-medium text-slate-500">
-                    of {statusScopedCount} in this tab
+                    of {statusScopedCount}
+                    {filtersActive ? ' matching filters' : ' in this tab'}
                     {hasMore ? ' · more available' : ''}
                   </span>
                 </>

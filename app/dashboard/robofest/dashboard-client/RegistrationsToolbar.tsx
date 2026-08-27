@@ -88,7 +88,7 @@ export function RegistrationsToolbar({
             />
           </div>
           <p className="text-[11px] text-slate-400">
-            Search within the current page of results.
+            Searches all {statusTab} registrations (not just this page).
           </p>
         </div>
         <div className="space-y-1.5">

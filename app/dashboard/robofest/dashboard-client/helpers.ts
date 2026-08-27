@@ -1,5 +1,7 @@
-import type { RobofestRegistration, RobofestRegistrationStatus } from '@/lib/robofest-content'
+import type { RobofestRegistrationStatus } from '@/lib/robofest-content'
 import type { StatusTone } from './types'
+
+export { registrationMatchesNameFilter } from '../registration-search'
 
 export function statusBadgeClass(status: string) {
   if (status === 'confirmed') {
@@ -49,27 +51,3 @@ export function getStatusTone(statusTab: RobofestRegistrationStatus): StatusTone
         }
 }
 
-export function registrationMatchesNameFilter(
-  r: RobofestRegistration,
-  name: string,
-): boolean {
-  const haystack = [
-    r.name,
-    r.teamNumber,
-    r.registrationId,
-    r.email,
-    r.phone,
-    r.school,
-    r.campusAmbassadorName,
-    ...(r.teamMembers || []).flatMap((m) => [
-      m.name,
-      m.email,
-      m.phone,
-      m.school,
-    ]),
-  ]
-    .filter(Boolean)
-    .join(' ')
-    .toLowerCase()
-  return haystack.includes(name)
-}

@@ -30,7 +30,7 @@ import {
 } from '@/components/ui/table'
 import { CollapsibleTeamMembers } from './CollapsibleTeamMembers'
 import { statusBadgeClass } from './helpers'
-import { ROBOFEST_PAGE_SIZE_OPTIONS } from './useRobofestDashboard'
+import { ROBOFEST_PAGE_SIZE_OPTIONS } from './constants'
 
 function pageWindow(
   current: number,
