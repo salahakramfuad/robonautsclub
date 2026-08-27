@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession, hasPermission } from '@/lib/auth'
-import type { RobofestContent, RobofestRegistration } from '@/lib/robofest-content'
-import { generateRobofestConfirmationPdfFromData } from '@/lib/robofest-registration'
+import { getRobofestContentFresh } from '@/lib/robofest-content'
+import {
+  generateRobofestConfirmationPdfFromData,
+  getRobofestRegistrationById,
+} from '@/lib/robofest-registration'
 import { SITE_CONFIG } from '@/lib/site-config'
 
 export const dynamic = 'force-dynamic'
@@ -24,7 +27,7 @@ function getBaseUrl(request: NextRequest): string {
 
 /**
  * POST /api/dashboard/robofest/registrations/[id]/pdf
- * Generate confirmation PDF from posted registration + content (no Firestore/Cloudinary).
+ * Generate confirmation PDF using fresh Firestore registration + content.
  */
 export async function POST(request: NextRequest, context: RouteContext) {
   const session = await getServerSession()
@@ -38,35 +41,15 @@ export async function POST(request: NextRequest, context: RouteContext) {
 
   const { id } = await context.params
 
-  let body: {
-    registration?: RobofestRegistration
-    content?: RobofestContent
-  }
-  try {
-    body = await request.json()
-  } catch {
-    return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 })
+  const registration = await getRobofestRegistrationById(id)
+  if (!registration) {
+    return NextResponse.json({ error: 'Registration not found' }, { status: 404 })
   }
 
-  const registration = body.registration
-  const content = body.content
-
-  if (!registration || !content) {
-    return NextResponse.json(
-      { error: 'registration and content are required' },
-      { status: 400 },
-    )
-  }
-
-  if (registration.id && registration.id !== id) {
-    return NextResponse.json(
-      { error: 'Registration id mismatch' },
-      { status: 400 },
-    )
-  }
+  const content = await getRobofestContentFresh()
 
   const result = await generateRobofestConfirmationPdfFromData(
-    { ...registration, id: registration.id || id },
+    registration,
     content,
     getBaseUrl(request),
   )

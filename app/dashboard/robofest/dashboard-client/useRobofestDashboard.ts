@@ -106,6 +106,11 @@ export function useRobofestDashboard({
   }
 
   const skipFilterFetchRef = useRef(true)
+
+  useEffect(() => {
+    setContent(initialContent)
+  }, [initialContent])
+
   useEffect(() => {
     if (skipFilterFetchRef.current) {
       skipFilterFetchRef.current = false
@@ -203,7 +208,7 @@ export function useRobofestDashboard({
             alert('No registrations to export.')
             return
           }
-          const opts = { includePayments: canViewPayments }
+          const opts = { includePayments: canViewPayments, content }
           if (kind === 'csv') exportRobofestCsv(items, opts)
           else if (kind === 'excel') await exportRobofestExcel(items, opts)
           else await exportRobofestPdf(items, opts)
@@ -246,6 +251,7 @@ export function useRobofestDashboard({
         setError(result.error || 'Failed to save.')
         return
       }
+      if (result.content) setContent(result.content)
       setMessage('Content saved. Public Robofest pages will refresh.')
       router.refresh()
     })
@@ -334,11 +340,7 @@ export function useRobofestDashboard({
       try {
         const response = await fetch(
           `/api/dashboard/robofest/registrations/${registration.id}/pdf`,
-          {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ registration, content }),
-          },
+          { method: 'POST' },
         )
         await downloadPdfFromResponse(
           response,
@@ -369,7 +371,7 @@ export function useRobofestDashboard({
           {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ registration, content, memberIndex }),
+            body: JSON.stringify({ memberIndex }),
           },
         )
         await downloadPdfFromResponse(
@@ -408,7 +410,6 @@ export function useRobofestDashboard({
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             registrations: items,
-            content,
             statusLabel: statusTab,
           }),
         })

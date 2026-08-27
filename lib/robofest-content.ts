@@ -774,16 +774,69 @@ export function resolveRobofestRoundDateLabel(
 }
 
 /** Division venue for PDF/email/verify. Prefers public venue lines over round labels. */
+export function formatRobofestVenueDisplay(line: string): string {
+  const trimmed = line.trim();
+  if (!trimmed) return "";
+  const separator = trimmed.indexOf(" - ");
+  if (separator > 0) return trimmed.slice(separator + 3).trim();
+  return trimmed;
+}
+
+export function findVenueLineForCity(
+  content: RobofestContent,
+  city: string,
+): string | undefined {
+  if (!city.trim() || !content.venueLines?.length) return undefined;
+  return content.venueLines.find((line) => lineMatchesCity(line, city))?.trim();
+}
+
+/** Keep round venue labels aligned with venue lines (school name only). */
+export function syncRobofestVenueFields(
+  content: RobofestContent,
+): RobofestContent {
+  const rounds = (content.rounds || []).map((round) => {
+    const line = findVenueLineForCity(content, round.city);
+    if (!line) return round;
+    return {
+      ...round,
+      venueLabel: formatRobofestVenueDisplay(line),
+    };
+  });
+  const schoolNames = (content.venueLines || [])
+    .map((line) => formatRobofestVenueDisplay(line))
+    .filter(Boolean);
+  const combinedVenue =
+    schoolNames.length > 0 ? schoolNames.join(" · ") : content.venueLabel;
+  return {
+    ...content,
+    rounds,
+    venueLabel: combinedVenue,
+    venueDetail: combinedVenue,
+  };
+}
+
+export function validateRobofestVenueConsistency(
+  content: RobofestContent,
+): { ok: true } | { ok: false; error: string } {
+  for (const round of content.rounds || []) {
+    const city = round.city.trim();
+    if (!city) continue;
+    if (!findVenueLineForCity(content, city)) {
+      return {
+        ok: false,
+        error: `Venue lines must include an entry for the ${city} division (e.g. "${city} - Venue name").`,
+      };
+    }
+  }
+  return { ok: true };
+}
+
 export function resolveRobofestRoundVenueLabel(
   content: RobofestContent,
   city: string,
 ): string {
-  if (city.trim() && content.venueLines?.length) {
-    const fromLines = content.venueLines.find((line) =>
-      lineMatchesCity(line, city),
-    );
-    if (fromLines?.trim()) return fromLines.trim();
-  }
+  const line = findVenueLineForCity(content, city);
+  if (line) return formatRobofestVenueDisplay(line);
 
   const round = getRobofestRoundForCity(content, city);
   const fromRound = round?.venueLabel?.trim() || "";

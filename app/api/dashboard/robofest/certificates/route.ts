@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession, hasPermission } from '@/lib/auth'
-import type { RobofestContent, RobofestRegistration } from '@/lib/robofest-content'
+import type { RobofestRegistration } from '@/lib/robofest-content'
+import { getRobofestContentFresh } from '@/lib/robofest-content'
 import { generateRobofestBulkParticipationCertificatesPDF } from '@/lib/robofest-certificate-pdf'
 import { SITE_CONFIG } from '@/lib/site-config'
 
@@ -34,7 +35,6 @@ export async function POST(request: NextRequest) {
 
   let body: {
     registrations?: RobofestRegistration[]
-    content?: RobofestContent
     statusLabel?: string
   }
   try {
@@ -44,11 +44,10 @@ export async function POST(request: NextRequest) {
   }
 
   const registrations = body.registrations
-  const content = body.content
 
-  if (!Array.isArray(registrations) || !content) {
+  if (!Array.isArray(registrations)) {
     return NextResponse.json(
-      { error: 'registrations and content are required' },
+      { error: 'registrations are required' },
       { status: 400 },
     )
   }
@@ -59,6 +58,8 @@ export async function POST(request: NextRequest) {
       { status: 400 },
     )
   }
+
+  const content = await getRobofestContentFresh()
 
   const result = await generateRobofestBulkParticipationCertificatesPDF({
     registrations,

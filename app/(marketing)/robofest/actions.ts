@@ -92,7 +92,9 @@ export async function submitRobofestRegistration(
     }
 
     const roundOk = content.rounds.some(
-      (round) => round.city === validated.data.roundCity,
+      (round) =>
+        round.city.trim().toLowerCase() ===
+        validated.data.roundCity.trim().toLowerCase(),
     );
     if (!roundOk) {
       return { success: false, error: "Please select a valid division." };
@@ -147,7 +149,9 @@ export async function initiateRobofestPaidCheckout(
     }
 
     const roundOk = content.rounds.some(
-      (round) => round.city === validated.data.roundCity,
+      (round) =>
+        round.city.trim().toLowerCase() ===
+        validated.data.roundCity.trim().toLowerCase(),
     );
     if (!roundOk) {
       return { success: false, error: "Please select a valid division." };

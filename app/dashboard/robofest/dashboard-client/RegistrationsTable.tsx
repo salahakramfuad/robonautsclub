@@ -7,6 +7,7 @@ import type {
   RobofestRegistration,
   RobofestRegistrationStatus,
 } from '@/lib/robofest-content'
+import { resolveRobofestRoundVenueLabel } from '@/lib/robofest-content'
 import { formatAgeCategoryLabel } from '@/lib/robofest-registration-options'
 import { cn } from '@/lib/utils'
 import { Card, CardContent } from '@/components/ui/card'
@@ -92,6 +93,7 @@ export function RegistrationsTable({
                   Competition
                 </TableHead>
                 <TableHead className="whitespace-nowrap">Division</TableHead>
+                <TableHead className="min-w-[10rem]">Venue</TableHead>
                 <TableHead className="min-w-[11rem]">Members</TableHead>
                 <TableHead className="min-w-[8rem]">Contact</TableHead>
                 <TableHead className="whitespace-nowrap">Status</TableHead>
@@ -110,7 +112,7 @@ export function RegistrationsTable({
               {filtered.length === 0 ? (
                 <TableRow>
                   <TableCell
-                    colSpan={canViewPayments ? 11 : 10}
+                    colSpan={canViewPayments ? 12 : 11}
                     className="text-center text-slate-500 py-12"
                   >
                     <p className="font-medium text-slate-700">
@@ -169,6 +171,13 @@ export function RegistrationsTable({
                     </TableCell>
                     <TableCell className="text-sm whitespace-nowrap">
                       {r.roundCity}
+                    </TableCell>
+                    <TableCell className="text-sm min-w-[10rem] max-w-[16rem]">
+                      <span className="line-clamp-3 leading-snug">
+                        {r.roundCity
+                          ? resolveRobofestRoundVenueLabel(content, r.roundCity)
+                          : '—'}
+                      </span>
                     </TableCell>
                     <TableCell className="min-w-[11rem] max-w-[18rem]">
                       <CollapsibleTeamMembers

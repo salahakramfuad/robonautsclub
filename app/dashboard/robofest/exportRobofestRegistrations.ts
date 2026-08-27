@@ -1,10 +1,13 @@
 import { format } from 'date-fns'
-import type { RobofestRegistration } from '@/lib/robofest-content'
+import type { RobofestContent, RobofestRegistration } from '@/lib/robofest-content'
+import { resolveRobofestRoundVenueLabel } from '@/lib/robofest-content'
 import { formatAgeCategoryLabel } from '@/lib/robofest-registration-options'
 
 export type RobofestExportOptions = {
   /** When false, omit payment status / amounts / trx from exports. */
   includePayments?: boolean
+  /** Used to resolve per-division venue in exports. */
+  content?: RobofestContent
 }
 
 function dateStamp() {
@@ -22,6 +25,14 @@ function createdLabel(r: RobofestRegistration) {
   } catch {
     return r.createdAt
   }
+}
+
+function venueLabel(
+  r: RobofestRegistration,
+  content?: RobofestContent,
+): string {
+  if (!content || !r.roundCity?.trim()) return ''
+  return resolveRobofestRoundVenueLabel(content, r.roundCity)
 }
 
 function membersLabel(r: RobofestRegistration) {
@@ -76,6 +87,7 @@ export function exportRobofestCsv(
     'Campus Ambassador',
     'Ambassador School',
     'Division',
+    'Venue',
     'Competition',
     'Status',
     ...(includePayments ? (['Payment', 'Amount Paid', 'Trx ID'] as const) : []),
@@ -96,6 +108,7 @@ export function exportRobofestCsv(
       r.campusAmbassadorName || '',
       r.campusAmbassadorSchool || '',
       r.roundCity,
+      venueLabel(r, options.content),
       r.category,
       r.status,
       ...(includePayments
@@ -133,6 +146,7 @@ export async function exportRobofestExcel(
       'Team Name': r.name || '',
       Competition: r.category || '',
       Division: r.roundCity || '',
+      Venue: venueLabel(r, options.content),
       'Age Category': ageLabel(r),
       'Team Size': r.teamSize ?? r.teamMembers?.length ?? '',
       'Contact Email': r.email || '',
@@ -204,6 +218,7 @@ export async function exportRobofestPdf(
       r.name || '',
       r.category || '',
       r.roundCity || '',
+      venueLabel(r, options.content) || '—',
       ageLabel(r) || '—',
       membersLabel(r),
       r.status || '',
@@ -220,6 +235,7 @@ export async function exportRobofestPdf(
         'Team',
         'Competition',
         'Division',
+        'Venue',
         'Age',
         'Team members',
         'Status',

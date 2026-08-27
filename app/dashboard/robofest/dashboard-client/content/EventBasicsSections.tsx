@@ -2,7 +2,10 @@
 
 import { Trophy } from 'lucide-react'
 import type { Dispatch, SetStateAction } from 'react'
-import type { RobofestContent } from '@/lib/robofest-content'
+import {
+  syncRobofestVenueFields,
+  type RobofestContent,
+} from '@/lib/robofest-content'
 import DatePicker from '@/app/dashboard/events/DatePicker'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -78,20 +81,38 @@ export function EventBasicsSections({
           </div>
           <div className="space-y-1 sm:col-span-2">
             <label className="text-xs text-slate-500">
-              Venue lines (one per line — shown in info strip)
+              Venue lines (one per line — public site, confirmation emails, and PDFs)
             </label>
+            <p className="text-[11px] text-slate-500">
+              Use the format{' '}
+              <span className="font-mono">City - Venue name</span> (e.g.{' '}
+              <span className="font-mono">Dhaka - Manarat Dhaka International School & College</span>
+              ). Each division must have a matching line.
+            </p>
             <Textarea
               rows={3}
               value={(content.venueLines || []).join('\n')}
               onChange={(e) =>
-                setContent((prev) => ({
-                  ...prev,
-                  venueLines: e.target.value
-                    .split('\n')
-                    .map((line) => line.trim())
-                    .filter(Boolean),
-                }))
+                setContent((prev) =>
+                  syncRobofestVenueFields({
+                    ...prev,
+                    venueLines: e.target.value
+                      .split('\n')
+                      .map((line) => line.trim())
+                      .filter(Boolean),
+                  }),
+                )
               }
+            />
+          </div>
+          <div className="space-y-1 sm:col-span-2">
+            <label className="text-xs text-slate-500">
+              Combined venue summary (auto-synced on save)
+            </label>
+            <Input
+              readOnly
+              value={content.venueLabel || ''}
+              className="bg-slate-50 text-slate-600"
             />
           </div>
       </ContentSection>
@@ -287,7 +308,7 @@ export function EventBasicsSections({
 
       <ContentSection
         title="Divisions / rounds"
-        description="City value is the registration Division option (e.g. Dhaka, Chittagong)."
+        description="City is the registration Division option. Venue labels sync from venue lines above when you save."
         contentClassName="space-y-4"
       >
           {content.rounds.map((round, index) => (
@@ -300,7 +321,7 @@ export function EventBasicsSections({
                   ['city', 'City / division'],
                   ['title', 'Title'],
                   ['dates', 'Dates'],
-                  ['venueLabel', 'Venue label'],
+                  ['venueLabel', 'Venue (synced from venue lines)'],
                   ['image', 'Image path'],
                 ] as const
               ).map(([field, label]) => (
@@ -308,7 +329,10 @@ export function EventBasicsSections({
                   <label className="text-xs text-slate-500">{label}</label>
                   <Input
                     value={round[field]}
+                    readOnly={field === 'venueLabel'}
+                    className={field === 'venueLabel' ? 'bg-slate-50 text-slate-600' : undefined}
                     onChange={(e) => {
+                      if (field === 'venueLabel') return
                       const value = e.target.value
                       setContent((prev) => {
                         const rounds = [...prev.rounds]
