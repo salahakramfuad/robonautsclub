@@ -17,6 +17,7 @@ export default function RobofestDashboardClient({
   initialStatusCounts,
   schools,
   campusAmbassadors,
+  referralCounts = {},
   canCreate = false,
   canEdit = false,
   canDelete = false,
@@ -124,6 +125,7 @@ export default function RobofestDashboardClient({
       <TabsContent value="ambassadors" className="space-y-4 w-full min-w-0">
         <CampusAmbassadorsManager
           ambassadors={campusAmbassadors}
+          referralCounts={referralCounts}
           canCreate={canCreate}
           canEdit={canEdit}
           canDelete={canDelete}

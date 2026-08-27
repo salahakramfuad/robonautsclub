@@ -2,6 +2,10 @@ export const ROBOFEST_CAMPUS_AMBASSADORS_COLLECTION = 'robofestCampusAmbassadors
 
 export const PUBLIC_ROBOFEST_AMBASSADORS_TAG = 'public-robofest-ambassadors'
 
+export const ROBOFEST_CAMPUS_AMBASSADOR_NOT_APPLICABLE = 'not_applicable'
+
+export const ROBOFEST_CAMPUS_AMBASSADOR_NOT_APPLICABLE_LABEL = 'Not applicable'
+
 export type RobofestCampusAmbassador = {
   id: string
   name: string

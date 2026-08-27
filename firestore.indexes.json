@@ -85,6 +85,14 @@
       ]
     },
     {
+      "collectionGroup": "robofestRegistrations",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "campusAmbassadorId", "order": "ASCENDING" },
+        { "fieldPath": "status", "order": "ASCENDING" }
+      ]
+    },
+    {
       "collectionGroup": "school_directory",
       "queryScope": "COLLECTION",
       "fields": [

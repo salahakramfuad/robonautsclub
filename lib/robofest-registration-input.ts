@@ -6,6 +6,10 @@ import {
   createPendingSchoolIfNeeded,
   resolveSchoolFromSelection,
 } from "@/lib/pendingSchool";
+import {
+  ROBOFEST_CAMPUS_AMBASSADOR_NOT_APPLICABLE,
+  ROBOFEST_CAMPUS_AMBASSADOR_NOT_APPLICABLE_LABEL,
+} from "@/lib/robofest-campus-ambassadors";
 import { getActiveRobofestCampusAmbassadorById } from "@/lib/robofest-campus-ambassadors-db";
 import { ROBOFEST_DEFAULT_AWARD_CATEGORY_ID } from "@/lib/robofest-award-categories";
 import type { RobofestTeamMember } from "@/lib/robofest-content";
@@ -154,7 +158,13 @@ export async function validateRobofestRegistrationInput(
   let campusAmbassadorName: string | undefined;
   let campusAmbassadorSchool: string | undefined;
   const ambassadorId = formData.campusAmbassadorId?.trim() ?? "";
-  if (ambassadorId) {
+  if (!ambassadorId) {
+    return { ok: false, error: "Campus ambassador is required." };
+  }
+  if (ambassadorId === ROBOFEST_CAMPUS_AMBASSADOR_NOT_APPLICABLE) {
+    campusAmbassadorId = ROBOFEST_CAMPUS_AMBASSADOR_NOT_APPLICABLE;
+    campusAmbassadorName = ROBOFEST_CAMPUS_AMBASSADOR_NOT_APPLICABLE_LABEL;
+  } else {
     const ambassador = await getActiveRobofestCampusAmbassadorById(ambassadorId);
     if (!ambassador) {
       return { ok: false, error: "Selected campus ambassador is not valid." };
