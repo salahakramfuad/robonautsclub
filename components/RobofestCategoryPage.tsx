@@ -5,6 +5,7 @@ import type {
   RobofestContent,
 } from "@/lib/robofest-content";
 import {
+  getRobofestCategoryHref,
   getRobofestCategoryImage,
   getRobofestCategoryRulesPdf,
 } from "@/lib/robofest-content";
@@ -49,12 +50,14 @@ export default function RobofestCategoryPage({
   fee,
   schools,
   campusAmbassadors,
+  siblingCategories = [],
 }: {
   category: RobofestCategoryContent;
   content: RobofestContent;
   fee: { isPaid: boolean; amount: number };
   schools: string[];
   campusAmbassadors: RobofestCampusAmbassador[];
+  siblingCategories?: RobofestCategoryContent[];
 }) {
   const rulesPdf = getRobofestCategoryRulesPdf(category);
   const rules = getRobofestCategoryRules(category.slug);
@@ -72,7 +75,7 @@ export default function RobofestCategoryPage({
       <header className="relative isolate overflow-hidden text-white min-h-[18rem] sm:min-h-[20rem]">
         <Image
           src={heroImage}
-          alt=""
+          alt={`${category.name} — Robofest Bangladesh 2026 local round`}
           fill
           priority
           sizes="100vw"
@@ -342,6 +345,42 @@ export default function RobofestCategoryPage({
           </div>
         </div>
       </main>
+
+      {siblingCategories.length > 0 ? (
+        <section className="border-t border-slate-200 bg-white py-10 sm:py-12 px-4 sm:px-6">
+          <div className="max-w-7xl mx-auto">
+            <h2 className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight mb-2">
+              Other competitions
+            </h2>
+            <p className="text-sm text-slate-600 mb-5 max-w-2xl">
+              Explore more Robofest Bangladesh 2026 local-round categories.
+            </p>
+            <ul className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+              {siblingCategories.map((sibling) => (
+                <li key={sibling.slug}>
+                  <Link
+                    href={getRobofestCategoryHref(sibling.slug)}
+                    prefetch={false}
+                    className="flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-50/80 px-4 py-3 text-slate-900 transition-colors hover:border-cyan-300 hover:bg-cyan-50/60"
+                  >
+                    <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white border border-slate-200 text-cyan-700">
+                      <RobofestIcon name={sibling.icon} className="text-xl" />
+                    </span>
+                    <span className="min-w-0">
+                      <span className="block font-semibold text-sm sm:text-base truncate">
+                        {sibling.name}
+                      </span>
+                      <span className="block text-xs text-slate-500 truncate">
+                        {sibling.format || sibling.skillLevel || "View details"}
+                      </span>
+                    </span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </section>
+      ) : null}
     </div>
   );
 }
