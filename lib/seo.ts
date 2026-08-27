@@ -73,6 +73,10 @@ export function getEventSchema(event: {
   venue?: string;
   image?: string;
   url: string;
+  /** Offer price in major currency units (e.g. BDT). Defaults to 0. */
+  price?: string | number;
+  priceCurrency?: string;
+  endDate?: string;
 }) {
   // Handle both single date string and multiple dates (use first date for schema)
   const dateValue = Array.isArray(event.date) 
@@ -93,12 +97,24 @@ export function getEventSchema(event: {
         )
     : absoluteSiteUrl(SITE_CONFIG.assets.defaultEventImage);
 
+  const price =
+    event.price === undefined || event.price === null
+      ? "0"
+      : String(event.price);
+
   return {
     "@context": "https://schema.org",
     "@type": "Event",
     name: event.title,
     description: event.description,
     startDate: startDate,
+    ...(event.endDate
+      ? {
+          endDate: event.time
+            ? `${event.endDate}T${event.time}:00`
+            : `${event.endDate}T23:59:59`,
+        }
+      : {}),
     eventStatus: "https://schema.org/EventScheduled",
     eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
     location: {
@@ -119,8 +135,8 @@ export function getEventSchema(event: {
     offers: {
       "@type": "Offer",
       url: event.url.startsWith("http") ? event.url : absoluteSiteUrl(event.url),
-      price: "0",
-      priceCurrency: "BDT",
+      price,
+      priceCurrency: event.priceCurrency || "BDT",
       availability: "https://schema.org/InStock",
     },
   };

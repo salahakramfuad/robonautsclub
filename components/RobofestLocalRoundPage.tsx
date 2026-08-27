@@ -5,6 +5,8 @@ import {
   getRobofestCategoryRulesPdf,
   getRobofestContent,
 } from "@/lib/robofest-content";
+import { resolveRobofestFee } from "@/lib/robofest-fee";
+import { getRobofestRoundStartDateIso } from "@/lib/robofest-local";
 import { Button } from "@/components/ui/button";
 import { Facebook, Instagram } from "lucide-react";
 import Image from "next/image";
@@ -101,18 +103,27 @@ export default async function RobofestLocalRoundPage() {
     })),
   };
 
-  const roundSchemas = (content.rounds ?? []).map((round, index) =>
-    getEventSchema({
-      id: `robofest-${(round.city || "round").toLowerCase().replace(/\s+/g, "-")}-${index}`,
+  const roundSchemas = (content.rounds ?? []).map((round, index) => {
+    const cityKey = (round.city || "round").toLowerCase().replace(/\s+/g, "-");
+    const startIso =
+      getRobofestRoundStartDateIso(round.city) ||
+      (typeof round.dates === "string" && /^\d{4}-\d{2}-\d{2}/.test(round.dates)
+        ? round.dates.slice(0, 10)
+        : "");
+    const defaultFee = resolveRobofestFee(content, categories[0]?.name || "");
+    return getEventSchema({
+      id: `robofest-${cityKey}-${index}`,
       title: round.title || `${content.headline} · ${round.city}`,
       description: content.lead || content.headline,
-      date: round.dates,
+      date: startIso || round.dates,
       location: round.city,
       venue: round.venueLabel,
       image: round.image,
-      url: "/robofest",
-    }),
-  );
+      url: `/robofest#${cityKey}`,
+      price: defaultFee.isPaid ? defaultFee.amount : 0,
+      priceCurrency: "BDT",
+    });
+  });
 
   const breadcrumbSchema = getBreadcrumbSchema([
     { name: "Home", url: "/" },
@@ -140,11 +151,12 @@ export default async function RobofestLocalRoundPage() {
         />
       ))}
 
+      <main className="flex-1 relative">
       <section className="relative overflow-hidden px-4 sm:px-6 pt-16 sm:pt-20 md:pt-24 pb-10 sm:pb-14">
         <div className="absolute inset-0 bg-[#5c74b0]" aria-hidden />
         <Image
           src="/robofest/robofestbg.jpeg"
-          alt=""
+          alt={`${content.headline || "Robofest Bangladesh"} local round hero`}
           fill
           priority
           className="object-cover object-top"
@@ -290,7 +302,6 @@ export default async function RobofestLocalRoundPage() {
         </div>
       </section>
 
-      <main className="flex-1 relative">
         <section className="relative py-14 sm:py-20 px-4 sm:px-6 overflow-hidden border-y border-slate-200 bg-white">
           <CircuitBackdrop className="opacity-60" />
           <div className="relative max-w-7xl mx-auto">
@@ -370,7 +381,7 @@ export default async function RobofestLocalRoundPage() {
                     <div className="relative aspect-[4/3] overflow-hidden">
                       <Image
                         src={cover}
-                        alt=""
+                        alt={`${category.name} competition cover — Robofest Bangladesh 2026`}
                         fill
                         className="object-cover transition-transform duration-700 group-hover:scale-110"
                         sizes="(max-width: 640px) 100vw, (max-width: 1280px) 50vw, 25vw"

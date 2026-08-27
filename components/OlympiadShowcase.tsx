@@ -40,7 +40,7 @@ const OLYMPIADS = [
   {
     name: 'Robofest',
     logo: '/olympiads/robofest.png',
-    url: 'https://www.robofest.net/',
+    url: '/robofest',
   },
 ] as const
 
@@ -95,12 +95,15 @@ export default function OlympiadShowcase() {
 
       <div className="mb-10 sm:mb-14">
         <InfiniteMarquee duration={42} fadeClassName="from-slate-950">
-          {OLYMPIADS.map((olympiad) => (
+          {OLYMPIADS.map((olympiad) => {
+            const isExternal = olympiad.url.startsWith('http')
+            return (
             <a
               key={olympiad.name}
               href={olympiad.url}
-              target="_blank"
-              rel="noopener noreferrer"
+              {...(isExternal
+                ? { target: '_blank', rel: 'noopener noreferrer' }
+                : {})}
               className="group flex h-24 w-46 shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-5 transition-all duration-300 hover:border-sky-300/40 hover:bg-white/10 sm:h-28 sm:w-52"
             >
               <div className="relative h-14 w-full sm:h-16">
@@ -115,7 +118,8 @@ export default function OlympiadShowcase() {
               </div>
               <span className="sr-only">{olympiad.name}</span>
             </a>
-          ))}
+            )
+          })}
         </InfiniteMarquee>
       </div>
 

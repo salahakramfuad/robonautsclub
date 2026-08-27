@@ -160,6 +160,32 @@ export function getRobofestCategoryHref(slug: RobofestCategorySlug): string {
   return `/robofest/${slug}`;
 }
 
+/** ISO calendar dates for local-round Event schema (Asia/Dhaka days). */
+export const ROBOFEST_ROUND_START_DATE_ISO = {
+  Chittagong: "2026-09-11",
+  Dhaka: "2026-09-18",
+} as const;
+
+/**
+ * Resolve YYYY-MM-DD start date for a division city (for JSON-LD).
+ * Display labels like "11 September (CTG)" are not valid schema dates.
+ */
+export function getRobofestRoundStartDateIso(city: string): string | undefined {
+  const normalized = city.trim().toLowerCase();
+  if (!normalized) return undefined;
+  if (
+    normalized.startsWith("chit") ||
+    normalized.includes("ctg") ||
+    normalized.includes("chattogram")
+  ) {
+    return ROBOFEST_ROUND_START_DATE_ISO.Chittagong;
+  }
+  if (normalized.startsWith("dha") || normalized.includes("dhk")) {
+    return ROBOFEST_ROUND_START_DATE_ISO.Dhaka;
+  }
+  return undefined;
+}
+
 export const ROBOFEST_HOW_IT_WORKS = [
   {
     icon: "group",

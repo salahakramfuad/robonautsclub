@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
-import { SITE_CONFIG } from "@/lib/site-config";
 
 const title = "Robofest Bangladesh 2026 Local Round";
 const description =
   "Register for Robofest Bangladesh 2026 local rounds in Chittagong (11 Sep) and Dhaka (18 Sep). Compete in BottleSumo, BuildAthon, Line Following Bot, or Robo Exhibition—hosted by Robonauts Ltd. Path to the World Championship 2027 in South Korea.";
 const ogImage = "/robofest/robofest.jpg";
+const brand = "Robonauts Club";
 
 export const metadata: Metadata = {
   title,
@@ -24,7 +24,7 @@ export const metadata: Metadata = {
     "Robofest South Korea 2027",
   ],
   openGraph: {
-    title: `${title} | ${SITE_CONFIG.name}`,
+    title: `${title} | ${brand}`,
     description,
     url: "/robofest",
     type: "website",
@@ -39,7 +39,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: `Robofest Bangladesh 2026 | ${SITE_CONFIG.name}`,
+    title: `Robofest Bangladesh 2026 | ${brand}`,
     description,
     images: [ogImage],
   },

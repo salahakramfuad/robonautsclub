@@ -11,7 +11,10 @@ import {
   getRobofestContent,
   resolveRobofestFee,
 } from "@/lib/robofest-content";
-import { ROBOFEST_CATEGORIES } from "@/lib/robofest-local";
+import {
+  ROBOFEST_CATEGORIES,
+  getRobofestRoundStartDateIso,
+} from "@/lib/robofest-local";
 import {
   absoluteSiteUrl,
   getBreadcrumbSchema,
@@ -49,6 +52,7 @@ export async function generateMetadata({
     category.about?.trim() || category.description?.trim() || category.name;
   const description = `${descriptionBase} Local rounds: Chittagong 11 Sep & Dhaka 18 Sep. Register with ${SITE_CONFIG.name}.`;
   const title = `${category.name} · Robofest Bangladesh 2026`;
+  const brand = "Robonauts Club";
 
   return {
     title,
@@ -65,7 +69,7 @@ export async function generateMetadata({
       SITE_CONFIG.name,
     ].filter(Boolean),
     openGraph: {
-      title: `${category.name} | Robofest Bangladesh | ${SITE_CONFIG.name}`,
+      title: `${category.name} | Robofest Bangladesh | ${brand}`,
       description: category.about || category.description,
       url: getRobofestCategoryHref(category.slug),
       type: "website",
@@ -74,13 +78,13 @@ export async function generateMetadata({
           url: image,
           width: 1200,
           height: 630,
-          alt: category.name,
+          alt: `${category.name} — Robofest Bangladesh 2026`,
         },
       ],
     },
     twitter: {
       card: "summary_large_image",
-      title: `${category.name} | Robofest Bangladesh`,
+      title: `${category.name} | Robofest Bangladesh | ${brand}`,
       description: category.description || category.about,
       images: [image],
     },
@@ -99,7 +103,8 @@ export default async function RobofestCategoryRoute({ params }: PageProps) {
   }
 
   const fee = resolveRobofestFee(content, category.name);
-  const activeSlugs = getActiveRobofestCategories(content).map((c) => c.slug);
+  const activeCategories = getActiveRobofestCategories(content);
+  const activeSlugs = activeCategories.map((c) => c.slug);
   if (!activeSlugs.includes(slug)) {
     notFound();
   }
@@ -115,17 +120,35 @@ export default async function RobofestCategoryRoute({ params }: PageProps) {
     { name: category.name, url: categoryUrl },
   ]);
 
-  const primaryRound = content.rounds[0];
-  const eventSchema = getEventSchema({
-    id: `robofest-${category.slug}`,
-    title: `${category.name} · ${content.headline || "Robofest Bangladesh 2026"}`,
-    description: category.about || category.description,
-    date: primaryRound?.dates || content.dateLabel || content.dateLines?.[0] || "",
-    location: primaryRound?.city || "Bangladesh",
-    venue: primaryRound?.venueLabel || content.venueLabel,
-    image,
-    url: absoluteSiteUrl(categoryUrl),
-  });
+  const rounds = content.rounds?.length ? content.rounds : [];
+  const eventSchemas = (rounds.length > 0 ? rounds : [null]).map(
+    (round, index) => {
+      const city = round?.city || "Bangladesh";
+      const startIso = round
+        ? getRobofestRoundStartDateIso(round.city)
+        : undefined;
+      const cityKey = city.toLowerCase().replace(/\s+/g, "-");
+      return getEventSchema({
+        id: `robofest-${category.slug}-${cityKey}-${index}`,
+        title: `${category.name} · ${content.headline || "Robofest Bangladesh 2026"}${
+          round?.city ? ` · ${round.city}` : ""
+        }`,
+        description: category.about || category.description,
+        date:
+          startIso ||
+          round?.dates ||
+          content.dateLabel ||
+          content.dateLines?.[0] ||
+          "",
+        location: city,
+        venue: round?.venueLabel || content.venueLabel,
+        image,
+        url: absoluteSiteUrl(categoryUrl),
+        price: fee.isPaid ? fee.amount : 0,
+        priceCurrency: "BDT",
+      });
+    },
+  );
 
   return (
     <>
@@ -134,17 +157,21 @@ export default async function RobofestCategoryRoute({ params }: PageProps) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
       />
-      <Script
-        id={`robofest-${category.slug}-event-jsonld`}
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(eventSchema) }}
-      />
+      {eventSchemas.map((schema, index) => (
+        <Script
+          key={`robofest-${category.slug}-event-${index}`}
+          id={`robofest-${category.slug}-event-jsonld-${index}`}
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+        />
+      ))}
       <RobofestCategoryPage
         category={category}
         content={content}
         fee={fee}
         schools={schools}
         campusAmbassadors={campusAmbassadors}
+        siblingCategories={activeCategories.filter((c) => c.slug !== slug)}
       />
     </>
   );
