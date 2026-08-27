@@ -284,31 +284,16 @@ export function RegistrationsTable({
                     </TableCell>
                     <TableCell className="text-right sticky right-0 bg-white shadow-[-8px_0_12px_-12px_rgba(0,0,0,0.25)]">
                       <div className="flex flex-wrap justify-end gap-1">
-                        {canEdit ? (
-                          <>
-                            {r.status !== 'confirmed' ? (
-                              <Button
-                                type="button"
-                                size="sm"
-                                variant="outline"
-                                disabled={pending}
-                                onClick={() => setStatus(r.id, 'confirmed')}
-                              >
-                                Confirm
-                              </Button>
-                            ) : null}
-                            {r.status !== 'cancelled' ? (
-                              <Button
-                                type="button"
-                                size="sm"
-                                variant="outline"
-                                disabled={pending}
-                                onClick={() => setStatus(r.id, 'cancelled')}
-                              >
-                                Cancel
-                              </Button>
-                            ) : null}
-                          </>
+                        {canEdit && r.status !== 'cancelled' ? (
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant="outline"
+                            disabled={pending}
+                            onClick={() => setStatus(r.id, 'cancelled')}
+                          >
+                            Cancel
+                          </Button>
                         ) : null}
                         {canSendMail ? (
                         <Button

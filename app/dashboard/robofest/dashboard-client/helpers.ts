@@ -19,11 +19,11 @@ export const statusEmptyCopy: Record<
 > = {
   pending: {
     title: 'No pending registrations',
-    body: 'No pending review queue — new public registrations are confirmed automatically.',
+    body: 'Registrations are only created after payment confirmation.',
   },
   confirmed: {
     title: 'No confirmed registrations',
-    body: 'Confirmed teams will appear here.',
+    body: 'Confirmed teams will appear here after successful payment or free registration.',
   },
   cancelled: {
     title: 'No cancelled registrations',
