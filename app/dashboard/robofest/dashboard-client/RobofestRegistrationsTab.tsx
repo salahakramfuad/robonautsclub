@@ -28,6 +28,7 @@ export function RobofestRegistrationsTab({
   statusCounts,
   statusTone,
   filtersActive,
+  nameFilterActive,
   filtered,
   statusScopedCount,
   hasMore,
@@ -61,7 +62,13 @@ export function RobofestRegistrationsTab({
   pending,
   listPending,
   registrationsLength,
-  loadMore,
+  pageSize,
+  pageIndex,
+  totalPages,
+  setPageSize,
+  goToPage,
+  goNextPage,
+  goPrevPage,
   setStatus,
   setMemberAward,
   resendEmail,
@@ -73,6 +80,7 @@ export function RobofestRegistrationsTab({
   statusCounts: RobofestRegistrationStatusCounts
   statusTone: StatusTone
   filtersActive: boolean
+  nameFilterActive: boolean
   filtered: RobofestRegistration[]
   statusScopedCount: number
   hasMore: boolean
@@ -109,7 +117,13 @@ export function RobofestRegistrationsTab({
   pending: boolean
   listPending: boolean
   registrationsLength: number
-  loadMore: () => void
+  pageSize: number
+  pageIndex: number
+  totalPages: number | null
+  setPageSize: (size: number) => void
+  goToPage: (page: number) => void
+  goNextPage: () => void
+  goPrevPage: () => void
   setStatus: (id: string, status: RobofestRegistrationStatus) => void
   setMemberAward: (
     registrationDocId: string,
@@ -127,18 +141,14 @@ export function RobofestRegistrationsTab({
     <TabsContent value="registrations" className="space-y-4 w-full min-w-0">
       <Tabs
         value={statusTab}
-        onValueChange={(value) =>
-          setStatusTab(value as RobofestRegistrationStatus)
-        }
+        onValueChange={(value) => {
+          if (value === 'confirmed' || value === 'cancelled') {
+            setStatusTab(value)
+          }
+        }}
         className="w-full space-y-4"
       >
         <TabsList className="bg-transparent border-b border-slate-200 rounded-none w-full justify-start h-auto p-0 gap-1 sm:gap-2 overflow-x-auto">
-          <TabsTrigger
-            value="pending"
-            className="data-[state=active]:bg-amber-50 data-[state=active]:text-amber-800 data-[state=active]:border-b-2 data-[state=active]:border-amber-500 data-[state=active]:shadow-none rounded-t-lg rounded-b-none px-3 sm:px-4 py-2 text-sm font-medium border-b-2 border-transparent text-slate-600 hover:text-slate-900 hover:bg-slate-50"
-          >
-            Pending ({statusCounts.pending})
-          </TabsTrigger>
           <TabsTrigger
             value="confirmed"
             className="data-[state=active]:bg-emerald-50 data-[state=active]:text-emerald-800 data-[state=active]:border-b-2 data-[state=active]:border-emerald-600 data-[state=active]:shadow-none rounded-t-lg rounded-b-none px-3 sm:px-4 py-2 text-sm font-medium border-b-2 border-transparent text-slate-600 hover:text-slate-900 hover:bg-slate-50"
@@ -158,6 +168,7 @@ export function RobofestRegistrationsTab({
             statusTab={statusTab}
             statusTone={statusTone}
             filtersActive={filtersActive}
+            nameFilterActive={nameFilterActive}
             filteredCount={filtered.length}
             statusScopedCount={statusScopedCount}
             hasMore={hasMore}
@@ -208,7 +219,13 @@ export function RobofestRegistrationsTab({
           listPending={listPending}
           hasMore={hasMore}
           registrationsLength={registrationsLength}
-          loadMore={loadMore}
+          pageSize={pageSize}
+          pageIndex={pageIndex}
+          totalPages={totalPages}
+          setPageSize={setPageSize}
+          goToPage={goToPage}
+          goNextPage={goNextPage}
+          goPrevPage={goPrevPage}
           setStatus={setStatus}
           setMemberAward={setMemberAward}
           resendEmail={resendEmail}

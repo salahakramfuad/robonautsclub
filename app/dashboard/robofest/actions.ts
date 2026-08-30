@@ -20,6 +20,8 @@ import {
   getRobofestContentFresh,
   mapRobofestContentDoc,
   sanitizeRobofestAwardCategories,
+  syncRobofestVenueFields,
+  validateRobofestVenueConsistency,
   type RobofestContent,
   type RobofestRegistration,
   type RobofestRegistrationStatus,
@@ -83,7 +85,7 @@ export async function getRobofestDashboardContent(): Promise<RobofestContent> {
 
 export async function updateRobofestContent(
   input: RobofestContent,
-): Promise<{ success: boolean; error?: string }> {
+): Promise<{ success: boolean; error?: string; content?: RobofestContent }> {
   const session = await requireAuth()
   if (!canEditOthersArea(session, 'robofest')) {
     return { success: false, error: 'You do not have permission to edit Robofest.' }
@@ -176,12 +178,19 @@ export async function updateRobofestContent(
       return { success: false, error: 'At least one round is required.' }
     }
 
+    const venueCheck = validateRobofestVenueConsistency(sanitized)
+    if (!venueCheck.ok) {
+      return { success: false, error: venueCheck.error }
+    }
+
+    const synced = syncRobofestVenueFields(sanitized)
+
     await adminDb
       .collection(ROBOFEST_CONTENT_COLLECTION)
       .doc(ROBOFEST_CONTENT_DOC_ID)
       .set(
         {
-          ...sanitized,
+          ...synced,
           updatedAt: FieldValue.serverTimestamp(),
           updatedBy: session.uid,
         },
@@ -189,11 +198,11 @@ export async function updateRobofestContent(
       )
 
     revalidateRobofestPublic()
-    for (const category of sanitized.categories) {
+    for (const category of synced.categories) {
       revalidatePath(`/robofest/${category.slug}`)
     }
 
-    return { success: true }
+    return { success: true, content: synced }
   } catch (error) {
     console.error('[robofest-dashboard] update content failed:', error)
     return { success: false, error: 'Failed to save Robofest content.' }
@@ -261,7 +270,7 @@ export async function getRobofestRegistrationsForExport(
 export async function getRobofestRegistrations(): Promise<RobofestRegistration[]> {
   await requireAuth()
   const page = await loadRobofestRegistrationsPage({
-    filters: { status: 'pending' },
+    filters: { status: 'confirmed' },
     pageSize: ROBOFEST_REGISTRATIONS_PAGE_SIZE,
   })
   return page.items
@@ -448,7 +457,9 @@ export async function createRobofestRegistrationManual(
     }
 
     const roundOk = content.rounds.some(
-      (round) => round.city === validated.data.roundCity,
+      (round) =>
+        round.city.trim().toLowerCase() ===
+        validated.data.roundCity.trim().toLowerCase(),
     )
     if (!roundOk) {
       return { success: false, error: 'Please select a valid division.' }
@@ -527,7 +538,7 @@ export async function resetRobofestContentToDefaults(): Promise<{
   }
   if (!adminDb) return { success: false, error: 'Database unavailable.' }
 
-  const defaults = getDefaultRobofestContent()
+  const defaults = syncRobofestVenueFields(getDefaultRobofestContent())
   await adminDb
     .collection(ROBOFEST_CONTENT_COLLECTION)
     .doc(ROBOFEST_CONTENT_DOC_ID)
@@ -538,7 +549,10 @@ export async function resetRobofestContentToDefaults(): Promise<{
     })
 
   revalidateRobofestPublic()
-  return { success: true, content: mapRobofestContentDoc(defaults as unknown as Record<string, unknown>) }
+  return {
+    success: true,
+    content: mapRobofestContentDoc(defaults as unknown as Record<string, unknown>),
+  }
 }
 
 export async function getRobofestCampusAmbassadors(): Promise<

@@ -1,10 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession, hasPermission } from '@/lib/auth'
-import type { RobofestContent, RobofestRegistration } from '@/lib/robofest-content'
+import { getRobofestContentFresh } from '@/lib/robofest-content'
 import { generateRobofestBulkParticipationCertificatesPDF } from '@/lib/robofest-certificate-pdf'
 import { SITE_CONFIG } from '@/lib/site-config'
+import { loadRobofestRegistrationsByIds } from '@/app/dashboard/robofest/registrations-data'
 
 export const dynamic = 'force-dynamic'
+
+const MAX_BULK_CERTIFICATE_IDS = 500
 
 function getBaseUrl(request: NextRequest): string {
   let baseUrl =
@@ -20,7 +23,7 @@ function getBaseUrl(request: NextRequest): string {
 
 /**
  * POST /api/dashboard/robofest/certificates
- * Bulk participation certificates for a list of registrations (one page per participant).
+ * Bulk participation certificates by Firestore registration document ids.
  */
 export async function POST(request: NextRequest) {
   const session = await getServerSession()
@@ -33,8 +36,7 @@ export async function POST(request: NextRequest) {
   }
 
   let body: {
-    registrations?: RobofestRegistration[]
-    content?: RobofestContent
+    registrationIds?: string[]
     statusLabel?: string
   }
   try {
@@ -43,22 +45,37 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 })
   }
 
-  const registrations = body.registrations
-  const content = body.content
+  const registrationIds = body.registrationIds
 
-  if (!Array.isArray(registrations) || !content) {
+  if (!Array.isArray(registrationIds)) {
     return NextResponse.json(
-      { error: 'registrations and content are required' },
+      { error: 'registrationIds are required' },
       { status: 400 },
     )
   }
 
-  if (registrations.length === 0) {
+  if (registrationIds.length === 0) {
     return NextResponse.json(
       { error: 'No registrations to export.' },
       { status: 400 },
     )
   }
+
+  const loaded = await loadRobofestRegistrationsByIds(
+    registrationIds,
+    MAX_BULK_CERTIFICATE_IDS,
+  )
+
+  const registrations = loaded.filter((r) => r.status !== 'cancelled')
+
+  if (registrations.length === 0) {
+    return NextResponse.json(
+      { error: 'No eligible registrations found for certificates.' },
+      { status: 400 },
+    )
+  }
+
+  const content = await getRobofestContentFresh()
 
   const result = await generateRobofestBulkParticipationCertificatesPDF({
     registrations,
