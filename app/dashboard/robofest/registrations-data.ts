@@ -11,15 +11,19 @@ import type {
   RobofestRegistrationCursor,
   RobofestRegistrationListFilters,
   RobofestRegistrationPage,
+  RobofestRegistrationStats,
   RobofestRegistrationStatusCounts,
 } from './registrations-types'
+import { EMPTY_ROBOFEST_REGISTRATION_STATS } from './registrations-types'
 
 export type {
   RobofestRegistrationCursor,
   RobofestRegistrationListFilters,
   RobofestRegistrationPage,
+  RobofestRegistrationStats,
   RobofestRegistrationStatusCounts,
 } from './registrations-types'
+export { EMPTY_ROBOFEST_REGISTRATION_STATS } from './registrations-types'
 
 export const ROBOFEST_REGISTRATIONS_PAGE_SIZE = 10
 
@@ -300,6 +304,58 @@ export async function loadRobofestRegistrationsForExport(
   }
 
   return items
+}
+
+function participantCount(r: RobofestRegistration): number {
+  if (typeof r.teamSize === 'number' && r.teamSize > 0) return r.teamSize
+  if (Array.isArray(r.teamMembers) && r.teamMembers.length > 0) {
+    return r.teamMembers.length
+  }
+  return 1
+}
+
+function aggregateRegistrationStats(
+  items: RobofestRegistration[],
+): RobofestRegistrationStats {
+  const byCategory = new Map<string, number>()
+  const byAge = new Map<string, number>()
+  let paidTotal = 0
+  let paidCount = 0
+  let participants = 0
+
+  for (const r of items) {
+    const members = participantCount(r)
+    participants += members
+    byCategory.set(r.category, (byCategory.get(r.category) || 0) + members)
+    if (r.ageCategory) {
+      byAge.set(r.ageCategory, (byAge.get(r.ageCategory) || 0) + members)
+    }
+    if (r.paymentStatus === 'paid' && typeof r.amountPaid === 'number') {
+      paidTotal += r.amountPaid
+      paidCount += 1
+    }
+  }
+
+  return {
+    total: participants,
+    registrations: items.length,
+    byCategory: Array.from(byCategory.entries()),
+    byAge: Array.from(byAge.entries()),
+    paidTotal,
+    paidCount,
+  }
+}
+
+/**
+ * Overview stats for every registration matching filters (not just the current page).
+ * Reuses the same export scan path (indexed + missing-index/search fallback, 5000 cap).
+ */
+export async function loadRobofestRegistrationStats(
+  filters: RobofestRegistrationListFilters,
+): Promise<RobofestRegistrationStats> {
+  if (!adminDb) return { ...EMPTY_ROBOFEST_REGISTRATION_STATS }
+  const items = await loadRobofestRegistrationsForExport(filters)
+  return aggregateRegistrationStats(items)
 }
 
 export async function loadRobofestRegistrationStatusCounts(): Promise<RobofestRegistrationStatusCounts> {

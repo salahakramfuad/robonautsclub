@@ -5,6 +5,7 @@ import {
   getRobofestCampusAmbassadors,
   getRobofestDashboardContent,
   getRobofestRegistrationsPage,
+  getRobofestRegistrationStats,
   getRobofestRegistrationStatusCounts,
 } from './actions'
 import RobofestDashboardClient from './RobofestDashboardClient'
@@ -14,17 +15,24 @@ export const dynamic = 'force-dynamic'
 export default async function RobofestDashboardPage() {
   const session = await requireTabAccess('robofest')
   const defaultFilters = { status: 'confirmed' as const }
-  const [content, registrationPage, statusCounts, schools, campusAmbassadors] =
-    await Promise.all([
-      getRobofestDashboardContent(),
-      getRobofestRegistrationsPage({
-        filters: defaultFilters,
-        pageSize: 10,
-      }),
-      getRobofestRegistrationStatusCounts(),
-      getPublicEnglishMediumSchools(),
-      getRobofestCampusAmbassadors(),
-    ])
+  const [
+    content,
+    registrationPage,
+    statusCounts,
+    initialStats,
+    schools,
+    campusAmbassadors,
+  ] = await Promise.all([
+    getRobofestDashboardContent(),
+    getRobofestRegistrationsPage({
+      filters: defaultFilters,
+      pageSize: 10,
+    }),
+    getRobofestRegistrationStatusCounts(),
+    getRobofestRegistrationStats(defaultFilters),
+    getPublicEnglishMediumSchools(),
+    getRobofestCampusAmbassadors(),
+  ])
 
   const referralCounts = await getRobofestCampusAmbassadorReferralCounts(
     campusAmbassadors.map((a) => a.id),
@@ -38,6 +46,7 @@ export default async function RobofestDashboardPage() {
         initialNextCursor={registrationPage.nextCursor}
         initialHasMore={registrationPage.hasMore}
         initialStatusCounts={statusCounts}
+        initialStats={initialStats}
         schools={schools}
         campusAmbassadors={campusAmbassadors}
         referralCounts={referralCounts}

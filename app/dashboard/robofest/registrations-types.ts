@@ -30,3 +30,22 @@ export type RobofestRegistrationStatusCounts = {
   confirmed: number
   cancelled: number
 }
+
+/** Overview totals for every registration matching the current filters. */
+export type RobofestRegistrationStats = {
+  total: number
+  registrations: number
+  byCategory: [string, number][]
+  byAge: [string, number][]
+  paidTotal: number
+  paidCount: number
+}
+
+export const EMPTY_ROBOFEST_REGISTRATION_STATS: RobofestRegistrationStats = {
+  total: 0,
+  registrations: 0,
+  byCategory: [],
+  byAge: [],
+  paidTotal: 0,
+  paidCount: 0,
+}

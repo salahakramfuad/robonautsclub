@@ -77,23 +77,23 @@ export function RegistrationsOverview({
             </div>
             <p className="text-lg sm:text-xl font-bold tracking-tight text-slate-900">
               <span className="tabular-nums text-cyan-800">
-                {filteredCount}
+                {statusScopedCount}
               </span>{' '}
               {nameFilterActive ? (
                 <>
-                  matching on this page
+                  matching {statusTab}
                   <span className="ml-1.5 text-sm font-medium text-slate-500">
-                    of {statusScopedCount} matching {statusTab}
+                    · showing {filteredCount} on this page
                     {hasMore ? ' · more pages' : ''}
                   </span>
                 </>
               ) : (
                 <>
                   {statusTab} registration
-                  {filteredCount === 1 ? '' : 's'} on this page
+                  {statusScopedCount === 1 ? '' : 's'}
                   <span className="ml-1.5 text-sm font-medium text-slate-500">
-                    of {statusScopedCount}
-                    {filtersActive ? ' matching filters' : ' in this tab'}
+                    {filtersActive ? ' matching filters' : ''}
+                    · showing {filteredCount} on this page
                     {hasMore ? ' · more available' : ''}
                   </span>
                 </>
@@ -141,7 +141,7 @@ export function RegistrationsOverview({
               {stats.total}
             </p>
             <p className="text-xs font-medium text-slate-500 mt-1 tabular-nums">
-              {stats.registrations} loaded team
+              {stats.registrations} team
               {stats.registrations === 1 ? '' : 's'}
             </p>
           </div>
@@ -150,7 +150,7 @@ export function RegistrationsOverview({
             <div className="flex items-center gap-2 text-emerald-700/80 mb-2">
               <CreditCard className="w-3.5 h-3.5" />
               <p className="text-[11px] font-semibold uppercase tracking-wide">
-                Paid (loaded)
+                Paid
               </p>
             </div>
             <p className="text-3xl font-bold tabular-nums text-emerald-800 tracking-tight">
@@ -168,7 +168,7 @@ export function RegistrationsOverview({
             <div className="flex items-center gap-2">
               <Trophy className="w-3.5 h-3.5 text-cyan-700" />
               <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">
-                By competition (loaded)
+                By competition
               </p>
             </div>
             <span className="text-[11px] font-medium text-slate-400 tabular-nums">

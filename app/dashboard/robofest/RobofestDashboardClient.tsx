@@ -15,6 +15,7 @@ export default function RobofestDashboardClient({
   initialNextCursor,
   initialHasMore,
   initialStatusCounts,
+  initialStats,
   schools,
   campusAmbassadors,
   referralCounts = {},
@@ -33,6 +34,7 @@ export default function RobofestDashboardClient({
     initialNextCursor,
     initialHasMore,
     initialStatusCounts,
+    initialStats,
     canViewPayments,
   })
 

@@ -10,6 +10,7 @@ import { downloadPdfFromResponse } from '@/lib/downloadPdfBlob'
 import {
   getRobofestRegistrationsForExport,
   getRobofestRegistrationsPage,
+  getRobofestRegistrationStats,
   getRobofestRegistrationStatusCounts,
   resendRobofestRegistrationEmail,
   resetRobofestContentToDefaults,
@@ -20,6 +21,7 @@ import {
 import type {
   RobofestRegistrationCursor,
   RobofestRegistrationListFilters,
+  RobofestRegistrationStats,
   RobofestRegistrationStatusCounts,
 } from '../registrations-types'
 import {
@@ -39,6 +41,7 @@ export function useRobofestDashboard({
   initialNextCursor,
   initialHasMore,
   initialStatusCounts,
+  initialStats,
   canViewPayments = false,
 }: Pick<
   Props,
@@ -47,6 +50,7 @@ export function useRobofestDashboard({
   | 'initialNextCursor'
   | 'initialHasMore'
   | 'initialStatusCounts'
+  | 'initialStats'
   | 'canViewPayments'
 >) {
   const router = useRouter()
@@ -79,6 +83,7 @@ export function useRobofestDashboard({
   const [matchedTotal, setMatchedTotal] = useState<number | null>(null)
   const [statusCounts, setStatusCounts] =
     useState<RobofestRegistrationStatusCounts>(initialStatusCounts)
+  const [stats, setStats] = useState<RobofestRegistrationStats>(initialStats)
 
   const listFetchGenRef = useRef(0)
   const cursorStackRef = useRef(cursorStack)
@@ -246,16 +251,18 @@ export function useRobofestDashboard({
     (filters = listFilters) => {
       const gen = ++listFetchGenRef.current
       startListTransition(async () => {
-        const [page, counts] = await Promise.all([
+        const [page, counts, nextStats] = await Promise.all([
           getRobofestRegistrationsPage({
             filters,
             pageSize,
           }),
           getRobofestRegistrationStatusCounts(),
+          getRobofestRegistrationStats(filters),
         ])
         if (gen !== listFetchGenRef.current) return
         applyPageResult(1, [null], page)
         setStatusCounts(counts)
+        setStats(nextStats)
       })
     },
     [listFilters, pageSize, applyPageResult],
@@ -302,46 +309,6 @@ export function useRobofestDashboard({
   }
 
   const filtered = registrations
-
-  const stats = useMemo(() => {
-    const source = filtered
-    const byCategory = new Map<string, number>()
-    const byAge = new Map<string, number>()
-    let paidTotal = 0
-    let paidCount = 0
-    let participants = 0
-    for (const r of source) {
-      const memberCount =
-        typeof r.teamSize === 'number' && r.teamSize > 0
-          ? r.teamSize
-          : Array.isArray(r.teamMembers) && r.teamMembers.length > 0
-            ? r.teamMembers.length
-            : 1
-      participants += memberCount
-      byCategory.set(
-        r.category,
-        (byCategory.get(r.category) || 0) + memberCount,
-      )
-      if (r.ageCategory) {
-        byAge.set(
-          r.ageCategory,
-          (byAge.get(r.ageCategory) || 0) + memberCount,
-        )
-      }
-      if (r.paymentStatus === 'paid' && typeof r.amountPaid === 'number') {
-        paidTotal += r.amountPaid
-        paidCount += 1
-      }
-    }
-    return {
-      total: participants,
-      registrations: source.length,
-      byCategory: Array.from(byCategory.entries()),
-      byAge: Array.from(byAge.entries()),
-      paidTotal,
-      paidCount,
-    }
-  }, [filtered])
 
   const clearFilters = () => {
     setCategoryFilter('')

@@ -53,13 +53,16 @@ import {
   loadRobofestCampusAmbassadorReferralCounts,
   loadRobofestRegistrationsForExport,
   loadRobofestRegistrationsPage,
+  loadRobofestRegistrationStats,
   loadRobofestRegistrationStatusCounts,
+  EMPTY_ROBOFEST_REGISTRATION_STATS,
   ROBOFEST_REGISTRATIONS_PAGE_SIZE,
 } from './registrations-data'
 import type {
   RobofestRegistrationCursor,
   RobofestRegistrationListFilters,
   RobofestRegistrationPage,
+  RobofestRegistrationStats,
   RobofestRegistrationStatusCounts,
 } from './registrations-types'
 
@@ -230,6 +233,18 @@ export async function getRobofestRegistrationStatusCounts(): Promise<RobofestReg
   } catch (error) {
     console.error('[robofest-dashboard] status counts failed:', error)
     return { pending: 0, confirmed: 0, cancelled: 0 }
+  }
+}
+
+export async function getRobofestRegistrationStats(
+  filters: RobofestRegistrationListFilters,
+): Promise<RobofestRegistrationStats> {
+  await requireAuth()
+  try {
+    return await loadRobofestRegistrationStats(filters)
+  } catch (error) {
+    console.error('[robofest-dashboard] registration stats failed:', error)
+    return { ...EMPTY_ROBOFEST_REGISTRATION_STATS }
   }
 }
 

@@ -2,6 +2,7 @@ import type { RobofestContent, RobofestRegistration } from '@/lib/robofest-conte
 import type { RobofestCampusAmbassador } from '@/lib/robofest-campus-ambassadors'
 import type {
   RobofestRegistrationCursor,
+  RobofestRegistrationStats,
   RobofestRegistrationStatusCounts,
 } from '../registrations-types'
 
@@ -11,6 +12,7 @@ export type Props = {
   initialNextCursor: RobofestRegistrationCursor | null
   initialHasMore: boolean
   initialStatusCounts: RobofestRegistrationStatusCounts
+  initialStats: RobofestRegistrationStats
   schools: string[]
   campusAmbassadors: RobofestCampusAmbassador[]
   referralCounts?: Record<string, number>
