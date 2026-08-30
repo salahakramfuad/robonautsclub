@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession, hasPermission } from '@/lib/auth'
-import type { RobofestContent, RobofestRegistration } from '@/lib/robofest-content'
+import { getRobofestContentFresh } from '@/lib/robofest-content'
+import { getRobofestRegistrationById } from '@/lib/robofest-registration'
 import { generateRobofestParticipationCertificatesPDF } from '@/lib/robofest-certificate-pdf'
 import { SITE_CONFIG } from '@/lib/site-config'
 
@@ -38,33 +39,20 @@ export async function POST(request: NextRequest, context: RouteContext) {
 
   const { id } = await context.params
 
-  let body: {
-    registration?: RobofestRegistration
-    content?: RobofestContent
-    memberIndex?: number
-  }
+  let body: { memberIndex?: number } = {}
   try {
-    body = await request.json()
+    const raw = await request.text()
+    if (raw.trim()) body = JSON.parse(raw)
   } catch {
     return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 })
   }
 
-  const registration = body.registration
-  const content = body.content
-
-  if (!registration || !content) {
-    return NextResponse.json(
-      { error: 'registration and content are required' },
-      { status: 400 },
-    )
+  const registration = await getRobofestRegistrationById(id)
+  if (!registration) {
+    return NextResponse.json({ error: 'Registration not found' }, { status: 404 })
   }
 
-  if (registration.id && registration.id !== id) {
-    return NextResponse.json(
-      { error: 'Registration id mismatch' },
-      { status: 400 },
-    )
-  }
+  const content = await getRobofestContentFresh()
 
   const memberIndex =
     typeof body.memberIndex === 'number' && Number.isInteger(body.memberIndex)
@@ -76,7 +64,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
   }
 
   const result = await generateRobofestParticipationCertificatesPDF({
-    registration: { ...registration, id: registration.id || id },
+    registration,
     content,
     memberIndex,
     baseUrl: getBaseUrl(request),

@@ -51,6 +51,8 @@ export type RobofestRegistrationWriteResult = {
   registrationDocId?: string;
   registrationId?: string;
   teamNumber?: string;
+  /** True when at least one confirmation email was accepted by Brevo. */
+  emailSent?: boolean;
 };
 
 function formatMemberLine(member: RobofestTeamMember): string {
@@ -360,6 +362,7 @@ export async function createRobofestRegistrationAndSendEmail(
       registrationDocId: regRef.id,
       registrationId,
       teamNumber,
+      emailSent: false,
     };
   }
 
@@ -412,6 +415,11 @@ export async function createRobofestRegistrationAndSendEmail(
     trxId: paymentMeta?.trxId,
   });
 
+  const partialFailure =
+    emailResult.success &&
+    Array.isArray(emailResult.failedRecipients) &&
+    emailResult.failedRecipients.length > 0;
+
   try {
     const pdfUpdate: Record<string, unknown> = {};
     if (emailResult.pdfBuffer && emailResult.pdfBuffer.length > 0) {
@@ -430,14 +438,20 @@ export async function createRobofestRegistrationAndSendEmail(
         emailSentAt: new Date(),
         emailSendCount: 1,
         emailRecipientCount: recipients.length,
-        emailError: FieldValue.delete(),
+        emailPartialFailure: partialFailure,
+        emailError: partialFailure
+          ? emailResult.warning ||
+            `Partial send failure: ${emailResult.failedRecipients?.join(", ")}`
+          : FieldValue.delete(),
         ...pdfUpdate,
       });
     } else {
       await regRef.update({
         emailSent: false,
+        emailPartialFailure: false,
         emailError: emailResult.error || "Unknown email service error",
         emailFailedAt: new Date(),
+        emailRecipientCount: recipients.length,
         ...pdfUpdate,
       });
     }
@@ -454,7 +468,21 @@ export async function createRobofestRegistrationAndSendEmail(
       registrationDocId: regRef.id,
       registrationId,
       teamNumber,
+      emailSent: false,
       warning: `Your registration was saved (ID: ${registrationId}), but we couldn't send the confirmation email. Please contact support.`,
+    };
+  }
+
+  if (partialFailure) {
+    return {
+      success: true,
+      registrationDocId: regRef.id,
+      registrationId,
+      teamNumber,
+      emailSent: true,
+      warning:
+        emailResult.warning ||
+        `Your registration was confirmed (ID: ${registrationId}), but some confirmation emails failed to send.`,
     };
   }
 
@@ -464,6 +492,7 @@ export async function createRobofestRegistrationAndSendEmail(
       registrationDocId: regRef.id,
       registrationId,
       teamNumber,
+      emailSent: true,
       warning: `Your registration was confirmed (ID: ${registrationId}), but we couldn't attach the confirmation PDF.`,
     };
   }
@@ -473,6 +502,7 @@ export async function createRobofestRegistrationAndSendEmail(
     registrationDocId: regRef.id,
     registrationId,
     teamNumber,
+    emailSent: true,
   };
 }
 
@@ -482,6 +512,7 @@ export async function resendRobofestConfirmationEmail(
 ): Promise<{
   success: boolean;
   error?: string;
+  warning?: string;
   recipientCount?: number;
   emailSendCount?: number;
 }> {
@@ -562,23 +593,32 @@ export async function resendRobofestConfirmationEmail(
 
   if (emailResult.success) {
     const nextCount = (registration.emailSendCount ?? 0) + 1;
+    const partialFailure =
+      Array.isArray(emailResult.failedRecipients) &&
+      emailResult.failedRecipients.length > 0;
     await ref.update({
       emailSent: true,
       emailSentAt: new Date(),
       emailSendCount: nextCount,
       emailRecipientCount: recipients.length,
-      emailError: FieldValue.delete(),
+      emailPartialFailure: partialFailure,
+      emailError: partialFailure
+        ? emailResult.warning ||
+          `Partial send failure: ${emailResult.failedRecipients?.join(", ")}`
+        : FieldValue.delete(),
       ...pdfUpdate,
     });
     return {
       success: true,
       recipientCount: recipients.length,
       emailSendCount: nextCount,
+      warning: emailResult.warning,
     };
   }
 
   await ref.update({
     emailSent: false,
+    emailPartialFailure: false,
     emailError: emailResult.error || "Unknown email service error",
     emailFailedAt: new Date(),
     ...pdfUpdate,

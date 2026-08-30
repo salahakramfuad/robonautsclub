@@ -40,6 +40,7 @@ export type RobofestConfirmationEmailProps = {
 export type RobofestEmailResult = {
   success: boolean
   error?: string
+  warning?: string
   pdfAttached?: boolean
   pdfError?: string
   pdfBuffer?: Buffer | null
@@ -164,6 +165,13 @@ function buildRobofestEmailHtml({
   const instagramUrl = SITE_CONFIG.social.instagram
   const contactEmail = 'events@robonautsltd.com'
   const logoUrl = `${resolveBaseUrl()}${SITE_CONFIG.assets.logo}`
+  const paymentReceived = amountPaid != null
+  const introBody = paymentReceived
+    ? `We’re excited to confirm that your registration has been successfully completed and your payment has been received. You are now officially confirmed as a participant of the <strong style="color: #0f172a;">Official RoboFest Bangladesh</strong> Qualifier, organized by <strong style="color: #0f172a;">Robonauts Ltd</strong>.`
+    : `We’re excited to confirm that your registration has been successfully completed. You are now officially confirmed as a participant of the <strong style="color: #0f172a;">Official RoboFest Bangladesh</strong> Qualifier, organized by <strong style="color: #0f172a;">Robonauts Ltd</strong>.`
+  const confirmationSectionTitle = paymentReceived
+    ? 'Payment Confirmation'
+    : 'Registration Confirmation'
 
   return `
 <!DOCTYPE html>
@@ -195,7 +203,7 @@ function buildRobofestEmailHtml({
                 Thank you for Registering for <strong style="color: #0e7490;">RoboFest Bangladesh 2026</strong>!
               </p>
               <p style="margin: 0 0 24px; font-size: 15px; color: #475569;">
-                We’re excited to confirm that your registration has been successfully completed and your payment has been received. You are now officially confirmed as a participant of the <strong style="color: #0f172a;">Official RoboFest Bangladesh</strong> Qualifier, organized by <strong style="color: #0f172a;">Robonauts Ltd</strong>.
+                ${introBody}
               </p>
 
               <table role="presentation" width="100%" style="border: 1px solid #e2e8f0; border-radius: 12px; margin-bottom: 20px;">
@@ -226,7 +234,7 @@ function buildRobofestEmailHtml({
               <table role="presentation" width="100%" style="border: 1px solid #e2e8f0; border-radius: 12px; margin-bottom: 20px;">
                 <tr>
                   <td style="background-color: #f8fafc; padding: 14px 18px; border-bottom: 1px solid #e2e8f0;">
-                    <h2 style="margin: 0; font-size: 16px; color: #0f172a;">Payment Confirmation</h2>
+                    <h2 style="margin: 0; font-size: 16px; color: #0f172a;">${confirmationSectionTitle}</h2>
                   </td>
                 </tr>
                 <tr>
@@ -492,6 +500,10 @@ export async function sendRobofestConfirmationEmail(
 
   return {
     success: true,
+    warning:
+      failedRecipients.length > 0
+        ? `Sent to ${sentCount} recipient(s); failed: ${failedRecipients.join(', ')}`
+        : undefined,
     pdfAttached,
     pdfError:
       failedRecipients.length > 0
