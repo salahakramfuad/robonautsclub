@@ -1,23 +1,10 @@
 'use client'
 
-import { useState } from 'react'
-import {
-  Award,
-  ChevronDown,
-  Download,
-  FileSpreadsheet,
-  FileText,
-  Search,
-} from 'lucide-react'
+import { Award, Download, FileSpreadsheet, FileText, Search } from 'lucide-react'
 import type { RobofestRegistrationStatus } from '@/lib/robofest-content'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover'
 import type { StatusTone } from './types'
 
 export function RegistrationsToolbar({
@@ -61,10 +48,6 @@ export function RegistrationsToolbar({
   runExport: (kind: 'csv' | 'excel' | 'pdf') => void
   downloadBulkCertificates: () => void
 }) {
-  const [exportOpen, setExportOpen] = useState(false)
-  const canExport = canExportCsv || canExportExcel || canExportPdf
-  const exportDisabled = statusScopedCount === 0 || exportPending
-
   return (
     <div className="border-t border-slate-100 bg-slate-50/40 px-4 sm:px-5 py-4 space-y-3.5">
       <div className="flex items-center gap-2 text-slate-500">
@@ -88,7 +71,7 @@ export function RegistrationsToolbar({
             />
           </div>
           <p className="text-[11px] text-slate-400">
-            Searches all {statusTab} registrations (not just this page).
+            Search within loaded results — load more to include older teams.
           </p>
         </div>
         <div className="space-y-1.5">
@@ -144,92 +127,69 @@ export function RegistrationsToolbar({
       </div>
 
       <div className="flex flex-wrap items-center gap-2 pt-1">
-        {canExport ? (
+        {(canExportCsv || canExportExcel || canExportPdf) ? (
           <>
-            <span
-              className={cn(
-                'inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium capitalize',
-                statusTone.chip,
-              )}
-            >
-              Export {statusTab}
-            </span>
-            <Popover open={exportOpen} onOpenChange={setExportOpen}>
-              <PopoverTrigger asChild>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  disabled={exportDisabled}
-                  className="bg-white border-slate-200 gap-1.5"
-                >
-                  <Download className="w-3.5 h-3.5" />
-                  {exportPending ? 'Exporting…' : 'Export'}
-                  <ChevronDown className="w-3.5 h-3.5 opacity-70" />
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent align="start" className="w-52 p-1">
-                <div className="flex flex-col">
-                  {canExportCsv ? (
-                    <button
-                      type="button"
-                      className="flex items-center gap-2 rounded-md px-2.5 py-2 text-sm text-slate-700 hover:bg-slate-100 text-left disabled:opacity-50"
-                      disabled={exportDisabled}
-                      onClick={() => {
-                        setExportOpen(false)
-                        runExport('csv')
-                      }}
-                    >
-                      <FileText className="w-3.5 h-3.5 text-slate-500" />
-                      CSV
-                    </button>
-                  ) : null}
-                  {canExportExcel ? (
-                    <button
-                      type="button"
-                      className="flex items-center gap-2 rounded-md px-2.5 py-2 text-sm text-slate-700 hover:bg-slate-100 text-left disabled:opacity-50"
-                      disabled={exportDisabled}
-                      onClick={() => {
-                        setExportOpen(false)
-                        runExport('excel')
-                      }}
-                    >
-                      <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-600" />
-                      Excel
-                    </button>
-                  ) : null}
-                  {canExportPdf ? (
-                    <button
-                      type="button"
-                      className="flex items-center gap-2 rounded-md px-2.5 py-2 text-sm text-slate-700 hover:bg-slate-100 text-left disabled:opacity-50"
-                      disabled={exportDisabled}
-                      onClick={() => {
-                        setExportOpen(false)
-                        runExport('pdf')
-                      }}
-                    >
-                      <Download className="w-3.5 h-3.5 text-rose-600" />
-                      PDF
-                    </button>
-                  ) : null}
-                  {canExportPdf ? (
-                    <button
-                      type="button"
-                      className="flex items-center gap-2 rounded-md px-2.5 py-2 text-sm text-slate-700 hover:bg-slate-100 text-left disabled:opacity-50 border-t border-slate-100 mt-0.5 pt-2"
-                      disabled={exportDisabled}
-                      title="Download participation certificates for all participants in this filtered list"
-                      onClick={() => {
-                        setExportOpen(false)
-                        downloadBulkCertificates()
-                      }}
-                    >
-                      <Award className="w-3.5 h-3.5 text-cyan-700" />
-                      Certificates
-                    </button>
-                  ) : null}
-                </div>
-              </PopoverContent>
-            </Popover>
+        <span
+          className={cn(
+            'inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium capitalize',
+            statusTone.chip,
+          )}
+        >
+          Export {statusTab} (server)
+        </span>
+        {canExportCsv ? (
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={() => runExport('csv')}
+          disabled={statusScopedCount === 0 || exportPending}
+          className="bg-white border-slate-200"
+        >
+          <FileText className="w-3.5 h-3.5" />
+          CSV
+        </Button>
+        ) : null}
+        {canExportExcel ? (
+        <Button
+          type="button"
+          size="sm"
+          className="bg-emerald-600 hover:bg-emerald-700 text-white"
+          onClick={() => runExport('excel')}
+          disabled={statusScopedCount === 0 || exportPending}
+        >
+          <FileSpreadsheet className="w-3.5 h-3.5" />
+          Excel
+        </Button>
+        ) : null}
+        {canExportPdf ? (
+        <Button
+          type="button"
+          size="sm"
+          className="bg-rose-600 hover:bg-rose-700 text-white"
+          onClick={() => runExport('pdf')}
+          disabled={statusScopedCount === 0 || exportPending}
+        >
+          <Download className="w-3.5 h-3.5" />
+          PDF
+        </Button>
+        ) : null}
+        {canExportPdf ? (
+        <Button
+          type="button"
+          size="sm"
+          className="bg-cyan-700 hover:bg-cyan-800 text-white"
+          onClick={downloadBulkCertificates}
+          disabled={statusScopedCount === 0 || exportPending}
+          title="Download participation certificates for all participants in this filtered list"
+        >
+          <Award className="w-3.5 h-3.5" />
+          Certificates
+        </Button>
+        ) : null}
+        {exportPending ? (
+          <span className="text-xs text-slate-500">Exporting…</span>
+        ) : null}
           </>
         ) : null}
       </div>

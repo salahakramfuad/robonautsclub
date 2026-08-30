@@ -67,9 +67,8 @@ export default function RobofestDashboardClient({
         statusCounts={d.statusCounts}
         statusTone={d.statusTone}
         filtersActive={d.filtersActive}
-        nameFilterActive={d.nameFilterActive}
         filtered={d.filtered}
-        statusScopedCount={d.displayTotal}
+        statusScopedCount={d.statusScopedCount}
         hasMore={d.hasMore}
         clearFilters={d.clearFilters}
         canCreate={canCreate}
@@ -101,13 +100,7 @@ export default function RobofestDashboardClient({
         pending={d.pending}
         listPending={d.listPending}
         registrationsLength={d.registrations.length}
-        pageSize={d.pageSize}
-        pageIndex={d.pageIndex}
-        totalPages={d.totalPages}
-        setPageSize={d.setPageSize}
-        goToPage={d.goToPage}
-        goNextPage={d.goNextPage}
-        goPrevPage={d.goPrevPage}
+        loadMore={d.loadMore}
         setStatus={d.setStatus}
         setMemberAward={d.setMemberAward}
         resendEmail={d.resendEmail}

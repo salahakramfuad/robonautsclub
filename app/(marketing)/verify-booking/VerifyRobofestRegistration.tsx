@@ -17,7 +17,7 @@ import type { RobofestContent, RobofestRegistration } from '@/lib/robofest-conte
 import {
   resolveRobofestRoundDateLabel,
   resolveRobofestRoundVenueLabel,
-} from '@/lib/robofest-venue'
+} from '@/lib/robofest-content'
 import {
   resolveRobofestAwardCategory,
   ROBOFEST_DEFAULT_AWARD_CATEGORY_ID,

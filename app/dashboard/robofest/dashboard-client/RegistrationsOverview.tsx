@@ -22,7 +22,6 @@ export function RegistrationsOverview({
   statusTab,
   statusTone,
   filtersActive,
-  nameFilterActive = false,
   filteredCount,
   statusScopedCount,
   hasMore,
@@ -39,7 +38,6 @@ export function RegistrationsOverview({
   statusTab: RobofestRegistrationStatus
   statusTone: StatusTone
   filtersActive: boolean
-  nameFilterActive?: boolean
   filteredCount: number
   statusScopedCount: number
   hasMore: boolean
@@ -79,25 +77,12 @@ export function RegistrationsOverview({
               <span className="tabular-nums text-cyan-800">
                 {filteredCount}
               </span>{' '}
-              {nameFilterActive ? (
-                <>
-                  matching on this page
-                  <span className="ml-1.5 text-sm font-medium text-slate-500">
-                    of {statusScopedCount} matching {statusTab}
-                    {hasMore ? ' · more pages' : ''}
-                  </span>
-                </>
-              ) : (
-                <>
-                  {statusTab} registration
-                  {filteredCount === 1 ? '' : 's'} on this page
-                  <span className="ml-1.5 text-sm font-medium text-slate-500">
-                    of {statusScopedCount}
-                    {filtersActive ? ' matching filters' : ' in this tab'}
-                    {hasMore ? ' · more available' : ''}
-                  </span>
-                </>
-              )}
+              loaded {statusTab} registration
+              {filteredCount === 1 ? '' : 's'}
+              <span className="ml-1.5 text-sm font-medium text-slate-500">
+                of {statusScopedCount} in this tab
+                {hasMore ? ' · more available' : ''}
+              </span>
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2 shrink-0">
