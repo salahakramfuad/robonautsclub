@@ -13,6 +13,7 @@ export function getRobofestEventsListCard(): Event {
   const now = new Date().toISOString()
   return {
     id: ROBOFEST_EVENTS_LIST_CARD_ID,
+    slug: 'robofest',
     title: ROBOFEST_LOCAL.headline,
     date: ['2026-09-11', '2026-09-18'],
     location: ROBOFEST_LOCAL.venueLabel,

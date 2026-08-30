@@ -12,6 +12,7 @@ import {
   ArrowRight,
 } from 'lucide-react'
 import { Event } from '@/types/event'
+import { eventPublicHref } from '@/lib/event-ui'
 import { parseEventDates, formatEventDates, isRegistrationOpen } from '@/lib/dateUtils'
 import { SITE_CONFIG } from '@/lib/site-config'
 import {
@@ -259,7 +260,7 @@ export default function FeaturedUpcomingCarousel({
                           asChild
                           className={`h-auto px-2.5 py-1 rounded-md text-[10px] sm:text-xs font-semibold text-white shadow-sm hover:opacity-90 hover:text-white whitespace-nowrap border-0 ${slideGradient}`}
                         >
-                          <Link href={`/events/${event.id}`} prefetch={false}>
+                          <Link href={eventPublicHref(event)} prefetch={false}>
                             {registrationOpen ? 'Register' : 'Details'}
                             <ArrowRight className="w-3 h-3 shrink-0" />
                           </Link>
@@ -443,7 +444,7 @@ export default function FeaturedUpcomingCarousel({
                         size="lg"
                         className={`h-auto px-5 py-3 rounded-xl font-semibold text-white shadow-lg hover:opacity-90 hover:text-white border-0 ${slideGradient}`}
                       >
-                        <Link href={`/events/${event.id}`} prefetch={false}>
+                        <Link href={eventPublicHref(event)} prefetch={false}>
                           {registrationOpen ? 'Register' : 'View details'}
                           <ArrowRight className="w-4 h-4" />
                         </Link>

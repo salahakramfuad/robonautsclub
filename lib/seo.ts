@@ -3,6 +3,7 @@
  */
 
 import { SITE_CONFIG, getSiteOrigin } from "./site-config";
+import { eventPublicHref } from "./event-ui";
 
 export { SITE_CONFIG, getSiteOrigin };
 
@@ -158,7 +159,7 @@ export function getBreadcrumbSchema(items: Array<{ name: string; url: string }>)
   };
 }
 
-export type ItemListEventItem = { id: string; title: string };
+export type ItemListEventItem = { id: string; title: string; slug?: string; href?: string };
 
 /**
  * ItemList JSON-LD for an events index (cap length for reasonable payload size).
@@ -172,7 +173,7 @@ export function getEventsItemListSchema(events: ItemListEventItem[], maxItems = 
       "@type": "ListItem",
       position: index + 1,
       name: e.title,
-      url: absoluteSiteUrl(`/events/${e.id}`),
+      url: absoluteSiteUrl(eventPublicHref(e)),
     })),
   };
 }

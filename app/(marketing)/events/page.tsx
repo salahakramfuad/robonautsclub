@@ -60,7 +60,7 @@ export default async function EventsPage() {
 
   const itemListJsonLd = JSON.stringify(
     getEventsItemListSchema(
-      initialUpcoming.map((e) => ({ id: e.id, title: e.title })),
+      initialUpcoming.map((e) => ({ id: e.id, slug: e.slug, href: e.href, title: e.title })),
       20,
     ),
   )

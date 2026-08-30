@@ -169,11 +169,11 @@ export default function BookingForm({ event, schools }: { event: Event; schools:
 
   return (
     <Card className="border-2 border-gray-200 shadow-lg hover:shadow-xl transition-shadow duration-300">
-      <CardHeader className="p-5 sm:p-7 pb-0">
+      <CardHeader className="p-1 sm:p-7 pb-0">
         <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-1 sm:mb-2">Registration Form</h3>
-        <p className="text-xs sm:text-sm text-gray-500">{event.title}</p>
+        <p className="text-xs sm:text-sm text-gray-500">{event.description}</p>
       </CardHeader>
-      <CardContent className="p-5 sm:p-7 pt-4 sm:pt-6">
+      <CardContent className="p-6 sm:p-8">
         {event.isPaid && (
           <Alert className="mb-5 border-2 border-amber-300 bg-amber-50 shadow-sm">
             <Banknote className="h-5 w-5 text-amber-600" />
