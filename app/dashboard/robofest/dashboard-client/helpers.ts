@@ -1,5 +1,7 @@
-import type { RobofestRegistration, RobofestRegistrationStatus } from '@/lib/robofest-content'
+import type { RobofestRegistrationStatus } from '@/lib/robofest-content'
 import type { StatusTone } from './types'
+
+export { registrationMatchesNameFilter } from '../registration-search'
 
 export function statusBadgeClass(status: string) {
   if (status === 'confirmed') {
@@ -17,11 +19,11 @@ export const statusEmptyCopy: Record<
 > = {
   pending: {
     title: 'No pending registrations',
-    body: 'New teams awaiting review will appear here.',
+    body: 'Registrations are only created after payment confirmation.',
   },
   confirmed: {
     title: 'No confirmed registrations',
-    body: 'Confirmed teams will appear here.',
+    body: 'Confirmed teams will appear here after successful payment or free registration.',
   },
   cancelled: {
     title: 'No cancelled registrations',
@@ -49,27 +51,3 @@ export function getStatusTone(statusTab: RobofestRegistrationStatus): StatusTone
         }
 }
 
-export function registrationMatchesNameFilter(
-  r: RobofestRegistration,
-  name: string,
-): boolean {
-  const haystack = [
-    r.name,
-    r.teamNumber,
-    r.registrationId,
-    r.email,
-    r.phone,
-    r.school,
-    r.campusAmbassadorName,
-    ...(r.teamMembers || []).flatMap((m) => [
-      m.name,
-      m.email,
-      m.phone,
-      m.school,
-    ]),
-  ]
-    .filter(Boolean)
-    .join(' ')
-    .toLowerCase()
-  return haystack.includes(name)
-}

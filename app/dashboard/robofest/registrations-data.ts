@@ -6,6 +6,7 @@ import {
   type RobofestRegistration,
   type RobofestRegistrationStatus,
 } from '@/lib/robofest-content'
+import { registrationMatchesNameFilter } from './registration-search'
 import type {
   RobofestRegistrationCursor,
   RobofestRegistrationListFilters,
@@ -20,10 +21,13 @@ export type {
   RobofestRegistrationStatusCounts,
 } from './registrations-types'
 
-export const ROBOFEST_REGISTRATIONS_PAGE_SIZE = 20
+export const ROBOFEST_REGISTRATIONS_PAGE_SIZE = 10
 
 /** Soft cap for in-memory fallback while composite indexes are building. */
 const FALLBACK_SCAN_LIMIT = 500
+
+/** Cap for search / export-style full scans. */
+const SEARCH_SCAN_LIMIT = 5000
 
 function normalizeFilters(
   filters: RobofestRegistrationListFilters,
@@ -33,6 +37,7 @@ function normalizeFilters(
     category: filters.category?.trim() || undefined,
     roundCity: filters.roundCity?.trim() || undefined,
     ageCategory: filters.ageCategory?.trim() || undefined,
+    search: filters.search?.trim() || undefined,
   }
 }
 
@@ -87,6 +92,7 @@ function matchesExtraFilters(
   if (f.category && item.category !== f.category) return false
   if (f.roundCity && item.roundCity !== f.roundCity) return false
   if (f.ageCategory && item.ageCategory !== f.ageCategory) return false
+  if (f.search && !registrationMatchesNameFilter(item, f.search)) return false
   return true
 }
 
@@ -127,27 +133,30 @@ function pageFromItems(
         ? { createdAt: last.createdAt, id: last.id }
         : null,
     hasMore,
+    matchedTotal: items.length,
   }
 }
 
 /**
  * Equality-only scan + in-memory sort/paginate.
- * Used when composite indexes are not ready yet.
+ * Used when composite indexes are not ready yet, or when search is active.
  */
 async function loadRobofestRegistrationsPageFallback(options: {
   filters: RobofestRegistrationListFilters
   cursor?: RobofestRegistrationCursor | null
   pageSize: number
+  scanLimit?: number
 }): Promise<RobofestRegistrationPage> {
   if (!adminDb) {
-    return { items: [], nextCursor: null, hasMore: false }
+    return { items: [], nextCursor: null, hasMore: false, matchedTotal: 0 }
   }
 
   const f = normalizeFilters(options.filters)
+  const scanLimit = options.scanLimit ?? FALLBACK_SCAN_LIMIT
   const snap = await adminDb
     .collection(ROBOFEST_REGISTRATIONS_COLLECTION)
     .where('status', '==', f.status)
-    .limit(FALLBACK_SCAN_LIMIT)
+    .limit(scanLimit)
     .get()
 
   const items = snap.docs
@@ -160,6 +169,25 @@ async function loadRobofestRegistrationsPageFallback(options: {
   return pageFromItems(items, options.cursor, options.pageSize)
 }
 
+async function countIndexedFilters(
+  filters: RobofestRegistrationListFilters,
+): Promise<number | null> {
+  try {
+    const q = buildIndexedQuery(filters)
+    if (!q) return null
+    const snap = await q.count().get()
+    return snap.data().count
+  } catch (error) {
+    if (!isMissingIndexError(error)) {
+      console.warn(
+        '[robofest] Filtered count failed:',
+        error instanceof Error ? error.message : error,
+      )
+    }
+    return null
+  }
+}
+
 /**
  * Paginated Robofest registrations for the dashboard.
  * Kept outside `'use server'` so it can be called from RSC and server actions.
@@ -170,17 +198,30 @@ export async function loadRobofestRegistrationsPage(options: {
   pageSize?: number
 }): Promise<RobofestRegistrationPage> {
   if (!adminDb) {
-    return { items: [], nextCursor: null, hasMore: false }
+    return { items: [], nextCursor: null, hasMore: false, matchedTotal: 0 }
   }
 
   const pageSize = Math.min(
     Math.max(options.pageSize ?? ROBOFEST_REGISTRATIONS_PAGE_SIZE, 1),
     100,
   )
+  const f = normalizeFilters(options.filters)
+  const hasSearch = Boolean(f.search)
+  const hasExtraFilters = Boolean(f.category || f.roundCity || f.ageCategory)
+
+  // Substring search is not indexable — scan matching status (+ equality filters) in memory.
+  if (hasSearch) {
+    return loadRobofestRegistrationsPageFallback({
+      filters: f,
+      cursor: options.cursor,
+      pageSize,
+      scanLimit: SEARCH_SCAN_LIMIT,
+    })
+  }
 
   try {
-    let q = buildIndexedQuery(options.filters)
-    if (!q) return { items: [], nextCursor: null, hasMore: false }
+    let q = buildIndexedQuery(f)
+    if (!q) return { items: [], nextCursor: null, hasMore: false, matchedTotal: 0 }
 
     const cursor = options.cursor
     if (cursor?.id && cursor.createdAt) {
@@ -190,7 +231,10 @@ export async function loadRobofestRegistrationsPage(options: {
       }
     }
 
-    const snap = await q.limit(pageSize + 1).get()
+    const [snap, matchedTotal] = await Promise.all([
+      q.limit(pageSize + 1).get(),
+      hasExtraFilters ? countIndexedFilters(f) : Promise.resolve(null),
+    ])
     const docs = snap.docs.slice(0, pageSize)
     const items = docs.map((doc) =>
       mapRobofestRegistrationDoc(doc.id, doc.data() as Record<string, unknown>),
@@ -208,7 +252,7 @@ export async function loadRobofestRegistrationsPage(options: {
       }
     }
 
-    return { items, nextCursor, hasMore }
+    return { items, nextCursor, hasMore, matchedTotal }
   } catch (error) {
     if (!isMissingIndexError(error)) throw error
     console.warn(
@@ -216,7 +260,7 @@ export async function loadRobofestRegistrationsPage(options: {
       error instanceof Error ? error.message : error,
     )
     return loadRobofestRegistrationsPageFallback({
-      filters: options.filters,
+      filters: f,
       cursor: options.cursor,
       pageSize,
     })
@@ -228,13 +272,25 @@ export async function loadRobofestRegistrationsForExport(
   filters: RobofestRegistrationListFilters,
   maxDocs = 5000,
 ): Promise<RobofestRegistration[]> {
+  const f = normalizeFilters(filters)
+
+  // Search requires a full in-memory pass (same path as search paging).
+  if (f.search) {
+    const page = await loadRobofestRegistrationsPageFallback({
+      filters: f,
+      pageSize: maxDocs,
+      scanLimit: Math.min(maxDocs, SEARCH_SCAN_LIMIT),
+    })
+    return page.items
+  }
+
   const items: RobofestRegistration[] = []
   let cursor: RobofestRegistrationCursor | null = null
   const batchSize = 200
 
   while (items.length < maxDocs) {
     const page = await loadRobofestRegistrationsPage({
-      filters,
+      filters: f,
       cursor,
       pageSize: Math.min(batchSize, maxDocs - items.length),
     })
@@ -297,4 +353,32 @@ export async function loadRobofestCampusAmbassadorReferralCounts(
     counts[id] = count
   }
   return counts
+}
+
+/** Load registrations by Firestore document ids (bulk certificates). */
+export async function loadRobofestRegistrationsByIds(
+  ids: string[],
+  maxDocs = 500,
+): Promise<RobofestRegistration[]> {
+  if (!adminDb || ids.length === 0) return []
+
+  const unique = Array.from(
+    new Set(ids.map((id) => id.trim()).filter(Boolean)),
+  ).slice(0, maxDocs)
+
+  const results = await Promise.all(
+    unique.map(async (id) => {
+      const snap = await adminDb!
+        .collection(ROBOFEST_REGISTRATIONS_COLLECTION)
+        .doc(id)
+        .get()
+      if (!snap.exists) return null
+      return mapRobofestRegistrationDoc(
+        snap.id,
+        snap.data() as Record<string, unknown>,
+      )
+    }),
+  )
+
+  return results.filter((r): r is RobofestRegistration => r != null)
 }
