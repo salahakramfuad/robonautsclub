@@ -48,28 +48,44 @@ export default async function NewsArticlePhotosPage({ params }: Props) {
 
   return (
     <div className="min-h-screen bg-linear-to-b from-slate-50 via-white to-slate-50/80">
-      <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-14 lg:px-8">
-        <Link
-          href={`/news/${article.slug}`}
-          prefetch={false}
-          className="inline-flex items-center gap-2 text-sm font-medium text-indigo-600 hover:text-indigo-800"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          Back to article
-        </Link>
+      <div className="relative overflow-hidden border-b border-slate-200/70 bg-linear-to-br from-slate-950 via-indigo-950 to-slate-900 text-white">
+        <div className="bg-tech-grid pointer-events-none absolute inset-0 opacity-40" aria-hidden />
+        <div className="bg-circuit-dots pointer-events-none absolute inset-0 opacity-25" aria-hidden />
+        <div
+          className="pointer-events-none absolute -top-20 right-0 h-56 w-56 rounded-full bg-indigo-500/25 blur-3xl"
+          aria-hidden
+        />
 
-        <header className="mt-8 mb-8 sm:mb-10">
-          <div className="flex items-center gap-2 text-indigo-600 mb-2">
-            <Images className="w-5 h-5" />
-            <span className="text-sm font-medium">Photo gallery</span>
+        <div className="relative z-10 mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-12 lg:px-8">
+          <Link
+            href={`/news/${article.slug}`}
+            prefetch={false}
+            className="inline-flex items-center gap-2 rounded-md text-sm font-medium text-sky-200 transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-300 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950"
+          >
+            <ArrowLeft className="size-4" aria-hidden />
+            Back to article
+          </Link>
+
+          <div className="mt-6 sm:mt-8">
+            <div className="mb-3 inline-flex items-center gap-2 text-sky-200">
+              <Images className="size-4 sm:size-5" aria-hidden />
+              <span className="text-[11px] font-semibold uppercase tracking-[0.22em] sm:text-xs">
+                Photos
+              </span>
+            </div>
+            <h1 className="max-w-4xl text-2xl font-extrabold tracking-tight sm:text-3xl md:text-4xl">
+              {article.title}
+            </h1>
+            <p className="mt-2 text-sm text-blue-100/90 sm:text-base">
+              {urls.length} photo{urls.length === 1 ? '' : 's'}
+            </p>
           </div>
-          <h1 className="text-3xl sm:text-4xl font-extrabold text-gray-900 tracking-tight">
-            Photos — {article.title}
-          </h1>
-        </header>
-
-        <NewsPhotosGrid images={urls} />
+        </div>
       </div>
+
+      <main className="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-14 lg:px-8">
+        <NewsPhotosGrid images={urls} />
+      </main>
     </div>
   )
 }
