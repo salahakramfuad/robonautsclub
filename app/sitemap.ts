@@ -1,5 +1,6 @@
 import { MetadataRoute } from 'next'
 import { getPublicEvents } from './(marketing)/events/actions'
+import { eventPublicHref } from '@/lib/event-ui'
 import {
   getActiveRobofestCategories,
   getRobofestCategoryHref,
@@ -58,7 +59,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   try {
     const events = await getPublicEvents()
     const eventPages: MetadataRoute.Sitemap = events.map((event) => ({
-      url: `${baseUrl}/events/${event.id}`,
+      url: `${baseUrl}${eventPublicHref(event)}`,
       lastModified: event.updatedAt
         ? new Date(event.updatedAt)
         : event.createdAt

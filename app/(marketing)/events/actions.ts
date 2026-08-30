@@ -4,6 +4,7 @@ import { cache } from 'react'
 import { revalidatePath, revalidateTag, unstable_cache } from 'next/cache'
 import { adminDb } from '@/lib/firebase-admin'
 import { Event } from '@/types/event'
+import { persistMissingEventSlugs, slugifyEventTitle } from '@/lib/event-slug'
 import { Course } from '@/types/course'
 import { sendBookingConfirmationEmail } from '@/lib/email'
 import { generateRegistrationId } from '@/lib/registrationId'
@@ -27,16 +28,11 @@ import {
 import type { PublicHomepageOrgs } from '@/types/homepage-org'
 
 const PUBLIC_EVENTS_TAG = 'public-events'
-const PUBLIC_EVENT_TAG_PREFIX = 'public-event'
 const PUBLIC_COURSES_TAG = 'public-courses'
 const PUBLIC_SCHOOLS_TAG = 'public-schools'
 const PUBLIC_EVENTS_MAX = 200
 const PUBLIC_COURSES_MAX = 100
 const PUBLIC_HOMEPAGE_ORGS_MAX = 100
-
-function getPublicEventTag(id: string): string {
-  return `${PUBLIC_EVENT_TAG_PREFIX}-${id}`
-}
 
 /**
  * Firestore fetch for public events. Only call when `adminDb` is initialized.
@@ -85,6 +81,7 @@ async function fetchPublicEventsFromFirestore(): Promise<Event[]> {
       events.push({
         id: doc.id,
         ...data,
+        slug: typeof data.slug === 'string' && data.slug.trim() ? data.slug.trim() : undefined,
         date: dateValue,
         createdAt: createdAtStr || new Date().toISOString(),
         updatedAt: updatedAtStr || new Date().toISOString(),
@@ -123,78 +120,104 @@ export const getPublicEvents = cache(async (): Promise<Event[]> => {
   return getCachedPublicEvents()
 })
 
-/**
- * Get a single event by ID (public - no auth required)
- * Used with ISR (Incremental Static Regeneration) for fast page loads
- * Wrapped with cache() for request deduplication
- */
-async function fetchPublicEventFromFirestore(id: string): Promise<Event | null> {
-  const db = adminDb!
-  try {
-    const eventDoc = await db.collection('events').doc(id).get()
+function mapPublicEventDoc(
+  eventDoc: { id: string },
+  data: Record<string, unknown> & {
+    createdAt?: { toDate?: () => Date }
+    updatedAt?: { toDate?: () => Date }
+    date?: unknown
+    slug?: unknown
+  },
+): Event {
+  const createdAt = data.createdAt?.toDate?.() || data.createdAt
+  const updatedAt = data.updatedAt?.toDate?.() || data.updatedAt
 
-    if (!eventDoc.exists) {
-      return null
-    }
-
-    const data = eventDoc.data()!
-
-    // Convert Firestore Timestamps to ISO strings for serialization
-    const createdAt = data.createdAt?.toDate?.() || data.createdAt
-    const updatedAt = data.updatedAt?.toDate?.() || data.updatedAt
-
-    // Convert Date objects to ISO strings for Next.js serialization
-    const createdAtStr = createdAt instanceof Date
-      ? createdAt.toISOString()
-      : typeof createdAt === 'string'
+  const createdAtStr = createdAt instanceof Date
+    ? createdAt.toISOString()
+    : typeof createdAt === 'string'
       ? createdAt
       : new Date().toISOString()
 
-    const updatedAtStr = updatedAt instanceof Date
-      ? updatedAt.toISOString()
-      : typeof updatedAt === 'string'
+  const updatedAtStr = updatedAt instanceof Date
+    ? updatedAt.toISOString()
+    : typeof updatedAt === 'string'
       ? updatedAt
       : new Date().toISOString()
 
-    // Handle date field - convert Timestamp to string if needed
-    let dateValue = data.date
-    if (dateValue && typeof dateValue === 'object' && 'toDate' in dateValue) {
-      // It's a Firestore Timestamp
-      dateValue = dateValue.toDate().toISOString().split('T')[0] // Convert to YYYY-MM-DD
-    } else if (dateValue && typeof dateValue === 'object' && '_seconds' in dateValue) {
-      // It's a Firestore Timestamp (alternative format)
-      dateValue = new Date(dateValue._seconds * 1000).toISOString().split('T')[0]
-    }
-
-    return {
-      id: eventDoc.id,
-      ...data,
-      date: dateValue,
-      createdAt: createdAtStr,
-      updatedAt: updatedAtStr,
-    } as Event
-  } catch (error) {
-    console.error('Error fetching event:', error)
-    return null
+  let dateValue = data.date
+  if (dateValue && typeof dateValue === 'object' && 'toDate' in dateValue) {
+    const withToDate = dateValue as { toDate: () => Date }
+    dateValue = withToDate.toDate().toISOString().split('T')[0]
+  } else if (dateValue && typeof dateValue === 'object' && '_seconds' in dateValue) {
+    const withSeconds = dateValue as { _seconds: number }
+    dateValue = new Date(withSeconds._seconds * 1000).toISOString().split('T')[0]
   }
+
+  return {
+    id: eventDoc.id,
+    ...data,
+    slug: typeof data.slug === 'string' && data.slug.trim() ? data.slug.trim() : undefined,
+    date: dateValue,
+    createdAt: createdAtStr,
+    updatedAt: updatedAtStr,
+  } as Event
 }
 
-const getCachedPublicEvent = (id: string) =>
-  unstable_cache(
-    async (): Promise<Event | null> => fetchPublicEventFromFirestore(id),
-    [PUBLIC_EVENT_TAG_PREFIX, id],
-    {
-      tags: [getPublicEventTag(id), PUBLIC_EVENTS_TAG],
-      revalidate: 3600,
-    }
-  )()
+function eventMatchesPublicParam(event: Event, param: string): boolean {
+  if (event.id === param) return true
+  if (event.slug && event.slug === param) return true
+  return slugifyEventTitle(event.title) === param
+}
 
-export const getPublicEvent = cache(async (id: string): Promise<Event | null> => {
+/**
+ * Get a single event by slug or Firestore document ID (public - no auth required).
+ * Slug query, ID lookup, and title-slug fallback are isolated so one miss cannot 404 the page.
+ */
+async function fetchPublicEventFromFirestore(param: string): Promise<Event | null> {
+  const db = adminDb!
+  const normalized = param.trim()
+  if (!normalized) return null
+
+  try {
+    const bySlug = await db.collection('events').where('slug', '==', normalized).limit(1).get()
+    if (!bySlug.empty) {
+      return mapPublicEventDoc(bySlug.docs[0], bySlug.docs[0].data() as Parameters<typeof mapPublicEventDoc>[1])
+    }
+  } catch (error) {
+    console.error('Error fetching event by slug:', error)
+  }
+
+  try {
+    const eventDoc = await db.collection('events').doc(normalized).get()
+    if (eventDoc.exists) {
+      const event = mapPublicEventDoc(eventDoc, eventDoc.data()! as Parameters<typeof mapPublicEventDoc>[1])
+      await persistMissingEventSlugs([event])
+      return event
+    }
+  } catch (error) {
+    console.error('Error fetching event by id:', error)
+  }
+
+  try {
+    const events = await getCachedPublicEvents()
+    const match = events.find((event) => eventMatchesPublicParam(event, normalized))
+    if (match) {
+      await persistMissingEventSlugs([match])
+      return match
+    }
+  } catch (error) {
+    console.error('Error matching event from public list:', error)
+  }
+
+  return null
+}
+
+export const getPublicEvent = cache(async (slugOrId: string): Promise<Event | null> => {
   if (!adminDb) {
     console.error('Firebase Admin SDK not available. Cannot fetch event.')
     return null
   }
-  return getCachedPublicEvent(id)
+  return fetchPublicEventFromFirestore(slugOrId)
 })
 
 export const getPublicEnglishMediumSchools = cache(async (): Promise<string[]> => {

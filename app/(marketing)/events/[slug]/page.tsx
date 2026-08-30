@@ -4,7 +4,8 @@ import Script from 'next/script'
 import { Calendar, Clock, MapPin, ArrowLeft, Users, Monitor, Building2, Banknote } from 'lucide-react'
 import { getPublicEnglishMediumSchools, getPublicEvent } from '../actions'
 import { Event } from '@/types/event'
-import { notFound } from 'next/navigation'
+import { notFound, permanentRedirect } from 'next/navigation'
+import { eventPublicHref } from '@/lib/event-ui'
 import BookingForm from './BookingForm'
 import EventImage from './EventImage'
 import { getEventSchema, getBreadcrumbSchema, absoluteSiteUrl } from '@/lib/seo'
@@ -118,10 +119,10 @@ const RegistrationClosedMessage = () => {
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ id: string }>
+  params: Promise<{ slug: string }>
 }): Promise<Metadata> {
-  const { id } = await params
-  const event = await getPublicEvent(id)
+  const { slug } = await params
+  const event = await getPublicEvent(slug)
 
   if (!event) {
     return {
@@ -129,7 +130,7 @@ export async function generateMetadata({
     }
   }
 
-  const eventPageUrl = absoluteSiteUrl(`/events/${id}`)
+  const eventPageUrl = absoluteSiteUrl(eventPublicHref(event))
   const eventImage = getEventImageUrl(event.image)
   const ogImageUrl = eventImage.startsWith('http')
     ? eventImage
@@ -173,7 +174,7 @@ export async function generateMetadata({
       images: [ogImageUrl],
     },
     alternates: {
-      canonical: `/events/${id}`,
+      canonical: eventPublicHref(event),
     },
   }
 }
@@ -184,14 +185,18 @@ export const revalidate = 1800
 export default async function EventDetailPage({
   params,
 }: {
-  params: Promise<{ id: string }>
+  params: Promise<{ slug: string }>
 }) {
-  const { id } = await params
-  const event = await getPublicEvent(id)
+  const { slug } = await params
+  const event = await getPublicEvent(slug)
   const schools = await getPublicEnglishMediumSchools()
 
   if (!event) {
     notFound()
+  }
+
+  if (event.slug && event.slug !== slug) {
+    permanentRedirect(eventPublicHref(event))
   }
 
   const eventDates = parseEventDates(event.date)
@@ -211,7 +216,7 @@ export default async function EventDetailPage({
   )
 
   // Generate structured data
-  const eventUrl = absoluteSiteUrl(`/events/${id}`)
+  const eventUrl = absoluteSiteUrl(eventPublicHref(event))
   // For structured data, use first date or comma-separated string
   const schemaDate = Array.isArray(event.date) 
     ? event.date.length > 0 ? event.date[0] : ''
@@ -234,7 +239,7 @@ export default async function EventDetailPage({
   const breadcrumbSchema = getBreadcrumbSchema([
     { name: 'Home', url: '/' },
     { name: 'Events', url: '/events' },
-    { name: event.title, url: `/events/${id}` },
+    { name: event.title, url: eventPublicHref(event) },
   ])
 
   return (

@@ -15,6 +15,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { Calendar, Clock, MapPin, ArrowRight } from 'lucide-react'
 import { Event } from '@/types/event'
+import { eventPublicHref } from '@/lib/event-ui'
 import { SITE_CONFIG } from '@/lib/site-config'
 import { differenceInDays, differenceInHours } from 'date-fns'
 import { Card, CardContent } from '@/components/ui/card'
@@ -187,7 +188,7 @@ const EventCard = memo(({ event }: { event: Event }) => {
   }
 
   return (
-    <Link href={event.href ?? `/events/${event.id}`} prefetch={false} className="h-full">
+    <Link href={eventPublicHref(event)} prefetch={false} className="h-full">
       <Card className="group relative border-2 hover:border-indigo-300 overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 h-full flex flex-col p-0">
         {/* Status Badge */}
         <div className="absolute top-4 right-4 z-10">
