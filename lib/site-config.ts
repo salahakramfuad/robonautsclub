@@ -20,7 +20,7 @@ export const SITE_CONFIG = {
   description:
     "Bangladesh's first youth robotics club preparing students for Robofest & global STEM challenges.",
   extendedDescription:
-    "Bangladesh's first youth robotics club preparing students for Robofest & global STEM challenges. Join 500+ members for hands-on robotics workshops, competitions, and international opportunities.",
+    "Bangladesh's first youth robotics club preparing students for Robofest and global STEM challenges through hands-on robotics workshops, programming, and competition training.",
   email: "info@robonautsltd.com",
   noreplyEmail: "no-reply@robonautsltd.com",
   phone: "+8801824863366",
@@ -33,7 +33,7 @@ export const SITE_CONFIG = {
   },
   social: {
     facebook: "https://www.facebook.com/robonautsltd",
-    instagram: "https://www.instagram.com/robonautsltd?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==",
+    instagram: "https://www.instagram.com/robonautsltd",
     whatsapp: "https://wa.me/8801824863366",
     linkedin: "https://www.linkedin.com/company/robonauts-ltd/",
     youtube: "https://www.youtube.com/@RobonautsLtd",
@@ -54,10 +54,10 @@ export const SITE_CONFIG = {
   ],
   metadata: {
     defaultTitle:
-      "Robonauts Club | A dynamic community of Youth Robotics and STEM Education",
-    titleTemplate: "%s | Robonauts Club",
+      "Robonauts | STEM, Robotics & Olympiad Education in Bangladesh",
+    titleTemplate: "%s | Robonauts",
     defaultDescription:
-      "Bangladesh's first youth robotics club preparing students for Robofest & global STEM challenges. Join 500+ members for hands-on robotics workshops, competitions, and international opportunities.",
+      "Robonauts is Bangladesh's youth robotics club offering STEM education, programming, robotics workshops, and olympiad training for students.",
     keywords: [
       "robotics Bangladesh",
       "STEM education Bangladesh",
@@ -77,7 +77,7 @@ export const SITE_CONFIG = {
     ],
     /** Used for Open Graph / Twitter link previews (not in-page hero art). */
     defaultImage: "/robologo.png",
-    defaultImageAlt: "Robonauts Club logo",
+    defaultImageAlt: "Robonauts logo",
     twitterCreator: "@robonauts_club",
   },
   assets: {

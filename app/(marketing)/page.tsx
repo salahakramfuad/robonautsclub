@@ -1,34 +1,26 @@
 import { Metadata } from "next";
 import Feed from "@/components/Feed";
-import { SITE_CONFIG } from "@/lib/site-config";
+import { PAGE_SEO, buildPageMetadata } from "@/lib/seo-metadata";
 import {
   getPublicCourses,
   getPublicEvents,
   getPublicHomepageOrgs,
 } from "./events/actions";
 import { isEventUpcoming } from "@/lib/dateUtils";
+import { SITE_CONFIG } from "@/lib/site-config";
 
-export const metadata: Metadata = {
-  title: "Home",
-  description: SITE_CONFIG.extendedDescription,
-  keywords: [...SITE_CONFIG.metadata.keywords],
-  openGraph: {
-    title: SITE_CONFIG.metadata.defaultTitle,
-    description: SITE_CONFIG.extendedDescription,
-    url: "/",
-    images: [
-      {
-        url: SITE_CONFIG.metadata.defaultImage,
-        width: 407,
-        height: 407,
-        alt: `${SITE_CONFIG.name} logo`,
-      },
-    ],
+export const metadata: Metadata = buildPageMetadata({
+  title: PAGE_SEO.home.title,
+  description: PAGE_SEO.home.description,
+  path: "/",
+  absoluteTitle: true,
+  ogImage: {
+    url: SITE_CONFIG.metadata.defaultImage,
+    width: 407,
+    height: 407,
+    alt: SITE_CONFIG.metadata.defaultImageAlt,
   },
-  alternates: {
-    canonical: "/",
-  },
-};
+});
 
 // ISR: longer window minimizes edge recompute frequency for mostly static content
 export const revalidate = 1800;

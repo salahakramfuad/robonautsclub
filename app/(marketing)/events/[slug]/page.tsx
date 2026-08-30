@@ -229,7 +229,7 @@ export default async function EventDetailPage({
     title: event.title,
     description: event.fullDescription || event.description,
     date: schemaDate,
-    time: event.time || '9:00 AM - 5:00 PM',
+    time: event.time,
     location: event.location,
     venue: event.venue,
     image: getEventImageUrl(event.image),

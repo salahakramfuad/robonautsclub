@@ -8,6 +8,7 @@ import { format } from 'date-fns'
 import Image from 'next/image'
 import { Metadata } from 'next'
 import { absoluteSiteUrl } from '@/lib/seo'
+import { buildPageMetadata } from '@/lib/seo-metadata'
 import { Card, CardContent } from '@/components/ui/card'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'
@@ -79,27 +80,17 @@ export async function generateMetadata({
   const { registrationId } = await params
   const { booking, event } = await getBookingByRegistrationId(registrationId)
 
-  const noindex = {
-    robots: {
-      index: false,
-      follow: false,
-      googleBot: { index: false, follow: false },
-    },
-  } as const
-
   if (!booking || !event) {
-    return {
-      title: 'Registration Not Found | Robonauts Club',
+    return buildPageMetadata({
+      title: 'Registration Not Found',
       description:
         'The registration ID you provided could not be found. Please verify your registration number and try again.',
-      alternates: {
-        canonical: `/verify/${registrationId}`,
-      },
-      ...noindex,
-    }
+      path: `/verify/${registrationId}`,
+      noindex: true,
+    })
   }
 
-  const title = `Registration Verified - ${event.title} | Robonauts Club`
+  const title = `Registration Verified - ${event.title}`
   const description = `Your registration for ${event.title} is verified. Event date: ${formatEventDateLabel(event.date, 'long')}.`
 
   const ogImage =
@@ -107,41 +98,25 @@ export async function generateMetadata({
       ? event.image
       : absoluteSiteUrl(event.image || '/robotics-event.jpg')
 
-  return {
+  return buildPageMetadata({
     title,
     description,
+    path: `/verify/${registrationId}`,
+    noindex: true,
+    ogImage: {
+      url: ogImage,
+      width: 1200,
+      height: 630,
+      alt: event.title,
+    },
     keywords: [
       'registration verification',
       'event confirmation',
       'robotics event',
-      'Robonauts Club',
+      'Robonauts',
       event.title,
     ],
-    openGraph: {
-      title,
-      description,
-      url: `/verify/${registrationId}`,
-      type: 'website',
-      images: [
-        {
-          url: ogImage,
-          width: 1200,
-          height: 630,
-          alt: event.title,
-        },
-      ],
-    },
-    twitter: {
-      card: 'summary_large_image',
-      title,
-      description,
-      images: [ogImage],
-    },
-    alternates: {
-      canonical: `/verify/${registrationId}`,
-    },
-    ...noindex,
-  }
+  })
 }
 
 export default async function VerificationPage({ params }: VerificationPageProps) {

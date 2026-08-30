@@ -1,23 +1,23 @@
 import { Metadata } from 'next'
-import { SITE_CONFIG } from '@/lib/site-config'
+import { PAGE_SEO, buildPageMetadata } from '@/lib/seo-metadata'
 import { getPublishedNews } from './actions'
 import NewsHero from '@/components/news/NewsHero'
 import FeaturedNewsCard from '@/components/news/FeaturedNewsCard'
 import NewsCard from '@/components/news/NewsCard'
 import NewsEmptyState from '@/components/news/NewsEmptyState'
 
-export const metadata: Metadata = {
-  title: 'News',
-  description: `Updates, stories, and announcements from ${SITE_CONFIG.name}.`,
-  openGraph: {
-    title: `News | ${SITE_CONFIG.name}`,
-    description: `Updates and stories from ${SITE_CONFIG.name}.`,
-    url: '/news',
+export const metadata: Metadata = buildPageMetadata({
+  title: PAGE_SEO.news.title,
+  description: PAGE_SEO.news.description,
+  path: '/news',
+  absoluteTitle: true,
+  ogImage: {
+    url: '/roboclass.jpg',
+    width: 1200,
+    height: 630,
+    alt: 'Robonauts News',
   },
-  alternates: {
-    canonical: '/news',
-  },
-}
+})
 
 export const revalidate = 1800
 

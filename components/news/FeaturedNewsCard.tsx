@@ -26,7 +26,7 @@ export default function FeaturedNewsCard({ article }: Props) {
           {article.coverImageUrl ? (
             <Image
               src={article.coverImageUrl}
-              alt=""
+              alt={article.title}
               fill
               priority
               className="object-cover transition-transform duration-500 ease-out motion-reduce:transition-none group-hover:scale-[1.03]"

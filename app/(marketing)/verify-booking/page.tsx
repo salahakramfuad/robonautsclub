@@ -8,8 +8,9 @@ import type { RobofestContent, RobofestRegistration } from '@/lib/robofest-conte
 import { format } from 'date-fns'
 import Link from 'next/link'
 import Image from 'next/image'
-import { Metadata } from 'next'
+import type { Metadata } from 'next'
 import { SITE_CONFIG } from '@/lib/site-config'
+import { buildPageMetadata } from '@/lib/seo-metadata'
 import CopyButton from './CopyButton'
 import RetryButton from './RetryButton'
 import VerifyRobofestRegistration from './VerifyRobofestRegistration'
@@ -20,9 +21,17 @@ import { Button } from '@/components/ui/button'
 
 export const dynamic = 'force-dynamic'
 
-export const metadata: Metadata = {
-  title: `Verify Registration | ${SITE_CONFIG.name}`,
+export const metadata: Metadata = buildPageMetadata({
+  title: 'Verify Registration',
   description: `Verify your event registration with ${SITE_CONFIG.name}. Enter your registration ID to confirm your registration and view event details.`,
+  path: '/verify-booking',
+  noindex: true,
+  ogImage: {
+    url: '/robotics-event.jpg',
+    width: 1200,
+    height: 630,
+    alt: `${SITE_CONFIG.name} - Verify Registration`,
+  },
   keywords: [
     'verify registration',
     'event verification',
@@ -30,35 +39,7 @@ export const metadata: Metadata = {
     'registration confirmation',
     `${SITE_CONFIG.name} verification`,
   ],
-  openGraph: {
-    title: `Verify Registration | ${SITE_CONFIG.name}`,
-    description: `Verify your event registration with ${SITE_CONFIG.name}. Enter your registration ID to confirm your registration.`,
-    url: '/verify-booking',
-    type: 'website',
-    images: [
-      {
-        url: '/robotics-event.jpg',
-        width: 1200,
-        height: 630,
-        alt: `${SITE_CONFIG.name} - Verify Registration`,
-      },
-    ],
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: `Verify Registration | ${SITE_CONFIG.name}`,
-    description: `Verify your event registration with ${SITE_CONFIG.name}.`,
-    images: ['/robotics-event.jpg'],
-  },
-  alternates: {
-    canonical: '/verify-booking',
-  },
-  robots: {
-    index: false,
-    follow: false,
-    googleBot: { index: false, follow: false },
-  },
-}
+})
 
 interface VerificationPageProps {
   searchParams: Promise<{ registrationId?: string; member?: string }>

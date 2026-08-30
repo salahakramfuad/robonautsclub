@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { ArrowRight } from 'lucide-react'
+import { resolveCourseHref, COURSE_FALLBACK_HREF } from '@/lib/course-ui'
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
 
@@ -37,10 +38,14 @@ export default function CourseCard({
 }: CourseCardProps) {
   const featured = variant === 'featured'
   const shortBlurb = !blurb || blurb.trim().length < 80
+  const targetHref = resolveCourseHref(href)
+  const isContactFallback = targetHref === COURSE_FALLBACK_HREF
+  const featuredCta = isContactFallback ? 'Contact about this program' : 'Explore this program'
+  const defaultCta = isContactFallback ? 'Contact about this program' : 'Learn more'
 
   if (featured) {
     return (
-      <Link href={href} prefetch={false} className="block h-full">
+      <Link href={targetHref} prefetch={false} className="block h-full">
         <article className="group relative grid h-full overflow-hidden rounded-3xl border border-slate-200/80 bg-white transition-all duration-300 ease-out hover:-translate-y-1 hover:border-indigo-200 hover:shadow-[0_24px_50px_-28px_rgba(79,70,229,0.4)] lg:grid-cols-[1.15fr_0.85fr]">
           <div className="relative min-h-52 overflow-hidden bg-linear-to-br from-slate-100 via-indigo-50 to-sky-50 sm:min-h-64 lg:min-h-[22rem]">
             {img ? (
@@ -86,7 +91,7 @@ export default function CourseCard({
               </p>
             ) : null}
             <div className="mt-6 flex items-center gap-2 text-sm font-semibold text-indigo-600">
-              <span>Explore this program</span>
+              <span>{featuredCta}</span>
               <ArrowRight className="size-4 transition-transform duration-300 group-hover:translate-x-1" />
             </div>
           </div>
@@ -96,7 +101,7 @@ export default function CourseCard({
   }
 
   return (
-    <Link href={href} prefetch={false} className="block h-full">
+    <Link href={targetHref} prefetch={false} className="block h-full">
       <article
         className={cn(
           'group relative flex h-full flex-col overflow-hidden rounded-3xl border border-slate-200/80 bg-white transition-all duration-300 ease-out',
@@ -138,7 +143,7 @@ export default function CourseCard({
           ) : null}
 
           <div className="mt-auto flex items-center gap-2 pt-3 text-sm font-semibold text-indigo-600">
-            <span>Learn more</span>
+            <span>{defaultCta}</span>
             <ArrowRight className="size-4 transition-transform duration-300 group-hover:translate-x-1" />
           </div>
         </div>

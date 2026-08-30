@@ -2,6 +2,8 @@ import React from 'react'
 import { Metadata } from 'next'
 import { SITE_CONFIG } from '@/lib/site-config'
 import { getEventsItemListSchema } from '@/lib/seo'
+import { PAGE_SEO, buildPageMetadata } from '@/lib/seo-metadata'
+import JsonLdScript from '@/components/JsonLdScript'
 import {
   Calendar,
   Sparkles,
@@ -15,35 +17,27 @@ import { isEventUpcoming } from '@/lib/dateUtils'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 
-export const metadata: Metadata = {
-  title: "Events",
-  description: "Discover upcoming robotics workshops, competitions, bootcamps, and STEM events in Bangladesh. Join hands-on training sessions, participate in Robofest, and connect with 500+ robotics enthusiasts.",
+export const metadata: Metadata = buildPageMetadata({
+  title: PAGE_SEO.events.title,
+  description: PAGE_SEO.events.description,
+  path: '/events',
+  absoluteTitle: true,
+  ogImage: {
+    url: '/robotics-event.jpg',
+    width: 1200,
+    height: 630,
+    alt: `${SITE_CONFIG.name} Events`,
+  },
   keywords: [
-    "robotics events Bangladesh",
-    "STEM workshops",
-    "robotics competitions",
-    "Robofest",
-    "robotics bootcamp",
-    "STEM training events",
-    "robotics workshop Dhaka",
+    'robotics events Bangladesh',
+    'STEM workshops',
+    'robotics competitions',
+    'Robofest',
+    'robotics bootcamp',
+    'STEM training events',
+    'robotics workshop Dhaka',
   ],
-  openGraph: {
-    title: `Robotics Events | ${SITE_CONFIG.name}`,
-    description: "Discover upcoming robotics workshops, competitions, bootcamps, and STEM events in Bangladesh.",
-    url: "/events",
-    images: [
-      {
-        url: "/robotics-event.jpg",
-        width: 1200,
-        height: 630,
-        alt: `${SITE_CONFIG.name} Events`,
-      },
-    ],
-  },
-  alternates: {
-    canonical: "/events",
-  },
-};
+})
 
 // ISR: longer window minimizes edge recompute churn; admin actions still call revalidatePath
 export const revalidate = 1800
@@ -58,21 +52,15 @@ export default async function EventsPage() {
     return isEventUpcoming(event.date)
   })
 
-  const itemListJsonLd = JSON.stringify(
-    getEventsItemListSchema(
-      initialUpcoming.map((e) => ({ id: e.id, slug: e.slug, href: e.href, title: e.title })),
-      20,
-    ),
+  const itemListSchema = getEventsItemListSchema(
+    initialUpcoming.map((e) => ({ id: e.id, slug: e.slug, href: e.href, title: e.title })),
+    20,
   )
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       {initialUpcoming.length > 0 ? (
-        <template
-          id="events-itemlist-schema"
-          suppressHydrationWarning
-          dangerouslySetInnerHTML={{ __html: itemListJsonLd }}
-        />
+        <JsonLdScript id="events-itemlist-schema" data={itemListSchema} />
       ) : null}
       <ListingHeroSection overlay="none">
         <div className="absolute inset-0 opacity-20 pointer-events-none">
@@ -152,7 +140,7 @@ export default async function EventsPage() {
               className="bg-white text-indigo-500 hover:bg-gray-100 shadow-lg text-sm sm:text-base"
             >
               <a href={`mailto:${SITE_CONFIG.email}`}>
-                Contact Us
+                Contact Robonauts
                 <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5" />
               </a>
             </Button>

@@ -1,6 +1,9 @@
 import { MetadataRoute } from 'next'
 import { getPublicEvents } from './(marketing)/events/actions'
+import { getPublishedNews } from './(marketing)/news/actions'
+import { getGalleryGroups } from './(marketing)/gallery/actions'
 import { eventPublicHref } from '@/lib/event-ui'
+import { newsArticleHref } from '@/lib/news-ui'
 import {
   getActiveRobofestCategories,
   getRobofestCategoryHref,
@@ -33,6 +36,18 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.9,
     },
     {
+      url: `${baseUrl}/news`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly',
+      priority: 0.85,
+    },
+    {
+      url: `${baseUrl}/gallery`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly',
+      priority: 0.85,
+    },
+    {
       url: `${baseUrl}/about`,
       lastModified: new Date(),
       changeFrequency: 'monthly',
@@ -56,6 +71,61 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     console.error('Error generating Robofest sitemap entries:', error)
   }
 
+  let newsPages: MetadataRoute.Sitemap = []
+  try {
+    const articles = await getPublishedNews()
+    newsPages = articles.flatMap((article) => {
+      const lastModified = article.updatedAt
+        ? new Date(article.updatedAt)
+        : article.publishedAt
+          ? new Date(article.publishedAt)
+          : new Date(article.createdAt)
+
+      const entries: MetadataRoute.Sitemap = [
+        {
+          url: `${baseUrl}${newsArticleHref(article)}`,
+          lastModified,
+          changeFrequency: 'weekly' as const,
+          priority: 0.7,
+        },
+      ]
+
+      const hasPhotos =
+        Boolean(article.coverImageUrl) ||
+        (Array.isArray(article.images) && article.images.length > 0)
+
+      if (hasPhotos) {
+        entries.push({
+          url: `${baseUrl}${newsArticleHref(article)}/photos`,
+          lastModified,
+          changeFrequency: 'monthly' as const,
+          priority: 0.5,
+        })
+      }
+
+      return entries
+    })
+  } catch (error) {
+    console.error('Error generating news sitemap entries:', error)
+  }
+
+  let galleryPages: MetadataRoute.Sitemap = []
+  try {
+    const groups = await getGalleryGroups()
+    galleryPages = groups.map((group) => ({
+      url: `${baseUrl}/gallery/album/${group.id}`,
+      lastModified: group.updatedAt
+        ? new Date(group.updatedAt)
+        : group.createdAt
+          ? new Date(group.createdAt)
+          : new Date(),
+      changeFrequency: 'monthly' as const,
+      priority: 0.6,
+    }))
+  } catch (error) {
+    console.error('Error generating gallery sitemap entries:', error)
+  }
+
   try {
     const events = await getPublicEvents()
     const eventPages: MetadataRoute.Sitemap = events.map((event) => ({
@@ -69,9 +139,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.7,
     }))
 
-    return [...staticPages, ...robofestPages, ...eventPages]
+    return [
+      ...staticPages,
+      ...robofestPages,
+      ...newsPages,
+      ...galleryPages,
+      ...eventPages,
+    ]
   } catch (error) {
     console.error('Error generating sitemap:', error)
-    return [...staticPages, ...robofestPages]
+    return [...staticPages, ...robofestPages, ...newsPages, ...galleryPages]
   }
 }
