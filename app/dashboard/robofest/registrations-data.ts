@@ -327,6 +327,34 @@ export async function loadRobofestRegistrationStatusCounts(): Promise<RobofestRe
   return counts
 }
 
+/** Confirmed registration counts keyed by campusAmbassadorId. */
+export async function loadRobofestCampusAmbassadorReferralCounts(
+  ambassadorIds: string[],
+): Promise<Record<string, number>> {
+  const counts: Record<string, number> = {}
+  for (const id of ambassadorIds) {
+    counts[id] = 0
+  }
+  if (!adminDb || ambassadorIds.length === 0) return counts
+
+  const collection = adminDb.collection(ROBOFEST_REGISTRATIONS_COLLECTION)
+  const results = await Promise.all(
+    ambassadorIds.map(async (id) => {
+      const snap = await collection
+        .where('campusAmbassadorId', '==', id)
+        .where('status', '==', 'confirmed')
+        .count()
+        .get()
+      return [id, snap.data().count] as const
+    }),
+  )
+
+  for (const [id, count] of results) {
+    counts[id] = count
+  }
+  return counts
+}
+
 /** Load registrations by Firestore document ids (bulk certificates). */
 export async function loadRobofestRegistrationsByIds(
   ids: string[],

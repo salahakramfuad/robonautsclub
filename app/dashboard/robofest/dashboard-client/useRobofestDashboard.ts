@@ -365,7 +365,25 @@ export function useRobofestDashboard({
             alert('No registrations to export.')
             return
           }
-          const opts = { includePayments: canViewPayments, content }
+          const opts = {
+            includePayments: canViewPayments,
+            ...(roundFilter
+              ? {
+                  division: roundFilter,
+                  venueLabel: (() => {
+                    const city = roundFilter.trim().toLowerCase()
+                    const fromLines = (content.venueLines || []).find((line) =>
+                      line.toLowerCase().includes(city),
+                    )
+                    if (fromLines?.trim()) return fromLines.trim()
+                    const round = (content.rounds || []).find(
+                      (r) => r.city.trim().toLowerCase() === city,
+                    )
+                    return round?.venueLabel?.trim() || ''
+                  })(),
+                }
+              : {}),
+          }
           if (kind === 'csv') exportRobofestCsv(items, opts)
           else if (kind === 'excel') await exportRobofestExcel(items, opts)
           else await exportRobofestPdf(items, opts)
