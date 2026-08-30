@@ -1,6 +1,6 @@
 'use server'
 
-import { revalidatePath, revalidateTag } from 'next/cache'
+import { revalidatePath, revalidateTag, unstable_cache } from 'next/cache'
 import { FieldValue, Timestamp } from 'firebase-admin/firestore'
 import { requireAuth, canCreateArea, canEditResource, canDeleteResource } from '@/lib/auth'
 import { adminDb } from '@/lib/firebase-admin'
@@ -8,6 +8,8 @@ import type { GalleryGroup, GalleryImage } from '@/types/gallery'
 import { sanitizeGalleryLocation, sanitizeGalleryTitle } from '@/lib/multilingualText'
 import { parseDateInputToTimestamp, timestampUtcNoonToday } from '@/lib/dateInput'
 import { PUBLIC_GALLERY_TAG } from '@/lib/public-cache-tags'
+
+const DASHBOARD_GALLERY_LIST_TAG = 'dashboard-gallery-list'
 
 async function fetchDashboardGalleryGroupsFromDb(): Promise<GalleryGroup[]> {
   const db = adminDb!
@@ -22,6 +24,10 @@ async function fetchDashboardGalleryGroupsFromDb(): Promise<GalleryGroup[]> {
   })
   return items
 }
+
+const getCachedDashboardGalleryGroups = unstable_cache(fetchDashboardGalleryGroupsFromDb, [DASHBOARD_GALLERY_LIST_TAG], {
+  tags: [DASHBOARD_GALLERY_LIST_TAG],
+})
 
 function toIso(v: unknown): string {
   if (v instanceof Date) return v.toISOString()
@@ -72,7 +78,7 @@ export async function getGalleryGroupsForDashboard(): Promise<GalleryGroup[]> {
     console.warn('Firebase Admin SDK not available. Cannot fetch gallery. Set FIREBASE_ADMIN_* in .env')
     return []
   }
-  return await fetchDashboardGalleryGroupsFromDb()
+  return await getCachedDashboardGalleryGroups()
 }
 
 export async function getGalleryGroupForDashboard(id: string): Promise<GalleryGroup | null> {
@@ -119,6 +125,7 @@ export async function createGalleryGroup(input: {
 
   revalidatePath('/gallery')
   revalidatePath('/')
+  revalidateTag(DASHBOARD_GALLERY_LIST_TAG, 'max')
   revalidateTag(PUBLIC_GALLERY_TAG, 'max')
 }
 
@@ -164,6 +171,7 @@ export async function updateGalleryGroup(
 
   revalidatePath('/gallery')
   revalidatePath('/')
+  revalidateTag(DASHBOARD_GALLERY_LIST_TAG, 'max')
   revalidateTag(PUBLIC_GALLERY_TAG, 'max')
 }
 
@@ -183,5 +191,6 @@ export async function deleteGalleryGroup(id: string) {
   await ref.delete()
   revalidatePath('/gallery')
   revalidatePath('/')
+  revalidateTag(DASHBOARD_GALLERY_LIST_TAG, 'max')
   revalidateTag(PUBLIC_GALLERY_TAG, 'max')
 }

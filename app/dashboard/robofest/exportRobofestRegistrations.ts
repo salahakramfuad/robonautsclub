@@ -1,14 +1,15 @@
 import { format } from 'date-fns'
-import type { RobofestContent, RobofestRegistration } from '@/lib/robofest-content'
-import { resolveRobofestRoundVenueLabel } from '@/lib/robofest-venue'
+import type { RobofestRegistration } from '@/lib/robofest-content'
 import { formatAgeCategoryLabel } from '@/lib/robofest-registration-options'
 import { ROBOFEST_LOCAL } from '@/lib/robofest-local'
 
 export type RobofestExportOptions = {
   /** When false, omit payment status / amounts / trx from exports. */
   includePayments?: boolean
-  /** Used to resolve per-division venue in exports. */
-  content?: RobofestContent
+  /** Active division (round city) filter, if any. */
+  division?: string
+  /** Venue label when a division filter is applied. */
+  venueLabel?: string
 }
 
 function dateStamp() {
@@ -26,14 +27,6 @@ function createdLabel(r: RobofestRegistration) {
   } catch {
     return r.createdAt
   }
-}
-
-function venueLabel(
-  r: RobofestRegistration,
-  content?: RobofestContent,
-): string {
-  if (!content || !r.roundCity?.trim()) return ''
-  return resolveRobofestRoundVenueLabel(content, r.roundCity)
 }
 
 function membersLabel(r: RobofestRegistration) {
@@ -104,7 +97,6 @@ export function exportRobofestCsv(
     'Campus Ambassador',
     'Ambassador School',
     'Division',
-    'Venue',
     'Competition',
     'Status',
     ...(includePayments ? (['Payment', 'Amount Paid', 'Trx ID'] as const) : []),
@@ -125,7 +117,6 @@ export function exportRobofestCsv(
       r.campusAmbassadorName || '',
       r.campusAmbassadorSchool || '',
       r.roundCity,
-      venueLabel(r, options.content),
       r.category,
       r.status,
       ...(includePayments
@@ -163,7 +154,6 @@ export async function exportRobofestExcel(
       'Team Name': r.name || '',
       Competition: r.category || '',
       Division: r.roundCity || '',
-      Venue: venueLabel(r, options.content),
       'Age Category': ageLabel(r),
       'Team Size': r.teamSize ?? r.teamMembers?.length ?? '',
       'Contact Email': r.email || '',
@@ -335,10 +325,11 @@ export async function exportRobofestPdf(
   const body = rows.map((r, index) => {
     const cells: string[] = [
       String(index + 1),
-      r.name || '',
-      r.category || '',
-      r.roundCity || '',
-      venueLabel(r, options.content) || '—',
+      r.teamNumber || '—',
+      r.category || '—',
+    ]
+    if (showDivisionCol) cells.push(r.roundCity || '—')
+    cells.push(
       ageLabel(r) || '—',
       membersLabel(r),
       r.campusAmbassadorName
@@ -356,20 +347,8 @@ export async function exportRobofestPdf(
   const paymentCol = includePayments ? statusCol + 1 : -1
 
   autoTable(doc, {
-    startY: 92,
-    head: [
-      [
-        'No.',
-        'Team',
-        'Competition',
-        'Division',
-        'Venue',
-        'Age',
-        'Team members',
-        'Status',
-        ...(includePayments ? (['Payment'] as const) : []),
-      ],
-    ],
+    startY: metaY + 18,
+    head: [head],
     body,
     styles: {
       font: 'helvetica',
