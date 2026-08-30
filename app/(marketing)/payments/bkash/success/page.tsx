@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { AlertTriangle, CheckCircle } from 'lucide-react'
+import { CheckCircle } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
@@ -10,8 +10,6 @@ type SuccessPageProps = {
     registrationDocId?: string
     registrationId?: string
     source?: string
-    emailSent?: string
-    emailWarning?: string
   }>
 }
 
@@ -20,8 +18,6 @@ export default async function BkashSuccessPage({ searchParams }: SuccessPageProp
   const bookingId = params.bookingId || ''
   const registrationId = params.registrationId || ''
   const isRobofest = params.source === 'robofest'
-  const emailSent = params.emailSent !== '0'
-  const emailWarning = params.emailWarning?.trim() || ''
 
   return (
     <main className="min-h-[60vh] flex items-center justify-center px-4 py-12">
@@ -38,14 +34,11 @@ export default async function BkashSuccessPage({ searchParams }: SuccessPageProp
                 <>
                   <p>
                     Your payment is completed and your registration for RoboFest
-                    Bangladesh 2026 is officially confirmed.
+                    Bangladesh 2026 is officially confirmed. A confirmation
+                    E-Mail has been sent to all Team Members with your Team
+                    details, along with a PDF containing information about your
+                    registration.
                   </p>
-                  {emailSent && !emailWarning ? (
-                    <p>
-                      A confirmation email has been sent to all team members with
-                      your team details, along with a PDF of your registration.
-                    </p>
-                  ) : null}
                   <p className="font-medium text-green-900">
                     You can safely leave this page once you have noted your
                     Registration ID below.
@@ -60,26 +53,6 @@ export default async function BkashSuccessPage({ searchParams }: SuccessPageProp
               )}
             </AlertDescription>
           </Alert>
-          {isRobofest && (!emailSent || emailWarning) ? (
-            <Alert className="mb-4 border-amber-200 bg-amber-50">
-              <AlertTriangle className="h-5 w-5 text-amber-600" />
-              <AlertTitle className="text-amber-900">
-                {emailSent
-                  ? 'Email delivery incomplete'
-                  : 'Confirmation email not sent'}
-              </AlertTitle>
-              <AlertDescription className="text-amber-900 space-y-2">
-                <p>
-                  {emailWarning ||
-                    'We could not send the confirmation email automatically. Your registration and payment are still valid.'}
-                </p>
-                <p>
-                  Please check spam/junk folders, or contact support with your
-                  Registration ID so we can resend the confirmation.
-                </p>
-              </AlertDescription>
-            </Alert>
-          ) : null}
           {registrationId ? (
             <p className="text-sm text-gray-500 mb-2">
               Registration ID: <span className="font-mono font-semibold">{registrationId}</span>

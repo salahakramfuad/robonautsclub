@@ -78,8 +78,6 @@ async function handleCallback(
     console.info('[bkash-callback] robofest finalize success', {
       paymentId,
       registrationDocId: result.registrationDocId || null,
-      registrationId: result.registrationId || null,
-      emailSent: result.emailSent === true,
     })
 
     const params = new URLSearchParams()
@@ -90,10 +88,6 @@ async function handleCallback(
       params.set('registrationId', result.registrationId)
     }
     params.set('source', 'robofest')
-    params.set('emailSent', result.emailSent === true ? '1' : '0')
-    if (result.warning) {
-      params.set('emailWarning', result.warning.slice(0, 280))
-    }
     return NextResponse.redirect(
       `${baseUrl}/payments/bkash/success?${params.toString()}`
     )

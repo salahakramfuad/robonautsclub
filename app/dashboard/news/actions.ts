@@ -1,6 +1,6 @@
 'use server'
 
-import { revalidatePath, revalidateTag } from 'next/cache'
+import { revalidatePath, revalidateTag, unstable_cache } from 'next/cache'
 import { FieldValue, Timestamp } from 'firebase-admin/firestore'
 import { requireAuth, canCreateArea, canEditResource, canDeleteResource } from '@/lib/auth'
 import { adminDb } from '@/lib/firebase-admin'
@@ -12,6 +12,8 @@ import {
 } from '@/lib/multilingualText'
 import { parseDateInputToTimestamp, timestampUtcNoonToday } from '@/lib/dateInput'
 import { PUBLIC_NEWS_TAG } from '@/lib/public-cache-tags'
+
+const DASHBOARD_NEWS_LIST_TAG = 'dashboard-news-list'
 
 async function fetchNewsArticlesFromDb(): Promise<NewsArticle[]> {
   const db = adminDb!
@@ -27,6 +29,10 @@ async function fetchNewsArticlesFromDb(): Promise<NewsArticle[]> {
   })
   return items
 }
+
+const getCachedNewsArticles = unstable_cache(fetchNewsArticlesFromDb, [DASHBOARD_NEWS_LIST_TAG], {
+  tags: [DASHBOARD_NEWS_LIST_TAG],
+})
 
 function toIso(v: unknown): string | null {
   if (v == null) return null
@@ -82,7 +88,7 @@ export async function getNewsArticles(): Promise<NewsArticle[]> {
     return []
   }
   try {
-    return await fetchNewsArticlesFromDb()
+    return await getCachedNewsArticles()
   } catch {
     throw new Error('Failed to fetch news articles')
   }
@@ -147,6 +153,7 @@ export async function createNewsArticle(input: {
   await adminDb.collection('news').add(doc)
   revalidatePath('/news')
   revalidatePath('/')
+  revalidateTag(DASHBOARD_NEWS_LIST_TAG, 'max')
   revalidateTag(PUBLIC_NEWS_TAG, 'max')
 }
 
@@ -213,6 +220,7 @@ export async function updateNewsArticle(
   revalidatePath(`/news/${data.slug as string}`)
   revalidatePath(`/news/${slug}`)
   revalidatePath('/')
+  revalidateTag(DASHBOARD_NEWS_LIST_TAG, 'max')
   revalidateTag(PUBLIC_NEWS_TAG, 'max')
 }
 
@@ -233,5 +241,6 @@ export async function deleteNewsArticle(id: string) {
   revalidatePath('/news')
   revalidatePath(`/news/${String(data.slug)}`)
   revalidatePath('/')
+  revalidateTag(DASHBOARD_NEWS_LIST_TAG, 'max')
   revalidateTag(PUBLIC_NEWS_TAG, 'max')
 }
