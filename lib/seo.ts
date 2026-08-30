@@ -15,10 +15,30 @@ export function absoluteSiteUrl(path: string): string {
   return `${origin}${p}`;
 }
 
+function organizationId(): string {
+  return `${getSiteOrigin()}/#organization`;
+}
+
+function websiteId(): string {
+  return `${getSiteOrigin()}/#website`;
+}
+
 function sameAsFromSocial(): string[] {
-  return (Object.values(SITE_CONFIG.social) as string[]).filter(
-    (u) => u.startsWith("http"),
+  return (Object.values(SITE_CONFIG.social) as string[]).filter((u) =>
+    u.startsWith("http"),
   );
+}
+
+function buildEventStartDate(dateValue: string, time?: string): string {
+  if (!dateValue) return "";
+  if (time) {
+    const match = time.match(/^(\d{1,2}):(\d{2})/);
+    if (match) {
+      const hours = match[1].padStart(2, "0");
+      return `${dateValue}T${hours}:${match[2]}:00`;
+    }
+  }
+  return `${dateValue}T00:00:00`;
 }
 
 /**
@@ -28,7 +48,8 @@ export function getOrganizationSchema() {
   const origin = getSiteOrigin();
   return {
     "@context": "https://schema.org",
-    "@type": "EducationalOrganization",
+    "@type": "Organization",
+    "@id": organizationId(),
     name: SITE_CONFIG.name,
     alternateName: SITE_CONFIG.alternateName,
     url: `${origin}/`,
@@ -62,6 +83,56 @@ export function getOrganizationSchema() {
 }
 
 /**
+ * Generate WebSite structured data (JSON-LD)
+ */
+export function getWebSiteSchema() {
+  const origin = getSiteOrigin();
+  return {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "@id": websiteId(),
+    url: `${origin}/`,
+    name: SITE_CONFIG.name,
+    publisher: {
+      "@id": organizationId(),
+    },
+  };
+}
+
+/**
+ * Generate NewsArticle structured data (JSON-LD)
+ */
+export function getArticleSchema(article: {
+  title: string;
+  description: string;
+  path: string;
+  imageUrl?: string;
+  datePublished?: string;
+  dateModified?: string;
+}) {
+  const pageUrl = absoluteSiteUrl(article.path);
+  return {
+    "@context": "https://schema.org",
+    "@type": "NewsArticle",
+    headline: article.title,
+    description: article.description,
+    url: pageUrl,
+    mainEntityOfPage: pageUrl,
+    ...(article.imageUrl ? { image: [article.imageUrl] } : {}),
+    ...(article.datePublished ? { datePublished: article.datePublished } : {}),
+    ...(article.dateModified ? { dateModified: article.dateModified } : {}),
+    author: {
+      "@type": "Organization",
+      name: SITE_CONFIG.name,
+      url: `${getSiteOrigin()}/`,
+    },
+    publisher: {
+      "@id": organizationId(),
+    },
+  };
+}
+
+/**
  * Generate Event structured data (JSON-LD)
  */
 export function getEventSchema(event: {
@@ -86,9 +157,7 @@ export function getEventSchema(event: {
     ? event.date.split(',')[0].trim()
     : event.date || ''
   
-  const startDate = event.time
-    ? `${dateValue}T${event.time}:00`
-    : `${dateValue}T00:00:00`;
+  const startDate = buildEventStartDate(dateValue, event.time);
 
   const imageUrl = event.image
     ? event.image.startsWith("http")
@@ -111,9 +180,7 @@ export function getEventSchema(event: {
     startDate: startDate,
     ...(event.endDate
       ? {
-          endDate: event.time
-            ? `${event.endDate}T${event.time}:00`
-            : `${event.endDate}T23:59:59`,
+          endDate: buildEventStartDate(event.endDate, event.time),
         }
       : {}),
     eventStatus: "https://schema.org/EventScheduled",
@@ -130,6 +197,7 @@ export function getEventSchema(event: {
     image: imageUrl,
     organizer: {
       "@type": "Organization",
+      "@id": organizationId(),
       name: SITE_CONFIG.name,
       url: `${getSiteOrigin()}/`,
     },

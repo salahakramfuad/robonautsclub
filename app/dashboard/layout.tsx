@@ -1,4 +1,6 @@
 import { requireAuth } from '@/lib/auth'
+import type { Metadata } from 'next'
+import { NOINDEX_ROBOTS } from '@/lib/seo-metadata'
 import LogoutButton from './LogoutButton'
 import TokenExpirationChecker from './TokenExpirationChecker'
 import SessionTimer from './SessionTimer'
@@ -7,6 +9,11 @@ import DashboardShell from './DashboardShell'
 
 // Force dynamic rendering since this layout uses cookies for authentication
 export const dynamic = 'force-dynamic'
+
+export const metadata: Metadata = {
+  title: 'Dashboard',
+  robots: NOINDEX_ROBOTS,
+}
 
 export default async function DashboardLayout({
   children,

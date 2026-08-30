@@ -1,9 +1,11 @@
 import Link from 'next/link'
 import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
+import Script from 'next/script'
 import { ArrowLeft, Calendar, Images, MapPin } from 'lucide-react'
-import { SITE_CONFIG } from '@/lib/site-config'
 import { effectiveGalleryDisplayRaw } from '@/lib/publicContentDates'
+import { getBreadcrumbSchema } from '@/lib/seo'
+import { buildPageMetadata } from '@/lib/seo-metadata'
 import { getPublicGalleryGroupById } from '../../actions'
 import ImageLightboxGallery from '@/components/ImageLightboxGallery'
 
@@ -31,17 +33,24 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!group) {
     return { title: 'Album' }
   }
-  return {
-    title: `${group.title} — Gallery`,
-    description: `Photos: ${group.title} · ${SITE_CONFIG.name}`,
-    openGraph: {
-      title: `${group.title} | ${SITE_CONFIG.name}`,
-      url: `/gallery/album/${id}`,
-    },
-    alternates: {
-      canonical: `/gallery/album/${id}`,
-    },
-  }
+
+  const path = `/gallery/album/${id}`
+  const cover = group.images[0]?.url
+
+  return buildPageMetadata({
+    title: `${group.title} | Robonauts Gallery`,
+    description: `Photos from ${group.title} at Robonauts events and activities.`,
+    path,
+    absoluteTitle: true,
+    ogImage: cover
+      ? { url: cover, alt: group.title }
+      : {
+          url: '/robofest/robofest.jpg',
+          width: 1200,
+          height: 630,
+          alt: group.title,
+        },
+  })
 }
 
 export default async function GalleryAlbumPage({ params }: Props) {
@@ -51,9 +60,21 @@ export default async function GalleryAlbumPage({ params }: Props) {
 
   const urls = group.images.map((i) => i.url).filter(Boolean)
   const dateLine = formatDisplayDate(effectiveGalleryDisplayRaw(group))
+  const albumPath = `/gallery/album/${id}`
+
+  const breadcrumbSchema = getBreadcrumbSchema([
+    { name: 'Home', url: '/' },
+    { name: 'Gallery', url: '/gallery' },
+    { name: group.title, url: albumPath },
+  ])
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <Script
+        id="gallery-breadcrumb-schema"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-10 sm:py-14">
         <Link
           href="/gallery"

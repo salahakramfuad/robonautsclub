@@ -52,7 +52,7 @@ export default function UpcomingEventsRail({ events }: { events: Event[] }) {
           prefetch={false}
           className="group inline-flex items-center gap-1 text-xs font-medium text-white/70 transition-colors hover:text-white"
         >
-          All events
+          Robotics &amp; STEM Events
           <ArrowRight className="size-3.5 transition-transform duration-300 group-hover:translate-x-0.5" />
         </Link>
       </div>

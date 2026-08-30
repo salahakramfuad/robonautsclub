@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { SITE_CONFIG } from '@/lib/site-config'
 import Link from 'next/link'
 import Image from 'next/image'
 import { ArrowRight, Volume2, VolumeX } from 'lucide-react'
@@ -83,17 +82,20 @@ export default function Hero({ upcomingEvents = [] }: { upcomingEvents?: Event[]
       <div className="relative z-10 flex w-full flex-1 flex-col pt-28 sm:pt-32 lg:pt-28">
         <div className="flex flex-1 items-center px-4 py-8 sm:px-6 sm:py-10 lg:px-10 xl:px-14">
           <div className="w-full max-w-[28rem] space-y-6 text-left sm:max-w-md md:max-w-lg lg:max-w-xl lg:space-y-7">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-sky-200/90 sm:text-xs">
-              {SITE_CONFIG.name} · STEM · Robotics · Olympiads
-            </p>
+            <h1 className="text-sm font-semibold uppercase tracking-[0.2em] text-sky-200/95 sm:text-base md:text-lg">
+              Robonauts – STEM, Robotics &amp; Olympiad Education in Bangladesh
+            </h1>
 
-            <h1 className="text-4xl font-bold tracking-tight text-white drop-shadow-[0_2px_12px_rgba(0,0,0,0.55)] sm:text-5xl md:text-6xl lg:text-[4.25rem] lg:leading-[0.95]">
+            <p
+              className="text-4xl font-bold tracking-tight text-white drop-shadow-[0_2px_12px_rgba(0,0,0,0.55)] sm:text-5xl md:text-6xl lg:text-[4.25rem] lg:leading-[0.95]"
+              aria-label="Build Skills. Break Barriers. Go Global."
+            >
               <span className="block">Build Skills.</span>
               <span className="block">Break Barriers.</span>
               <span className="mt-1 block bg-linear-to-r from-sky-200 via-indigo-200 to-sky-100 bg-clip-text text-transparent">
                 Go Global.
               </span>
-            </h1>
+            </p>
 
             <p className="max-w-md text-base leading-relaxed text-slate-100/90 sm:text-lg">
               Hands-on robotics, competition pathways, and international stages for students
@@ -118,10 +120,24 @@ export default function Hero({ upcomingEvents = [] }: { upcomingEvents?: Event[]
                 className="h-12 rounded-xl border-white/30 bg-transparent px-7 text-base font-medium text-white/90 hover:border-white/50 hover:bg-white/10 hover:text-white"
               >
                 <Link href="/about" prefetch={false}>
-                  Learn More
+                  About Robonauts
                 </Link>
               </Button>
             </div>
+
+            <p className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-slate-200/85">
+              <Link href="/news" prefetch={false} className="font-medium underline-offset-4 hover:text-white hover:underline">
+                Robonauts News
+              </Link>
+              <span aria-hidden="true">·</span>
+              <Link href="/gallery" prefetch={false} className="font-medium underline-offset-4 hover:text-white hover:underline">
+                Event Gallery
+              </Link>
+              <span aria-hidden="true">·</span>
+              <Link href="/robofest" prefetch={false} className="font-medium underline-offset-4 hover:text-white hover:underline">
+                RoboFest
+              </Link>
+            </p>
 
             <ul className="flex flex-wrap gap-2 pt-1">
               {TRACK_TAGS.map((tag) => (

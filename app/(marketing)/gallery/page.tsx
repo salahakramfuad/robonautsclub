@@ -1,6 +1,6 @@
 import { Metadata } from 'next'
 import { Calendar, Images, MapPin } from 'lucide-react'
-import { SITE_CONFIG } from '@/lib/site-config'
+import { PAGE_SEO, buildPageMetadata } from '@/lib/seo-metadata'
 import { effectiveGalleryDisplayRaw } from '@/lib/publicContentDates'
 import { GALLERY_ALBUM_PREVIEW_MAX } from '@/lib/media-gallery'
 import ImageLightboxGallery from '@/components/ImageLightboxGallery'
@@ -8,18 +8,18 @@ import ListingHeroSection from '@/components/ListingHeroSection'
 import { getGalleryGroups } from './actions'
 import { Card, CardContent } from '@/components/ui/card'
 
-export const metadata: Metadata = {
-  title: 'Gallery',
-  description: `Photo gallery from ${SITE_CONFIG.name} events and activities.`,
-  openGraph: {
-    title: `Gallery | ${SITE_CONFIG.name}`,
-    description: `Photos from ${SITE_CONFIG.name} events and activities.`,
-    url: '/gallery',
+export const metadata: Metadata = buildPageMetadata({
+  title: PAGE_SEO.gallery.title,
+  description: PAGE_SEO.gallery.description,
+  path: '/gallery',
+  absoluteTitle: true,
+  ogImage: {
+    url: '/robofest/robofest.jpg',
+    width: 1200,
+    height: 630,
+    alt: 'Robonauts Gallery',
   },
-  alternates: {
-    canonical: '/gallery',
-  },
-}
+})
 
 export const revalidate = 1800
 

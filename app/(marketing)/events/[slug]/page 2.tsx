@@ -4,12 +4,15 @@ import Script from 'next/script'
 import { Calendar, Clock, MapPin, ArrowLeft, Users, Monitor, Building2, Banknote } from 'lucide-react'
 import { getPublicEnglishMediumSchools, getPublicEvent } from '../actions'
 import { Event } from '@/types/event'
-import { notFound } from 'next/navigation'
+import { notFound, permanentRedirect } from 'next/navigation'
+import { eventPublicHref } from '@/lib/event-ui'
 import BookingForm from './BookingForm'
 import EventImage from './EventImage'
-import AutoRefresh from '../AutoRefresh'
 import { getEventSchema, getBreadcrumbSchema, absoluteSiteUrl } from '@/lib/seo'
 import { parseEventDates, formatEventDates, hasEventPassed, isRegistrationOpen } from '@/lib/dateUtils'
+import { Card, CardContent } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 
 
 // Helper function to validate and get image URL
@@ -66,8 +69,8 @@ const getEventTags = (event: Event) => {
 // Event Passed Component
 const EventPassedMessage = () => {
   return (
-    <div className="bg-white rounded-xl sm:rounded-2xl p-6 sm:p-8 border border-gray-200 shadow-sm">
-      <div className="text-center">
+    <Card className="shadow-sm">
+      <CardContent className="p-6 sm:p-8 text-center">
         <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-3 sm:mb-4">
           <Calendar className="w-6 h-6 sm:w-8 sm:h-8 text-gray-400" />
         </div>
@@ -78,23 +81,21 @@ const EventPassedMessage = () => {
           This event has already taken place. Check out our upcoming events for
           new opportunities!
         </p>
-        <Link
-          href="/events"
-          prefetch={false}
-          className="inline-block py-2 px-6 bg-indigo-500 hover:bg-indigo-600 text-white font-semibold rounded-lg transition-colors text-sm sm:text-base"
-        >
-          View Upcoming Events
-        </Link>
-      </div>
-    </div>
+        <Button asChild className="bg-indigo-500 hover:bg-indigo-600 text-white">
+          <Link href="/events" prefetch={false}>
+            View Upcoming Events
+          </Link>
+        </Button>
+      </CardContent>
+    </Card>
   )
 }
 
 // Registration Closed Component
 const RegistrationClosedMessage = () => {
   return (
-    <div className="bg-white rounded-xl sm:rounded-2xl p-6 sm:p-8 border border-gray-200 shadow-sm">
-      <div className="text-center">
+    <Card className="shadow-sm">
+      <CardContent className="p-6 sm:p-8 text-center">
         <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-amber-100 flex items-center justify-center mx-auto mb-3 sm:mb-4">
           <Users className="w-6 h-6 sm:w-8 sm:h-8 text-amber-600" />
         </div>
@@ -105,25 +106,23 @@ const RegistrationClosedMessage = () => {
           Registration for this event is closed. Check out our other events for
           new opportunities!
         </p>
-        <Link
-          href="/events"
-          prefetch={false}
-          className="inline-block py-2 px-6 bg-indigo-500 hover:bg-indigo-600 text-white font-semibold rounded-lg transition-colors text-sm sm:text-base"
-        >
-          View Other Events
-        </Link>
-      </div>
-    </div>
+        <Button asChild className="bg-indigo-500 hover:bg-indigo-600 text-white">
+          <Link href="/events" prefetch={false}>
+            View Other Events
+          </Link>
+        </Button>
+      </CardContent>
+    </Card>
   )
 }
 
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ id: string }>
+  params: Promise<{ slug: string }>
 }): Promise<Metadata> {
-  const { id } = await params
-  const event = await getPublicEvent(id)
+  const { slug } = await params
+  const event = await getPublicEvent(slug)
 
   if (!event) {
     return {
@@ -131,7 +130,7 @@ export async function generateMetadata({
     }
   }
 
-  const eventPageUrl = absoluteSiteUrl(`/events/${id}`)
+  const eventPageUrl = absoluteSiteUrl(eventPublicHref(event))
   const eventImage = getEventImageUrl(event.image)
   const ogImageUrl = eventImage.startsWith('http')
     ? eventImage
@@ -175,7 +174,7 @@ export async function generateMetadata({
       images: [ogImageUrl],
     },
     alternates: {
-      canonical: `/events/${id}`,
+      canonical: eventPublicHref(event),
     },
   }
 }
@@ -186,14 +185,18 @@ export const revalidate = 1800
 export default async function EventDetailPage({
   params,
 }: {
-  params: Promise<{ id: string }>
+  params: Promise<{ slug: string }>
 }) {
-  const { id } = await params
-  const event = await getPublicEvent(id)
+  const { slug } = await params
+  const event = await getPublicEvent(slug)
   const schools = await getPublicEnglishMediumSchools()
 
   if (!event) {
     notFound()
+  }
+
+  if (event.slug && event.slug !== slug) {
+    permanentRedirect(eventPublicHref(event))
   }
 
   const eventDates = parseEventDates(event.date)
@@ -213,7 +216,7 @@ export default async function EventDetailPage({
   )
 
   // Generate structured data
-  const eventUrl = absoluteSiteUrl(`/events/${id}`)
+  const eventUrl = absoluteSiteUrl(eventPublicHref(event))
   // For structured data, use first date or comma-separated string
   const schemaDate = Array.isArray(event.date) 
     ? event.date.length > 0 ? event.date[0] : ''
@@ -226,7 +229,7 @@ export default async function EventDetailPage({
     title: event.title,
     description: event.fullDescription || event.description,
     date: schemaDate,
-    time: event.time,
+    time: event.time || '9:00 AM - 5:00 PM',
     location: event.location,
     venue: event.venue,
     image: getEventImageUrl(event.image),
@@ -236,7 +239,7 @@ export default async function EventDetailPage({
   const breadcrumbSchema = getBreadcrumbSchema([
     { name: 'Home', url: '/' },
     { name: 'Events', url: '/events' },
-    { name: event.title, url: `/events/${id}` },
+    { name: event.title, url: eventPublicHref(event) },
   ])
 
   return (
@@ -251,7 +254,6 @@ export default async function EventDetailPage({
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
       />
-      <AutoRefresh />
       {/* Compact Header Section */}
       <section className="relative overflow-hidden">
         {/* Background decoration */}
@@ -287,26 +289,29 @@ export default async function EventDetailPage({
           {/* Left Column - Image and Content Sections */}
           <div className="lg:col-span-2 space-y-4 sm:space-y-5">
             {/* Main Event Image */}
-            <div className="bg-white rounded-xl sm:rounded-2xl overflow-hidden border-2 border-gray-200 shadow-lg">
+            <Card className="overflow-hidden border-2 border-gray-200 shadow-lg p-0">
               <EventImage
                 src={getEventImageUrl(event.image)}
                 alt={event.title}
                 priority
               />
-            </div>
+            </Card>
 
             {/* Overview Section */}
-            <div className="bg-white rounded-xl sm:rounded-2xl p-4 sm:p-6 md:p-8 border-2 border-gray-200 shadow-lg">
-              <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-3 sm:mb-4">Overview</h3>
-              <p className="text-gray-700 leading-relaxed text-sm sm:text-base md:text-lg">
-                {event.fullDescription || event.description}
-              </p>
-            </div>
+            <Card className="border-2 border-gray-200 shadow-lg">
+              <CardContent className="p-4 sm:p-6 md:p-8">
+                <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-3 sm:mb-4">Overview</h3>
+                <p className="text-gray-700 leading-relaxed text-sm sm:text-base md:text-lg">
+                  {event.fullDescription || event.description}
+                </p>
+              </CardContent>
+            </Card>
 
             {/* Event Details Section */}
-            <div className="bg-white rounded-xl sm:rounded-2xl p-4 sm:p-6 md:p-8 border-2 border-gray-200 shadow-lg">
-              <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">Event Details</h3>
-              <div className="space-y-3 sm:space-y-4">
+            <Card className="border-2 border-gray-200 shadow-lg">
+              <CardContent className="p-4 sm:p-6 md:p-8">
+                <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">Event Details</h3>
+                <div className="space-y-3 sm:space-y-4">
                 <div className="flex items-start gap-2 sm:gap-3 p-3 sm:p-4 rounded-lg sm:rounded-xl bg-indigo-50/50 border border-indigo-100">
                   <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-indigo-100 flex items-center justify-center shrink-0">
                     <Calendar className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-500" />
@@ -381,69 +386,79 @@ export default async function EventDetailPage({
                     </div>
                   </div>
                 )}
-              </div>
-            </div>
+                </div>
+              </CardContent>
+            </Card>
 
             {/* Contact person */}
             {hasContactDetails && (
-              <div className="bg-white rounded-xl sm:rounded-2xl p-4 sm:p-6 md:p-8 border-2 border-gray-200 shadow-lg">
-                <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">Contact Person</h3>
-                <div className="space-y-3">
-                  {event.contactPersonName && (
-                    <p className="text-sm sm:text-base text-gray-800">
-                      <span className="font-semibold">Name:</span> {event.contactPersonName}
-                    </p>
-                  )}
-                  {event.contactPersonDesignation && (
-                    <p className="text-sm sm:text-base text-gray-800">
-                      <span className="font-semibold">Designation:</span> {event.contactPersonDesignation}
-                    </p>
-                  )}
-                  {event.contactPersonMobileOrEmail && (
-                    <p className="text-sm sm:text-base text-gray-800">
-                      <span className="font-semibold">Mobile/Email:</span> {event.contactPersonMobileOrEmail}
-                    </p>
-                  )}
-                </div>
-              </div>
+              <Card className="border-2 border-gray-200 shadow-lg">
+                <CardContent className="p-4 sm:p-6 md:p-8">
+                  <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">Contact Person</h3>
+                  <div className="space-y-3">
+                    {event.contactPersonName && (
+                      <p className="text-sm sm:text-base text-gray-800">
+                        <span className="font-semibold">Name:</span> {event.contactPersonName}
+                      </p>
+                    )}
+                    {event.contactPersonDesignation && (
+                      <p className="text-sm sm:text-base text-gray-800">
+                        <span className="font-semibold">Designation:</span> {event.contactPersonDesignation}
+                      </p>
+                    )}
+                    {event.contactPersonMobileOrEmail && (
+                      <p className="text-sm sm:text-base text-gray-800">
+                        <span className="font-semibold">Mobile/Email:</span> {event.contactPersonMobileOrEmail}
+                      </p>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
             )}
 
             {/* Agenda Section */}
             {event.agenda && (
-              <div className="bg-white rounded-xl sm:rounded-2xl p-4 sm:p-6 md:p-8 border-2 border-gray-200 shadow-lg">
-                <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">Agenda</h3>
-                <div className="text-gray-700 leading-relaxed text-sm sm:text-base md:text-lg whitespace-pre-line">
-                  {event.agenda}
-                </div>
-              </div>
+              <Card className="border-2 border-gray-200 shadow-lg">
+                <CardContent className="p-4 sm:p-6 md:p-8">
+                  <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">Agenda</h3>
+                  <div className="text-gray-700 leading-relaxed text-sm sm:text-base md:text-lg whitespace-pre-line">
+                    {event.agenda}
+                  </div>
+                </CardContent>
+              </Card>
             )}
 
             {/* About the Organizer Section */}
-            <div className="bg-white rounded-xl sm:rounded-2xl p-4 sm:p-6 md:p-8 border-2 border-gray-200 shadow-lg">
-              <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-3 sm:mb-4">About the Organizer</h3>
-              <div className="space-y-3 sm:space-y-4 text-gray-700 leading-relaxed text-sm sm:text-base md:text-lg">
-                <p>
-                  Robonauts Club is Bangladesh&apos;s first youth robotics club, dedicated to preparing students for RoboFest and global STEM challenges. We empower the next generation of robotics innovators through hands-on learning, expert mentorship, and competitive opportunities.
-                </p>
-                <p>
-                  Our events bring together passionate students, experienced mentors, and industry leaders to share knowledge, tools, and inspiration that shape the future of robotics and technology in Bangladesh.
-                </p>
-              </div>
-            </div>
+            <Card className="border-2 border-gray-200 shadow-lg">
+              <CardContent className="p-4 sm:p-6 md:p-8">
+                <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-3 sm:mb-4">About the Organizer</h3>
+                <div className="space-y-3 sm:space-y-4 text-gray-700 leading-relaxed text-sm sm:text-base md:text-lg">
+                  <p>
+                    Robonauts Club is Bangladesh&apos;s first youth robotics club, dedicated to preparing students for RoboFest and global STEM challenges. We empower the next generation of robotics innovators through hands-on learning, expert mentorship, and competitive opportunities.
+                  </p>
+                  <p>
+                    Our events bring together passionate students, experienced mentors, and industry leaders to share knowledge, tools, and inspiration that shape the future of robotics and technology in Bangladesh.
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
 
             {/* Tags Section */}
-            <div className="bg-white rounded-xl sm:rounded-2xl p-4 sm:p-6 md:p-8 border-2 border-gray-200 shadow-lg">
-              <div className="flex flex-wrap gap-2 sm:gap-3">
-                {tags.map((tag, index) => (
-                  <span
-                    key={index}
-                    className="px-3 sm:px-4 py-1.5 sm:py-2 bg-indigo-50 text-indigo-700 rounded-full text-xs sm:text-sm font-medium border border-indigo-200 hover:bg-indigo-100 transition-colors"
-                  >
-                    {tag}
-                  </span>
-                ))}
-              </div>
-            </div>
+            <Card className="border-2 border-gray-200 shadow-lg">
+              <CardContent className="p-4 sm:p-6 md:p-8">
+                <div className="flex flex-wrap gap-2 sm:gap-3">
+                  {tags.map((tag, index) => (
+                    <Badge
+                      key={index}
+                      variant="secondary"
+                      className="px-3 sm:px-4 py-1.5 sm:py-2 bg-indigo-50 text-indigo-700 border border-indigo-200 hover:bg-indigo-100 text-xs sm:text-sm font-medium"
+                    >
+                      {tag}
+                    </Badge>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
           </div>
 
           {/* Right Column - Booking Form */}

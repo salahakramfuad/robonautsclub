@@ -1,14 +1,11 @@
-import { getOrganizationSchema } from '@/lib/seo'
+import JsonLdScript from "@/components/JsonLdScript";
+import { getOrganizationSchema, getWebSiteSchema } from "@/lib/seo";
 
 export default function OrganizationSchema() {
-  const schemaJson = JSON.stringify(getOrganizationSchema())
-  
   return (
-    <template
-      id="organization-schema"
-      suppressHydrationWarning
-      dangerouslySetInnerHTML={{ __html: schemaJson }}
-    />
-  )
+    <>
+      <JsonLdScript id="organization-schema" data={getOrganizationSchema()} />
+      <JsonLdScript id="website-schema" data={getWebSiteSchema()} />
+    </>
+  );
 }
-
