@@ -13,6 +13,7 @@ export type Props = {
   initialStatusCounts: RobofestRegistrationStatusCounts
   schools: string[]
   campusAmbassadors: RobofestCampusAmbassador[]
+  referralCounts?: Record<string, number>
   canCreate?: boolean
   canEdit?: boolean
   canDelete?: boolean

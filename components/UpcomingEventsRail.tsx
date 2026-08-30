@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { ArrowRight } from 'lucide-react'
 import type { Event } from '@/types/event'
+import { eventPublicHref } from '@/lib/event-ui'
 import { parseEventDates } from '@/lib/dateUtils'
 import {
   Carousel,
@@ -51,7 +52,7 @@ export default function UpcomingEventsRail({ events }: { events: Event[] }) {
           prefetch={false}
           className="group inline-flex items-center gap-1 text-xs font-medium text-white/70 transition-colors hover:text-white"
         >
-          All events
+          Robotics &amp; STEM Events
           <ArrowRight className="size-3.5 transition-transform duration-300 group-hover:translate-x-0.5" />
         </Link>
       </div>
@@ -78,7 +79,7 @@ export default function UpcomingEventsRail({ events }: { events: Event[] }) {
                 className="pl-3 basis-[min(17.5rem,82vw)] sm:basis-76"
               >
                 <Link
-                  href={`/events/${event.id}`}
+                  href={eventPublicHref(event)}
                   prefetch={false}
                   className="group flex items-center gap-3 rounded-2xl border border-white/15 bg-white/10 px-3 py-2.5 shadow-[0_12px_40px_-20px_rgba(0,0,0,0.8)] backdrop-blur-md transition-all duration-300 hover:-translate-y-0.5 hover:border-sky-200/40 hover:bg-white/15"
                 >

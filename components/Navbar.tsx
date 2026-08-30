@@ -107,7 +107,7 @@ export default function Nav() {
           >
             <Image
               src={SITE_CONFIG.assets.logo}
-              alt="Hope TTC"
+              alt={SITE_CONFIG.name}
               width={48}
               height={48}
               priority

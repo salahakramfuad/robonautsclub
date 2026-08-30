@@ -1,6 +1,7 @@
 import { requireTabAccess, canCreateArea, canEditOthersArea, canDeleteArea, hasPermission } from '@/lib/auth'
 import { getPublicEnglishMediumSchools } from '@/app/(marketing)/events/actions'
 import {
+  getRobofestCampusAmbassadorReferralCounts,
   getRobofestCampusAmbassadors,
   getRobofestDashboardContent,
   getRobofestRegistrationsPage,
@@ -25,6 +26,10 @@ export default async function RobofestDashboardPage() {
       getRobofestCampusAmbassadors(),
     ])
 
+  const referralCounts = await getRobofestCampusAmbassadorReferralCounts(
+    campusAmbassadors.map((a) => a.id),
+  )
+
   return (
     <div className="w-full min-w-0 max-w-none">
       <RobofestDashboardClient
@@ -35,6 +40,7 @@ export default async function RobofestDashboardPage() {
         initialStatusCounts={statusCounts}
         schools={schools}
         campusAmbassadors={campusAmbassadors}
+        referralCounts={referralCounts}
         canCreate={canCreateArea(session, 'robofest')}
         canEdit={canEditOthersArea(session, 'robofest')}
         canDelete={canDeleteArea(session, 'robofest')}

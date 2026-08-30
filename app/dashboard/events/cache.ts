@@ -1,6 +1,7 @@
 import { unstable_cache } from 'next/cache'
 import { adminDb } from '@/lib/firebase-admin'
 import { Event } from '@/types/event'
+import { persistMissingEventSlugs } from '@/lib/event-slug'
 
 export type DashboardEventSummary = Pick<Event, 'id' | 'date' | 'createdAt' | 'title' | 'description'>
 export const DASHBOARD_EVENTS_SUMMARY_TAG = 'dashboard-events-summary'
@@ -8,6 +9,7 @@ export const DASHBOARD_EVENTS_LIST_TAG = 'dashboard-events-list'
 
 const DASHBOARD_EVENT_LIST_FIELDS = [
   'title',
+  'slug',
   'date',
   'time',
   'location',
@@ -127,10 +129,13 @@ async function fetchDashboardEventsListFromDb(): Promise<Event[]> {
     events.push({
       id: doc.id,
       ...data,
+      slug: typeof data.slug === 'string' && data.slug.trim() ? data.slug.trim() : undefined,
       createdAt: data.createdAt?.toDate?.() || data.createdAt,
       updatedAt: data.updatedAt?.toDate?.() || data.updatedAt,
     } as Event)
   })
+
+  await persistMissingEventSlugs(events)
 
   events.sort((a, b) => {
     if (!a.createdAt && !b.createdAt) return 0
@@ -158,10 +163,13 @@ export async function fetchDashboardEventByIdFromDb(id: string): Promise<Event |
   }
 
   const data = eventDoc.data()!
-  return {
+  const event = {
     id: eventDoc.id,
     ...data,
+    slug: typeof data.slug === 'string' && data.slug.trim() ? data.slug.trim() : undefined,
     createdAt: data.createdAt?.toDate?.() || data.createdAt,
     updatedAt: data.updatedAt?.toDate?.() || data.updatedAt,
   } as Event
+  await persistMissingEventSlugs([event])
+  return event
 }

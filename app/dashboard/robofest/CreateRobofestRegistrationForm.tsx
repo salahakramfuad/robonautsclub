@@ -10,6 +10,8 @@ import {
 } from '@/lib/robofest-fee'
 import {
   formatCampusAmbassadorLabel,
+  ROBOFEST_CAMPUS_AMBASSADOR_NOT_APPLICABLE,
+  ROBOFEST_CAMPUS_AMBASSADOR_NOT_APPLICABLE_LABEL,
   type RobofestCampusAmbassador,
 } from '@/lib/robofest-campus-ambassadors'
 import {
@@ -473,7 +475,7 @@ export default function CreateRobofestRegistrationForm({
 
           <div className="space-y-1">
             <label className="text-xs text-gray-500">
-              Campus ambassador (optional)
+              Campus ambassador <span className="text-red-500">*</span>
             </label>
             <select
               className={selectClassName}
@@ -484,13 +486,17 @@ export default function CreateRobofestRegistrationForm({
                   campusAmbassadorId: e.target.value,
                 }))
               }
+              required
             >
-              <option value="">None</option>
+              <option value="">Select campus ambassador</option>
               {campusAmbassadors.map((a) => (
                 <option key={a.id} value={a.id}>
                   {formatCampusAmbassadorLabel(a)}
                 </option>
               ))}
+              <option value={ROBOFEST_CAMPUS_AMBASSADOR_NOT_APPLICABLE}>
+                {ROBOFEST_CAMPUS_AMBASSADOR_NOT_APPLICABLE_LABEL}
+              </option>
             </select>
           </div>
 

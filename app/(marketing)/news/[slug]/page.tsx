@@ -1,11 +1,19 @@
 import Link from 'next/link'
 import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
+import Script from 'next/script'
 import { ArrowLeft } from 'lucide-react'
 import { SITE_CONFIG } from '@/lib/site-config'
 import { NEWS_ARTICLE_IMAGES_PREVIEW_MAX } from '@/lib/media-gallery'
 import { effectiveNewsDisplayRaw } from '@/lib/publicContentDates'
-import { collectArticleImageUrls, formatNewsDate, newsDateTimeAttr } from '@/lib/news-ui'
+import {
+  collectArticleImageUrls,
+  excerptBody,
+  formatNewsDate,
+  newsDateTimeAttr,
+} from '@/lib/news-ui'
+import { getArticleSchema, getBreadcrumbSchema } from '@/lib/seo'
+import { buildPageMetadata } from '@/lib/seo-metadata'
 import ArticleCoverLightbox from '@/components/ArticleCoverLightbox'
 import ArticleGallery from '@/components/news/ArticleGallery'
 import NewsCoverFallback from '@/components/news/NewsCoverFallback'
@@ -15,25 +23,37 @@ export const revalidate = 1800
 
 type Props = { params: Promise<{ slug: string }> }
 
+function toSchemaIso(raw: string | Date | null | undefined): string | undefined {
+  if (!raw) return undefined
+  const d = raw instanceof Date ? raw : new Date(raw)
+  return Number.isNaN(d.getTime()) ? undefined : d.toISOString()
+}
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params
   const article = await getNewsArticleBySlug(slug)
   if (!article) {
     return { title: 'Article' }
   }
-  return {
-    title: article.title,
-    description: article.body.slice(0, 160).replace(/\s+/g, ' ').trim(),
-    openGraph: {
-      title: `${article.title} | ${SITE_CONFIG.name}`,
-      description: article.body.slice(0, 160).replace(/\s+/g, ' ').trim(),
-      url: `/news/${article.slug}`,
-      images: article.coverImageUrl ? [{ url: article.coverImageUrl }] : undefined,
-    },
-    alternates: {
-      canonical: `/news/${article.slug}`,
-    },
-  }
+
+  const description = excerptBody(article.body, 160)
+  const path = `/news/${article.slug}`
+
+  return buildPageMetadata({
+    title: `${article.title} | ${SITE_CONFIG.name}`,
+    description,
+    path,
+    absoluteTitle: true,
+    ogType: 'article',
+    ogImage: article.coverImageUrl
+      ? { url: article.coverImageUrl, alt: article.title }
+      : {
+          url: '/roboclass.jpg',
+          width: 1200,
+          height: 630,
+          alt: article.title,
+        },
+  })
 }
 
 export default async function NewsArticlePage({ params }: Props) {
@@ -51,9 +71,38 @@ export default async function NewsArticlePage({ params }: Props) {
   const moreThanFourImages = totalWithCover > NEWS_ARTICLE_IMAGES_PREVIEW_MAX
   const photosHref = `/news/${article.slug}/photos`
   const extraPhotoCount = Math.max(0, totalWithCover - 1)
+  const articlePath = `/news/${article.slug}`
+  const description = excerptBody(article.body, 160)
+  const datePublished = toSchemaIso(article.publishedAt ?? article.createdAt)
+  const dateModified = toSchemaIso(article.updatedAt)
+
+  const articleSchema = getArticleSchema({
+    title: article.title,
+    description,
+    path: articlePath,
+    imageUrl: article.coverImageUrl,
+    datePublished,
+    dateModified,
+  })
+
+  const breadcrumbSchema = getBreadcrumbSchema([
+    { name: 'Home', url: '/' },
+    { name: 'News', url: '/news' },
+    { name: article.title, url: articlePath },
+  ])
 
   return (
     <article className="min-h-screen bg-linear-to-b from-slate-50 via-white to-slate-50/80">
+      <Script
+        id="article-schema"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }}
+      />
+      <Script
+        id="article-breadcrumb-schema"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
       <div className="mx-auto max-w-[1100px] px-4 py-10 sm:px-6 sm:py-14 lg:px-8">
         <Link
           href="/news"

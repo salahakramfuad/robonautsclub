@@ -3,6 +3,7 @@
 import { useMemo } from 'react'
 import dynamic from 'next/dynamic'
 import { SITE_CONFIG } from '@/lib/site-config'
+import { resolveCourseHref } from '@/lib/course-ui'
 import Hero from './Hero'
 import FeatureBento from './FeatureBento'
 import CourseShowcase from './CourseShowcase'
@@ -48,7 +49,7 @@ const Feed = ({
         title: course.title,
         level: course.level,
         blurb: course.blurb,
-        href: course.href,
+        href: resolveCourseHref(course.href),
         img: course.image,
       }))
   }, [initialCourses])

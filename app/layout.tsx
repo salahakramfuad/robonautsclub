@@ -53,7 +53,7 @@ export const metadata: Metadata = {
     ],
   },
   twitter: {
-    card: "summary",
+    card: "summary_large_image",
     title: SITE_CONFIG.metadata.defaultTitle,
     description: SITE_CONFIG.metadata.defaultDescription,
     images: [SITE_CONFIG.metadata.defaultImage],
@@ -84,6 +84,9 @@ export const metadata: Metadata = {
     'geo.position': '23.8103;90.4125',
     'ICBM': '23.8103, 90.4125',
   },
+  ...(process.env.GOOGLE_SITE_VERIFICATION
+    ? { verification: { google: process.env.GOOGLE_SITE_VERIFICATION } }
+    : {}),
 };
 
 export default function RootLayout({

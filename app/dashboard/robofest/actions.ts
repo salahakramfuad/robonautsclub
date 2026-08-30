@@ -50,6 +50,7 @@ import {
 } from '@/lib/robofest-campus-ambassadors-db'
 import { sanitizeRobofestCertificateSignatures } from '@/lib/robofest-certificate-signatures'
 import {
+  loadRobofestCampusAmbassadorReferralCounts,
   loadRobofestRegistrationsForExport,
   loadRobofestRegistrationsPage,
   loadRobofestRegistrationStatusCounts,
@@ -229,6 +230,22 @@ export async function getRobofestRegistrationStatusCounts(): Promise<RobofestReg
   } catch (error) {
     console.error('[robofest-dashboard] status counts failed:', error)
     return { pending: 0, confirmed: 0, cancelled: 0 }
+  }
+}
+
+export async function getRobofestCampusAmbassadorReferralCounts(
+  ambassadorIds: string[],
+): Promise<Record<string, number>> {
+  await requireAuth()
+  try {
+    return await loadRobofestCampusAmbassadorReferralCounts(ambassadorIds)
+  } catch (error) {
+    console.error('[robofest-dashboard] ambassador referral counts failed:', error)
+    const empty: Record<string, number> = {}
+    for (const id of ambassadorIds) {
+      empty[id] = 0
+    }
+    return empty
   }
 }
 

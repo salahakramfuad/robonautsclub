@@ -506,14 +506,14 @@ async function generatePDFContent(
     },
     metric: {
       pageMarginX: 50,
-      pageMarginBottom: 38,
+      pageMarginBottom: 22,
       headerHeight: 76,
       logoSize: 40,
       labelColW: isTeamRegistration ? 134 : 120,
       sectionGap: 22,
       rowGap: 8,
-      qrSize: 110,
-      qrBlockH: 178, // QR + caption + URL
+      qrSize: 72,
+      qrBlockH: 108, // QR + caption + URL (compact so 4 members fit on one page)
     },
   }
 
@@ -677,30 +677,40 @@ async function generatePDFContent(
   // Everything after this point flows into whatever vertical room is left
   // before the QR section. This guarantees the QR + footer always sit at
   // their fixed bottom location, no matter the optional content above.
-  const footerH = 28
+  const footerH = 18
   const qrBlockY = pageHeight - theme.metric.pageMarginBottom - footerH - theme.metric.qrBlockH
   const flowSpaceBottom = qrBlockY - 14
 
   // ---------- Team members (Robofest) ----------
-  if (
-    sanitizedBooking.teamMembers &&
-    sanitizedBooking.teamMembers.length > 0 &&
-    y + 40 < flowSpaceBottom
-  ) {
+  // Always list every member (up to 4). Compact full-width rows leave room
+  // above the smaller bottom-pinned QR; "About the Event" is optional filler.
+  if (sanitizedBooking.teamMembers && sanitizedBooking.teamMembers.length > 0) {
     y += 6
     y = drawSectionHeader('Team Members', y)
     for (let i = 0; i < sanitizedBooking.teamMembers.length; i += 1) {
-      if (y + 28 > flowSpaceBottom) break
       const member = sanitizedBooking.teamMembers[i]
-      const label = `${String(i + 1).padStart(2, '0')}. ${member.name || 'Member'}${
+      const nameLine = `${String(i + 1).padStart(2, '0')}. ${member.name || 'Member'}${
         i === 0 ? ' (Team Leader)' : ''
       }`
       const detail = [member.email, member.grade, member.school, member.phone]
         .filter(Boolean)
         .join(' · ')
-      y = drawRow(label, detail || '—', y)
+
+      doc.font(theme.font.bold).fontSize(theme.size.value).fillColor(theme.color.ink)
+      doc.text(nameLine, left, y, { width: contentWidth, lineGap: 1 })
+      const nameH = doc.heightOfString(nameLine, { width: contentWidth, lineGap: 1 })
+      y += nameH + 1
+
+      if (detail) {
+        doc.font(theme.font.regular).fontSize(theme.size.caption).fillColor(theme.color.mute)
+        doc.text(detail, left, y, { width: contentWidth, lineGap: 1 })
+        const detailH = doc.heightOfString(detail, { width: contentWidth, lineGap: 1 })
+        y += detailH + 4
+      } else {
+        y += 4
+      }
     }
-    y += 4
+    y += 2
   }
 
   // ---------- Optional: About the Event ----------
@@ -720,20 +730,20 @@ async function generatePDFContent(
   }
 
   // ---------- QR Code block (bottom-pinned) ----------
-  drawHRule(qrBlockY - 12)
+  drawHRule(qrBlockY - 8)
 
   const qrSize = theme.metric.qrSize
   const qrX = (pageWidth - qrSize) / 2
-  const qrY = qrBlockY + 6
+  const qrY = qrBlockY + 2
 
   try {
     const qrCodeBuffer = await generateQRCodeBuffer(verificationUrl, qrSize * 4)
-    doc.rect(qrX - 6, qrY - 6, qrSize + 12, qrSize + 12)
+    doc.rect(qrX - 4, qrY - 4, qrSize + 8, qrSize + 8)
       .strokeColor(theme.color.rule).lineWidth(0.75).stroke()
     doc.image(qrCodeBuffer, qrX, qrY, { width: qrSize, height: qrSize })
   } catch {
     doc.font(theme.font.regular).fontSize(theme.size.body).fillColor(theme.color.faint)
-    doc.text('QR code unavailable — please contact support', left, qrY + 40, {
+    doc.text('QR code unavailable — please contact support', left, qrY + 24, {
       width: contentWidth,
       align: 'center',
     })
@@ -745,7 +755,7 @@ async function generatePDFContent(
       ? 'Scan to verify the registration'
       : 'Scan to verify your registration',
     left,
-    qrY + qrSize + 14,
+    qrY + qrSize + 8,
     {
       width: contentWidth,
       align: 'center',
@@ -753,21 +763,21 @@ async function generatePDFContent(
   )
 
   // URL — split at query string if long, otherwise let it wrap naturally
-  const urlY = qrY + qrSize + 30
+  const urlY = qrY + qrSize + 20
   const questionMarkIndex = verificationUrl.indexOf('?')
   doc.font(theme.font.regular).fontSize(theme.size.micro).fillColor(theme.color.faint)
   if (questionMarkIndex > 0 && verificationUrl.length > 90) {
     const base = verificationUrl.substring(0, questionMarkIndex)
     const params = verificationUrl.substring(questionMarkIndex)
     doc.text(base, left, urlY, { width: contentWidth, align: 'center' })
-    doc.text(params, left, urlY + 10, { width: contentWidth, align: 'center' })
+    doc.text(params, left, urlY + 9, { width: contentWidth, align: 'center' })
   } else {
     doc.text(verificationUrl, left, urlY, { width: contentWidth, align: 'center', lineGap: 1.5 })
   }
 
   // ---------- Footer (bottom-pinned) ----------
-  const footerY = pageHeight - theme.metric.pageMarginBottom + 6
-  drawHRule(footerY - 8)
+  const footerY = pageHeight - theme.metric.pageMarginBottom + 2
+  drawHRule(footerY - 6)
   doc.font(theme.font.regular).fontSize(theme.size.footer).fillColor(theme.color.faint)
   doc.text(
     `© ${new Date().getFullYear()} ${SITE_CONFIG.name}. All rights reserved.`,

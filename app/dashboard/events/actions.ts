@@ -9,6 +9,7 @@ import {
 } from '@/lib/auth'
 import { adminDb } from '@/lib/firebase-admin'
 import { Event } from '@/types/event'
+import { ensureUniqueEventSlug, slugifyEventTitle } from '@/lib/event-slug'
 import { sanitizeEventForDatabase } from '@/lib/textSanitizer'
 import { createNotification } from '@/lib/notifications'
 import { normalizeCustomFormFields } from '@/lib/eventCustomForm'
@@ -172,8 +173,10 @@ export async function createEvent(formData: {
     const defaultRegistrationFields = normalizeDefaultRegistrationFields(formData.defaultRegistrationFields, {
       hasCategories: categories.length > 0,
     })
+    const slug = await ensureUniqueEventSlug(slugifyEventTitle(sanitized.title))
     const eventRef = await adminDb.collection('events').add({
       title: sanitized.title,
+      slug,
       date: normalizedDate,
       description: sanitized.description,
       time: sanitized.time || defaultTime,
@@ -204,7 +207,7 @@ export async function createEvent(formData: {
 
     // Revalidate ISR pages to show new event immediately
     revalidatePath('/events')
-    revalidatePath(`/events/${eventRef.id}`)
+    revalidatePath(`/events/${slug}`)
     revalidateTag(DASHBOARD_EVENTS_LIST_TAG, 'max')
     revalidateTag(DASHBOARD_EVENTS_SUMMARY_TAG, 'max')
     revalidateTag(PUBLIC_EVENTS_TAG, 'max')
@@ -334,8 +337,12 @@ export async function updateEvent(
     const defaultRegistrationFields = normalizeDefaultRegistrationFields(formData.defaultRegistrationFields, {
       hasCategories: categories.length > 0,
     })
+    const previousSlug =
+      typeof eventData.slug === 'string' && eventData.slug.trim() ? eventData.slug.trim() : ''
+    const slug = await ensureUniqueEventSlug(slugifyEventTitle(sanitized.title), eventId)
     await adminDb.collection('events').doc(eventId).update({
       title: sanitized.title,
+      slug,
       date: normalizedDate,
       description: sanitized.description,
       time: sanitized.time || defaultTime,
@@ -363,6 +370,10 @@ export async function updateEvent(
 
     // Revalidate ISR pages to show updated event immediately
     revalidatePath('/events')
+    revalidatePath(`/events/${slug}`)
+    if (previousSlug && previousSlug !== slug) {
+      revalidatePath(`/events/${previousSlug}`)
+    }
     revalidatePath(`/events/${eventId}`)
     revalidateTag(DASHBOARD_EVENTS_LIST_TAG, 'max')
     revalidateTag(DASHBOARD_EVENTS_SUMMARY_TAG, 'max')
@@ -441,7 +452,12 @@ export async function deleteEvent(eventId: string): Promise<{ success: boolean; 
     await batch.commit()
 
     // Revalidate ISR pages to remove deleted event immediately
+    const deletedSlug =
+      typeof eventData.slug === 'string' && eventData.slug.trim() ? eventData.slug.trim() : ''
     revalidatePath('/events')
+    if (deletedSlug) {
+      revalidatePath(`/events/${deletedSlug}`)
+    }
     revalidatePath(`/events/${eventId}`)
     revalidateTag(DASHBOARD_EVENTS_LIST_TAG, 'max')
     revalidateTag(DASHBOARD_EVENTS_SUMMARY_TAG, 'max')

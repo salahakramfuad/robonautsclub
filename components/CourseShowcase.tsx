@@ -43,7 +43,7 @@ function pickFeaturedIndex(courses: ShowcaseCourse[]) {
 export default function CourseShowcase({ courses }: { courses: ShowcaseCourse[] }) {
   if (courses.length === 0) {
     return (
-      <div>
+      <div id="programs">
         <SectionHeader />
         <div className="py-12 text-center">
           <BookOpen className="mx-auto mb-3 size-12 text-slate-300" />
@@ -60,7 +60,7 @@ export default function CourseShowcase({ courses }: { courses: ShowcaseCourse[] 
   const others = courses.filter((_, index) => index !== featuredIndex)
 
   return (
-    <div>
+    <div id="programs">
       <SectionHeader showExplore={others.length > 2} />
 
       <Reveal>

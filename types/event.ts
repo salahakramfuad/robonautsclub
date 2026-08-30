@@ -38,6 +38,8 @@ export type EventDefaultRegistrationFields = {
 // with Firestore-specific fields
 export type Event = {
   id: string // Firestore document ID
+  /** URL slug derived from title. Optional on older docs until lazy-backfilled. */
+  slug?: string
   title: string
   date: string | string[] // Single date string or array of dates
   time?: string
@@ -62,6 +64,8 @@ export type Event = {
   defaultRegistrationFields?: EventDefaultRegistrationFields
   /** Assigned certificate template from Certificates dashboard. */
   certificateTemplateId?: string | null
+  /** Optional card link override (e.g. hardcoded Robofest → /robofest). Defaults to /events/[slug]. */
+  href?: string
   // Firestore metadata
   createdAt: Date | string
   updatedAt: Date | string

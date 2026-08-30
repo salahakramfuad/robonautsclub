@@ -39,6 +39,7 @@ import {
 
 type Props = {
   ambassadors: RobofestCampusAmbassador[]
+  referralCounts?: Record<string, number>
   canCreate?: boolean
   canEdit?: boolean
   canDelete?: boolean
@@ -54,6 +55,7 @@ const emptyDefaults: CampusAmbassadorFormValues = {
 
 export default function CampusAmbassadorsManager({
   ambassadors,
+  referralCounts = {},
   canCreate = false,
   canEdit = false,
   canDelete = false,
@@ -349,6 +351,9 @@ export default function CampusAmbassadorsManager({
               <TableHead className="px-4 py-2 text-xs font-semibold text-slate-600 uppercase hidden lg:table-cell">
                 Contact
               </TableHead>
+              <TableHead className="px-4 py-2 text-xs font-semibold text-slate-600 uppercase text-right">
+                Referrals
+              </TableHead>
               <TableHead className="px-4 py-2 text-xs font-semibold text-slate-600 uppercase">
                 Status
               </TableHead>
@@ -361,7 +366,7 @@ export default function CampusAmbassadorsManager({
             {filtered.length === 0 ? (
               <TableRow>
                 <TableCell
-                  colSpan={6}
+                  colSpan={7}
                   className="px-4 py-8 text-center text-sm text-slate-500"
                 >
                   No ambassadors found. Use Seed / Sync Roster to load the
@@ -385,6 +390,9 @@ export default function CampusAmbassadorsManager({
                     <div className="text-xs text-slate-500">
                       {ambassador.email || ''}
                     </div>
+                  </TableCell>
+                  <TableCell className="px-4 py-2 text-sm text-slate-900 text-right font-medium tabular-nums">
+                    {referralCounts[ambassador.id] ?? 0}
                   </TableCell>
                   <TableCell className="px-4 py-2">
                     <Badge

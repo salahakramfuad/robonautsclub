@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation'
 import { ArrowLeft, Images } from 'lucide-react'
 import { SITE_CONFIG } from '@/lib/site-config'
 import { collectArticleImageUrls } from '@/lib/news-ui'
+import { buildPageMetadata } from '@/lib/seo-metadata'
 import { getNewsArticleBySlug } from '../../actions'
 import NewsPhotosGrid from '@/components/news/NewsPhotosGrid'
 
@@ -17,17 +18,24 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!article) {
     return { title: 'Photos' }
   }
-  return {
-    title: `Photos — ${article.title}`,
-    description: `Images for “${article.title}” · ${SITE_CONFIG.name}`,
-    openGraph: {
-      title: `Photos | ${article.title}`,
-      url: `/news/${article.slug}/photos`,
-    },
-    alternates: {
-      canonical: `/news/${article.slug}/photos`,
-    },
-  }
+
+  const path = `/news/${article.slug}/photos`
+  const urls = collectArticleImageUrls(article)
+
+  return buildPageMetadata({
+    title: `Photos — ${article.title} | ${SITE_CONFIG.name}`,
+    description: `Images from "${article.title}" at Robonauts.`,
+    path,
+    absoluteTitle: true,
+    ogImage: urls[0]
+      ? { url: urls[0], alt: article.title }
+      : {
+          url: '/roboclass.jpg',
+          width: 1200,
+          height: 630,
+          alt: article.title,
+        },
+  })
 }
 
 export default async function NewsArticlePhotosPage({ params }: Props) {

@@ -18,6 +18,13 @@ const SOCIAL_LINKS = [
   { icon: FaWhatsapp, href: SITE_CONFIG.social.whatsapp, label: "WhatsApp" },
 ];
 
+const SERVICE_LINKS = [
+  { title: "Robotics Workshops", href: "/#programs" },
+  { title: "Hands-on Training", href: "/#programs" },
+  { title: "Robo Fair", href: "/robofest" },
+  { title: "Competitions and Simulations", href: "/events" },
+] as const;
+
 export default function Footer() {
   return (
     <footer className="bg-brand-light text-brand-dar bg-sky-100">
@@ -83,7 +90,7 @@ export default function Footer() {
         {/* Main Content */}
         <div className="grid gap-8 sm:gap-10 sm:grid-cols-2 md:grid-cols-4">
           {/* Navigation */}
-          <div>
+          <nav aria-label="Footer">
             <h3 className="mb-3 sm:mb-4 text-xs sm:text-sm font-semibold uppercase tracking-wide text-brand-blue">
               Quick Links
             </h3>
@@ -99,8 +106,17 @@ export default function Footer() {
                   </Link>
                 </li>
               ))}
+              <li>
+                <Link
+                  href="/about#contact"
+                  prefetch={false}
+                  className="transition hover:text-brand-blue"
+                >
+                  Contact
+                </Link>
+              </li>
             </ul>
-          </div>
+          </nav>
 
           {/* Services */}
           <div>
@@ -108,9 +124,15 @@ export default function Footer() {
               Our Services
             </h3>
             <ul className="space-y-2 sm:space-y-3 text-xs sm:text-sm">
-              {SITE_CONFIG.services.map((service) => (
-                <li key={service} className="text-brand-dark/70">
-                  {service}
+              {SERVICE_LINKS.map((service) => (
+                <li key={service.title}>
+                  <Link
+                    href={service.href}
+                    prefetch={false}
+                    className="transition hover:text-brand-blue"
+                  >
+                    {service.title}
+                  </Link>
                 </li>
               ))}
             </ul>
