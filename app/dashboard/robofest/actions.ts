@@ -55,6 +55,7 @@ import {
   loadRobofestRegistrationsPage,
   loadRobofestRegistrationStats,
   loadRobofestRegistrationStatusCounts,
+  EMPTY_ROBOFEST_CAMPUS_AMBASSADOR_REFERRAL_STATS,
   EMPTY_ROBOFEST_REGISTRATION_STATS,
   ROBOFEST_REGISTRATIONS_PAGE_SIZE,
 } from './registrations-data'
@@ -250,15 +251,16 @@ export async function getRobofestRegistrationStats(
 
 export async function getRobofestCampusAmbassadorReferralCounts(
   ambassadorIds: string[],
-): Promise<Record<string, number>> {
+) {
   await requireAuth()
   try {
     return await loadRobofestCampusAmbassadorReferralCounts(ambassadorIds)
   } catch (error) {
     console.error('[robofest-dashboard] ambassador referral counts failed:', error)
-    const empty: Record<string, number> = {}
+    const empty: Record<string, typeof EMPTY_ROBOFEST_CAMPUS_AMBASSADOR_REFERRAL_STATS> =
+      {}
     for (const id of ambassadorIds) {
-      empty[id] = 0
+      empty[id] = { ...EMPTY_ROBOFEST_CAMPUS_AMBASSADOR_REFERRAL_STATS }
     }
     return empty
   }
