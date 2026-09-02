@@ -8,22 +8,30 @@ import {
 } from '@/lib/robofest-content'
 import { registrationMatchesNameFilter } from './registration-search'
 import type {
+  RobofestCampusAmbassadorReferralStats,
   RobofestRegistrationCursor,
   RobofestRegistrationListFilters,
   RobofestRegistrationPage,
   RobofestRegistrationStats,
   RobofestRegistrationStatusCounts,
 } from './registrations-types'
-import { EMPTY_ROBOFEST_REGISTRATION_STATS } from './registrations-types'
+import {
+  EMPTY_ROBOFEST_CAMPUS_AMBASSADOR_REFERRAL_STATS,
+  EMPTY_ROBOFEST_REGISTRATION_STATS,
+} from './registrations-types'
 
 export type {
+  RobofestCampusAmbassadorReferralStats,
   RobofestRegistrationCursor,
   RobofestRegistrationListFilters,
   RobofestRegistrationPage,
   RobofestRegistrationStats,
   RobofestRegistrationStatusCounts,
 } from './registrations-types'
-export { EMPTY_ROBOFEST_REGISTRATION_STATS } from './registrations-types'
+export {
+  EMPTY_ROBOFEST_CAMPUS_AMBASSADOR_REFERRAL_STATS,
+  EMPTY_ROBOFEST_REGISTRATION_STATS,
+} from './registrations-types'
 
 export const ROBOFEST_REGISTRATIONS_PAGE_SIZE = 10
 
@@ -383,13 +391,13 @@ export async function loadRobofestRegistrationStatusCounts(): Promise<RobofestRe
   return counts
 }
 
-/** Confirmed registration counts keyed by campusAmbassadorId. */
+/** Confirmed team + member totals keyed by campusAmbassadorId. */
 export async function loadRobofestCampusAmbassadorReferralCounts(
   ambassadorIds: string[],
-): Promise<Record<string, number>> {
-  const counts: Record<string, number> = {}
+): Promise<Record<string, RobofestCampusAmbassadorReferralStats>> {
+  const counts: Record<string, RobofestCampusAmbassadorReferralStats> = {}
   for (const id of ambassadorIds) {
-    counts[id] = 0
+    counts[id] = { ...EMPTY_ROBOFEST_CAMPUS_AMBASSADOR_REFERRAL_STATS }
   }
   if (!adminDb || ambassadorIds.length === 0) return counts
 
@@ -399,14 +407,24 @@ export async function loadRobofestCampusAmbassadorReferralCounts(
       const snap = await collection
         .where('campusAmbassadorId', '==', id)
         .where('status', '==', 'confirmed')
-        .count()
+        .select('teamSize', 'teamMembers')
         .get()
-      return [id, snap.data().count] as const
+
+      let members = 0
+      for (const doc of snap.docs) {
+        const registration = mapRobofestRegistrationDoc(
+          doc.id,
+          doc.data() as Record<string, unknown>,
+        )
+        members += participantCount(registration)
+      }
+
+      return [id, { teams: snap.size, members }] as const
     }),
   )
 
-  for (const [id, count] of results) {
-    counts[id] = count
+  for (const [id, stats] of results) {
+    counts[id] = stats
   }
   return counts
 }

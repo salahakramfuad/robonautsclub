@@ -49,3 +49,14 @@ export const EMPTY_ROBOFEST_REGISTRATION_STATS: RobofestRegistrationStats = {
   paidTotal: 0,
   paidCount: 0,
 }
+
+export type RobofestCampusAmbassadorReferralStats = {
+  teams: number
+  members: number
+}
+
+export const EMPTY_ROBOFEST_CAMPUS_AMBASSADOR_REFERRAL_STATS: RobofestCampusAmbassadorReferralStats =
+  {
+    teams: 0,
+    members: 0,
+  }

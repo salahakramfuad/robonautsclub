@@ -36,10 +36,11 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form'
+import type { RobofestCampusAmbassadorReferralStats } from './registrations-types'
 
 type Props = {
   ambassadors: RobofestCampusAmbassador[]
-  referralCounts?: Record<string, number>
+  referralCounts?: Record<string, RobofestCampusAmbassadorReferralStats>
   canCreate?: boolean
   canEdit?: boolean
   canDelete?: boolean
@@ -392,7 +393,12 @@ export default function CampusAmbassadorsManager({
                     </div>
                   </TableCell>
                   <TableCell className="px-4 py-2 text-sm text-slate-900 text-right font-medium tabular-nums">
-                    {referralCounts[ambassador.id] ?? 0}
+                    <div>{referralCounts[ambassador.id]?.members ?? 0}</div>
+                    <div className="text-xs text-slate-500 font-normal">
+                      {(referralCounts[ambassador.id]?.teams ?? 0) === 1
+                        ? '1 team'
+                        : `${referralCounts[ambassador.id]?.teams ?? 0} teams`}
+                    </div>
                   </TableCell>
                   <TableCell className="px-4 py-2">
                     <Badge
