@@ -154,6 +154,15 @@ export async function updateRobofestContent(
         dates: round.dates.trim(),
         venueLabel: round.venueLabel.trim(),
         image: round.image.trim() || '/robofest/dhaka.jpg',
+        registrationClosingDate: (() => {
+          const raw = (round.registrationClosingDate || '').trim()
+          if (!raw) return null
+          if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2})?$/.test(raw)) {
+            return raw.slice(0, 16)
+          }
+          if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) return `${raw}T23:59`
+          return null
+        })(),
       })),
       howItWorks: (input.howItWorks || []).map((step) => ({
         icon: step.icon.trim() || 'group',

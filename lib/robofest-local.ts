@@ -48,6 +48,7 @@ export const ROBOFEST_LOCAL = {
       dates: "11 September (CTG)",
       venueLabel: "Chittagong Grammar School",
       image: "/roboclass.jpg",
+      registrationClosingDate: "2026-09-08T23:59",
     },
     {
       city: "Dhaka",
@@ -55,6 +56,7 @@ export const ROBOFEST_LOCAL = {
       dates: "18 September (DHK)",
       venueLabel: "Manarat Dhaka International School & College",
       image: "/robofest/dhaka.jpg",
+      registrationClosingDate: "2026-09-14T23:59",
     },
   ],
 } as const;

@@ -55,10 +55,13 @@ export default function RobofestRegistrationCountdown({
   closingDate,
   className,
   compact = false,
+  label,
 }: {
   closingDate: string;
   className?: string;
   compact?: boolean;
+  /** Optional division label, e.g. "Chittagong Division". */
+  label?: string;
 }) {
   const nowSeconds = useSyncExternalStore(
     subscribeToSecondTicks,
@@ -79,6 +82,10 @@ export default function RobofestRegistrationCountdown({
     [closingDate, nowSeconds],
   );
 
+  const closesLabel = label
+    ? `Registration closes · ${label}`
+    : "Registration closes";
+
   if (remaining?.expired) {
     return (
       <div
@@ -87,7 +94,7 @@ export default function RobofestRegistrationCountdown({
           className,
         )}
       >
-        Registration closed
+        {label ? `${label} registration closed` : "Registration closed"}
         <span className="ml-2 font-normal text-rose-700/80">
           (deadline was {dateLabel})
         </span>
@@ -124,7 +131,7 @@ export default function RobofestRegistrationCountdown({
       >
         <div className="min-w-0">
           <p className="text-[11px] font-semibold uppercase tracking-wide text-cyan-800/80">
-            Registration closes
+            {closesLabel}
           </p>
           <p className="text-sm font-semibold text-slate-900">{dateLabel}</p>
         </div>

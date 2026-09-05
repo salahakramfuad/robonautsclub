@@ -226,81 +226,111 @@ export function EventBasicsSections({
       </ContentSection>
 
       <ContentSection
-        title="Registration deadline"
-        description="Public registration closes at this date and time in Bangladesh Standard Time (UTC+6). Leave empty for no deadline."
-        contentClassName="flex flex-wrap items-end gap-3"
+        title="Registration deadlines by division"
+        description="Public registration closes per division at this date and time in Bangladesh Standard Time (UTC+6). Leave empty for no deadline on that division."
+        contentClassName="space-y-4"
         defaultOpen
       >
-          <div className="space-y-1 min-w-56">
-            <label className="text-xs text-slate-500">Closing date</label>
-            <DatePicker
-              value={
-                content.registrationClosingDate
-                  ? content.registrationClosingDate.slice(0, 10)
-                  : ''
-              }
-              onChange={(date) =>
-                setContent((prev) => {
-                  if (!date) {
-                    return { ...prev, registrationClosingDate: null }
-                  }
-                  const prevTime = prev.registrationClosingDate?.includes('T')
-                    ? prev.registrationClosingDate.slice(11, 16)
-                    : '23:59'
-                  return {
-                    ...prev,
-                    registrationClosingDate: `${date}T${prevTime || '23:59'}`,
-                  }
-                })
-              }
-            />
-          </div>
-          <div className="space-y-1">
-            <label className="text-xs text-slate-500">Closing time</label>
-            <Input
-              type="time"
-              value={
-                content.registrationClosingDate?.includes('T')
-                  ? content.registrationClosingDate.slice(11, 16)
-                  : content.registrationClosingDate
-                    ? '23:59'
-                    : ''
-              }
-              disabled={!content.registrationClosingDate}
-              onChange={(e) =>
-                setContent((prev) => {
-                  const date = prev.registrationClosingDate
-                    ? prev.registrationClosingDate.slice(0, 10)
-                    : ''
-                  if (!date) return prev
-                  const time = e.target.value || '23:59'
-                  return {
-                    ...prev,
-                    registrationClosingDate: `${date}T${time}`,
-                  }
-                })
-              }
-              className="w-36 h-12.5"
-            />
-          </div>
-          {content.registrationClosingDate ? (
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() =>
-                setContent((prev) => ({
-                  ...prev,
-                  registrationClosingDate: null,
-                }))
-              }
-            >
-              Clear deadline
-            </Button>
-          ) : null}
-          <p className="text-xs text-slate-500 w-full">
-            Shown as a live countdown on the Robofest pages. Registration closes
-            at the exact Bangladesh time (BST, UTC+6) you set.
+          {content.rounds.map((round, index) => {
+            const closing = round.registrationClosingDate
+            const divisionLabel = round.city.trim()
+              ? `${round.city.trim()} Division`
+              : `Division ${index + 1}`
+            return (
+              <div
+                key={`deadline-${round.city}-${index}`}
+                className="rounded-lg border border-slate-100 p-3 space-y-3"
+              >
+                <p className="text-sm font-semibold text-slate-800">
+                  {divisionLabel}
+                </p>
+                <div className="flex flex-wrap items-end gap-3">
+                  <div className="space-y-1 min-w-56">
+                    <label className="text-xs text-slate-500">Closing date</label>
+                    <DatePicker
+                      value={closing ? closing.slice(0, 10) : ''}
+                      onChange={(date) =>
+                        setContent((prev) => {
+                          const rounds = [...prev.rounds]
+                          const current = rounds[index]
+                          if (!date) {
+                            rounds[index] = {
+                              ...current,
+                              registrationClosingDate: null,
+                            }
+                            return { ...prev, rounds }
+                          }
+                          const prevTime = current.registrationClosingDate?.includes(
+                            'T',
+                          )
+                            ? current.registrationClosingDate.slice(11, 16)
+                            : '23:59'
+                          rounds[index] = {
+                            ...current,
+                            registrationClosingDate: `${date}T${prevTime || '23:59'}`,
+                          }
+                          return { ...prev, rounds }
+                        })
+                      }
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-xs text-slate-500">Closing time</label>
+                    <Input
+                      type="time"
+                      value={
+                        closing?.includes('T')
+                          ? closing.slice(11, 16)
+                          : closing
+                            ? '23:59'
+                            : ''
+                      }
+                      disabled={!closing}
+                      onChange={(e) =>
+                        setContent((prev) => {
+                          const rounds = [...prev.rounds]
+                          const current = rounds[index]
+                          const date = current.registrationClosingDate
+                            ? current.registrationClosingDate.slice(0, 10)
+                            : ''
+                          if (!date) return prev
+                          const time = e.target.value || '23:59'
+                          rounds[index] = {
+                            ...current,
+                            registrationClosingDate: `${date}T${time}`,
+                          }
+                          return { ...prev, rounds }
+                        })
+                      }
+                      className="w-36 h-12.5"
+                    />
+                  </div>
+                  {closing ? (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() =>
+                        setContent((prev) => {
+                          const rounds = [...prev.rounds]
+                          rounds[index] = {
+                            ...rounds[index],
+                            registrationClosingDate: null,
+                          }
+                          return { ...prev, rounds }
+                        })
+                      }
+                    >
+                      Clear deadline
+                    </Button>
+                  ) : null}
+                </div>
+              </div>
+            )
+          })}
+          <p className="text-xs text-slate-500">
+            Shown as live countdowns on the Robofest pages. Registration for each
+            division closes at the exact Bangladesh time (BST, UTC+6) you set.
           </p>
       </ContentSection>
 
