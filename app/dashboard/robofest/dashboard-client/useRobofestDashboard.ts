@@ -445,6 +445,35 @@ export function useRobofestDashboard({
     })
   }
 
+  const onRegistrationSaved = (registration: RobofestRegistration) => {
+    const leftCurrentTab = registration.status !== statusTab
+    if (leftCurrentTab) {
+      setStatusCounts((prev) => {
+        const next = { ...prev }
+        if (statusTab === 'confirmed' || statusTab === 'cancelled') {
+          next[statusTab] = Math.max(0, (next[statusTab] || 0) - 1)
+        }
+        if (
+          registration.status === 'confirmed' ||
+          registration.status === 'cancelled'
+        ) {
+          next[registration.status] = (next[registration.status] || 0) + 1
+        }
+        return next
+      })
+      setRegistrations((prev) => prev.filter((r) => r.id !== registration.id))
+      void getRobofestRegistrationStatusCounts().then(setStatusCounts)
+      void getRobofestRegistrationStats(listFilters).then(setStats)
+      return
+    }
+
+    setRegistrations((prev) =>
+      prev.map((r) => (r.id === registration.id ? registration : r)),
+    )
+    void getRobofestRegistrationStats(listFilters).then(setStats)
+    router.refresh()
+  }
+
   const resendEmail = (id: string) => {
     startTransition(async () => {
       const result = await resendRobofestRegistrationEmail(id)
@@ -618,6 +647,7 @@ export function useRobofestDashboard({
     resetContent,
     setStatus,
     setMemberAward,
+    onRegistrationSaved,
     resendEmail,
     downloadConfirmationPdf,
     downloadMemberCertificate,

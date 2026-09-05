@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession, hasPermission } from '@/lib/auth'
+import { canViewTab, getServerSession, hasPermission } from '@/lib/auth'
 import { getRobofestContentFresh } from '@/lib/robofest-content'
 import { generateRobofestBulkParticipationCertificatesPDF } from '@/lib/robofest-certificate-pdf'
 import { SITE_CONFIG } from '@/lib/site-config'
@@ -32,6 +32,10 @@ export async function POST(request: NextRequest) {
   }
 
   if (!hasPermission(session, 'exports.pdf')) {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  }
+
+  if (!canViewTab(session, 'robofest')) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
 

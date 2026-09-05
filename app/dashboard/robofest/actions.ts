@@ -4,6 +4,7 @@ import { revalidatePath, revalidateTag } from 'next/cache'
 import { FieldValue } from 'firebase-admin/firestore'
 import {
   requireAuth,
+  requireTabAccess,
   canCreateArea,
   canEditOthersArea,
   canDeleteArea,
@@ -19,6 +20,7 @@ import {
   getRobofestCategoryByName,
   getRobofestContentFresh,
   mapRobofestContentDoc,
+  mapRobofestRegistrationDoc,
   sanitizeRobofestAwardCategories,
   syncRobofestVenueFields,
   validateRobofestVenueConsistency,
@@ -28,11 +30,13 @@ import {
 } from '@/lib/robofest-content'
 import {
   getRobofestRegistrationById,
+  hasExistingRobofestRegistration,
   resendRobofestConfirmationEmail,
   createRobofestRegistrationAndSendEmail,
 } from '@/lib/robofest-registration'
 import {
   validateRobofestRegistrationInput,
+  type RobofestMemberInput,
   type RobofestRegistrationInput,
 } from '@/lib/robofest-registration-input'
 import { computeRobofestRegistrationTotal, resolveRobofestFee } from '@/lib/robofest-fee'
@@ -218,7 +222,7 @@ export async function getRobofestRegistrationsPage(input: {
   cursor?: RobofestRegistrationCursor | null
   pageSize?: number
 }): Promise<RobofestRegistrationPage> {
-  await requireAuth()
+  await requireTabAccess('robofest')
   try {
     return await loadRobofestRegistrationsPage(input)
   } catch (error) {
@@ -228,7 +232,7 @@ export async function getRobofestRegistrationsPage(input: {
 }
 
 export async function getRobofestRegistrationStatusCounts(): Promise<RobofestRegistrationStatusCounts> {
-  await requireAuth()
+  await requireTabAccess('robofest')
   try {
     return await loadRobofestRegistrationStatusCounts()
   } catch (error) {
@@ -240,7 +244,7 @@ export async function getRobofestRegistrationStatusCounts(): Promise<RobofestReg
 export async function getRobofestRegistrationStats(
   filters: RobofestRegistrationListFilters,
 ): Promise<RobofestRegistrationStats> {
-  await requireAuth()
+  await requireTabAccess('robofest')
   try {
     return await loadRobofestRegistrationStats(filters)
   } catch (error) {
@@ -252,7 +256,7 @@ export async function getRobofestRegistrationStats(
 export async function getRobofestCampusAmbassadorReferralCounts(
   ambassadorIds: string[],
 ) {
-  await requireAuth()
+  await requireTabAccess('robofest')
   try {
     return await loadRobofestCampusAmbassadorReferralCounts(ambassadorIds)
   } catch (error) {
@@ -270,7 +274,7 @@ export async function getRobofestCampusAmbassadorReferralCounts(
 export async function getRobofestRegistrationsForExport(
   filters: RobofestRegistrationListFilters,
 ): Promise<{ success: boolean; items?: RobofestRegistration[]; error?: string }> {
-  await requireAuth()
+  await requireTabAccess('robofest')
   try {
     const items = await loadRobofestRegistrationsForExport(filters)
     return { success: true, items }
@@ -285,7 +289,7 @@ export async function getRobofestRegistrationsForExport(
 
 /** @deprecated Prefer getRobofestRegistrationsPage — kept for any leftover callers. */
 export async function getRobofestRegistrations(): Promise<RobofestRegistration[]> {
-  await requireAuth()
+  await requireTabAccess('robofest')
   const page = await loadRobofestRegistrationsPage({
     filters: { status: 'confirmed' },
     pageSize: ROBOFEST_REGISTRATIONS_PAGE_SIZE,
@@ -315,6 +319,7 @@ export async function updateRobofestRegistrationStatus(
   const update: Record<string, unknown> = {
     status,
     updatedAt: FieldValue.serverTimestamp(),
+    updatedBy: session.uid,
   }
   if (adminNotes !== undefined) {
     update.adminNotes = adminNotes.trim()
@@ -323,6 +328,142 @@ export async function updateRobofestRegistrationStatus(
   await ref.update(update)
   revalidatePath('/dashboard/robofest')
   return { success: true }
+}
+
+export type UpdateRobofestRegistrationInput = {
+  division: string
+  ageCategory: string
+  teamSize: number
+  teamMembers: RobofestMemberInput[]
+  campusAmbassadorId?: string
+  notes?: string
+  status?: 'confirmed' | 'cancelled'
+}
+
+export async function updateRobofestRegistration(
+  id: string,
+  input: UpdateRobofestRegistrationInput,
+): Promise<{
+  success: boolean
+  error?: string
+  registration?: RobofestRegistration
+}> {
+  const session = await requireAuth()
+  if (!canEditOthersArea(session, 'robofest')) {
+    return { success: false, error: 'You do not have permission to edit Robofest.' }
+  }
+  if (!adminDb) return { success: false, error: 'Database unavailable.' }
+
+  const trimmedId = (id || '').trim()
+  if (!trimmedId) {
+    return { success: false, error: 'Registration id is required.' }
+  }
+
+  const ref = adminDb.collection(ROBOFEST_REGISTRATIONS_COLLECTION).doc(trimmedId)
+  const snap = await ref.get()
+  if (!snap.exists) return { success: false, error: 'Registration not found.' }
+
+  const existing = mapRobofestRegistrationDoc(
+    snap.id,
+    snap.data() as Record<string, unknown>,
+  )
+
+  if (input.status !== undefined && !['confirmed', 'cancelled'].includes(input.status)) {
+    return { success: false, error: 'Invalid status.' }
+  }
+
+  const content = await getRobofestContentFresh()
+  const roundOk = content.rounds.some(
+    (round) =>
+      round.city.trim().toLowerCase() === input.division.trim().toLowerCase(),
+  )
+  if (!roundOk) {
+    return { success: false, error: 'Please select a valid division.' }
+  }
+
+  const validated = await validateRobofestRegistrationInput(
+    {
+      category: existing.category,
+      division: input.division,
+      ageCategory: input.ageCategory,
+      teamSize: input.teamSize,
+      teamMembers: input.teamMembers,
+      campusAmbassadorId: input.campusAmbassadorId,
+      notes: input.notes,
+    },
+    {
+      existingMembers: existing.teamMembers,
+      existingCampusAmbassadorId: existing.campusAmbassadorId,
+      existingCampusAmbassadorName: existing.campusAmbassadorName,
+      existingCampusAmbassadorSchool: existing.campusAmbassadorSchool,
+    },
+  )
+  if (!validated.ok) {
+    return { success: false, error: validated.error }
+  }
+
+  const duplicate = await hasExistingRobofestRegistration(
+    existing.category,
+    validated.data.email,
+    trimmedId,
+  )
+  if (duplicate) {
+    return {
+      success: false,
+      error:
+        'Another active registration already uses this email for this competition.',
+    }
+  }
+
+  const nextStatus: RobofestRegistrationStatus =
+    input.status === 'confirmed' || input.status === 'cancelled'
+      ? input.status
+      : existing.status === 'confirmed' || existing.status === 'cancelled'
+        ? existing.status
+        : 'confirmed'
+
+  const update: Record<string, unknown> = {
+    email: validated.data.email,
+    phone: validated.data.phone,
+    school: validated.data.school,
+    schoolIsCustom: Boolean(validated.data.schoolIsCustom),
+    ageCategory: validated.data.ageCategory,
+    teamSize: validated.data.teamSize,
+    teamMembers: validated.data.teamMembers,
+    roundCity: validated.data.roundCity,
+    notes: validated.data.notes || '',
+    status: nextStatus,
+    updatedAt: FieldValue.serverTimestamp(),
+    updatedBy: session.uid,
+  }
+
+  if (validated.data.pendingSchoolId) {
+    update.pendingSchoolId = validated.data.pendingSchoolId
+  } else {
+    update.pendingSchoolId = FieldValue.delete()
+  }
+
+  if (validated.data.campusAmbassadorId) {
+    update.campusAmbassadorId = validated.data.campusAmbassadorId
+    update.campusAmbassadorName = validated.data.campusAmbassadorName || ''
+    update.campusAmbassadorSchool =
+      validated.data.campusAmbassadorSchool || ''
+  } else {
+    update.campusAmbassadorId = FieldValue.delete()
+    update.campusAmbassadorName = FieldValue.delete()
+    update.campusAmbassadorSchool = FieldValue.delete()
+  }
+
+  await ref.update(update)
+
+  const refreshed = await ref.get()
+  const registration = mapRobofestRegistrationDoc(
+    refreshed.id,
+    refreshed.data() as Record<string, unknown>,
+  )
+
+  revalidatePath('/dashboard/robofest')
+  return { success: true, registration }
 }
 
 export async function updateRobofestMemberAwardCategory(
@@ -386,6 +527,7 @@ export async function updateRobofestMemberAwardCategory(
   await ref.update({
     teamMembers: members,
     updatedAt: FieldValue.serverTimestamp(),
+    updatedBy: session.uid,
   })
   revalidatePath('/dashboard/robofest')
   return { success: true }

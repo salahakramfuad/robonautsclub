@@ -225,6 +225,7 @@ export async function generateRobofestConfirmationPdfFromData(
 export async function hasExistingRobofestRegistration(
   category: string,
   normalizedEmail: string,
+  excludeId?: string,
 ): Promise<boolean> {
   if (!adminDb) return false;
   const snap = await adminDb
@@ -234,7 +235,9 @@ export async function hasExistingRobofestRegistration(
     .limit(5)
     .get();
 
+  const exclude = excludeId?.trim() || "";
   return snap.docs.some((doc) => {
+    if (exclude && doc.id === exclude) return false;
     const status = String(doc.data().status ?? "pending");
     return status !== "cancelled";
   });
