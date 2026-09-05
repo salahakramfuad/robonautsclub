@@ -70,6 +70,8 @@ export type RobofestRoundContent = {
   dates: string;
   venueLabel: string;
   image: string;
+  /** YYYY-MM-DDTHH:mm (Asia/Dhaka) or legacy YYYY-MM-DD. Null = fall back to global, then no deadline. */
+  registrationClosingDate: string | null;
 };
 
 export type RobofestCategoryContent = {
@@ -343,6 +345,18 @@ function toIso(value: unknown): string | null {
   return null;
 }
 
+/** Normalize a registration closing datetime from CMS / Firestore. */
+export function normalizeRobofestClosingDate(value: unknown): string | null {
+  if (value == null || value === "") return null;
+  const raw = asString(value).trim();
+  if (!raw) return null;
+  if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2})?$/.test(raw)) {
+    return raw.slice(0, 16);
+  }
+  if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) return raw;
+  return null;
+}
+
 function normalizeCategory(
   raw: Record<string, unknown>,
   fallback?: RobofestCategoryContent,
@@ -476,6 +490,9 @@ export function mapRobofestContentDoc(
         dates: asString(r.dates),
         venueLabel: asString(r.venueLabel),
         image: asString(r.image, "/robofest/dhaka.jpg"),
+        registrationClosingDate: normalizeRobofestClosingDate(
+          r.registrationClosingDate,
+        ),
       };
     }),
     categories: categoriesRaw.map((category, index) =>
@@ -507,17 +524,9 @@ export function mapRobofestContentDoc(
     awardCategories: mergeRobofestAwardCategories(data.awardCategories),
     isPaid: asBool(data.isPaid, defaults.isPaid),
     amount: asNumber(data.amount, defaults.amount),
-    registrationClosingDate: (() => {
-      if (data.registrationClosingDate == null || data.registrationClosingDate === "") {
-        return null;
-      }
-      const raw = asString(data.registrationClosingDate).trim();
-      if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2})?$/.test(raw)) {
-        return raw.slice(0, 16);
-      }
-      if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) return raw;
-      return null;
-    })(),
+    registrationClosingDate: normalizeRobofestClosingDate(
+      data.registrationClosingDate,
+    ),
     updatedAt: toIso(data.updatedAt),
     updatedBy: data.updatedBy ? asString(data.updatedBy) : null,
   };

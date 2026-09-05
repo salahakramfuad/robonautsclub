@@ -8,6 +8,8 @@ export type RobofestVenueRound = {
   dates: string
   venueLabel: string
   image: string
+  /** YYYY-MM-DDTHH:mm (Asia/Dhaka). Null = fall back to global content deadline. */
+  registrationClosingDate?: string | null
 }
 
 export type RobofestVenueContent = {

@@ -20,6 +20,10 @@ import {
   type RobofestAgeCategory,
 } from "@/lib/robofest-registration-options";
 import {
+  areAllRobofestDivisionsClosed,
+  isRobofestDivisionRegistrationClosed,
+} from "@/lib/robofest-deadlines";
+import {
   initiateRobofestPaidCheckout,
   submitRobofestRegistration,
 } from "@/app/(marketing)/robofest/actions";
@@ -86,7 +90,7 @@ export default function RobofestCategoryRegistrationForm({
   isPaid,
   amount,
   rulesPdf,
-  registrationClosed = false,
+  globalRegistrationClosingDate = null,
 }: {
   category: string;
   rounds: RobofestRoundContent[];
@@ -95,20 +99,61 @@ export default function RobofestCategoryRegistrationForm({
   isPaid: boolean;
   amount: number;
   rulesPdf?: string;
-  registrationClosed?: boolean;
+  /** Legacy global deadline fallback for unsaved CMS docs. */
+  globalRegistrationClosingDate?: string | null;
 }) {
+  const deadlineContent = useMemo(
+    () => ({
+      rounds,
+      registrationClosingDate: globalRegistrationClosingDate,
+    }),
+    [rounds, globalRegistrationClosingDate],
+  );
+
   const divisionOptions = useMemo(() => {
     const fromRounds = rounds
       .map((round) => {
         const match = ROBOFEST_DIVISIONS.find((d) => d.value === round.city);
-        return match ?? { value: round.city, label: `${round.city} Division` };
+        const base =
+          match ?? { value: round.city, label: `${round.city} Division` };
+        const closed = isRobofestDivisionRegistrationClosed(
+          deadlineContent,
+          round.city,
+        );
+        return {
+          ...base,
+          closed,
+          label: closed ? `${base.label} (closed)` : base.label,
+        };
       })
       .filter((d, i, arr) => arr.findIndex((x) => x.value === d.value) === i);
-    return fromRounds.length > 0 ? fromRounds : ROBOFEST_DIVISIONS;
-  }, [rounds]);
+    if (fromRounds.length > 0) return fromRounds;
+    return ROBOFEST_DIVISIONS.map((d) => {
+      const closed = isRobofestDivisionRegistrationClosed(
+        deadlineContent,
+        d.value,
+      );
+      return {
+        ...d,
+        closed,
+        label: closed ? `${d.label} (closed)` : d.label,
+      };
+    });
+  }, [rounds, deadlineContent]);
 
-  const defaultDivision = divisionOptions[0]?.value ?? "Dhaka";
-  const [form, setForm] = useState<FormState>(() => emptyForm(defaultDivision));
+  const allDivisionsClosed = useMemo(
+    () => areAllRobofestDivisionsClosed(deadlineContent),
+    [deadlineContent],
+  );
+
+  const firstOpenDivision =
+    divisionOptions.find((d) => !d.closed)?.value ??
+    divisionOptions[0]?.value ??
+    "Dhaka";
+
+  const [form, setForm] = useState<FormState>(() =>
+    emptyForm(firstOpenDivision),
+  );
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [registrationId, setRegistrationId] = useState<string | null>(null);
@@ -117,6 +162,10 @@ export default function RobofestCategoryRegistrationForm({
   const [error, setError] = useState("");
   const [understood, setUnderstood] = useState(false);
   const [rulesUnderstood, setRulesUnderstood] = useState(false);
+
+  const selectedDivisionClosed = form.division
+    ? isRobofestDivisionRegistrationClosed(deadlineContent, form.division)
+    : false;
 
   const gradeOptions = getGradesForAgeCategory(form.ageCategory);
   const totalAmount =
@@ -168,8 +217,15 @@ export default function RobofestCategoryRegistrationForm({
     setError("");
     setWarning("");
 
-    if (registrationClosed) {
-      setError("Registration is closed for this event.");
+    if (
+      !form.division ||
+      isRobofestDivisionRegistrationClosed(deadlineContent, form.division)
+    ) {
+      setError(
+        form.division
+          ? `Registration for the ${form.division} division is closed.`
+          : "Please select a division.",
+      );
       return;
     }
 
@@ -228,7 +284,7 @@ export default function RobofestCategoryRegistrationForm({
       setTeamNumber(result.teamNumber ?? null);
       if (result.warning) setWarning(result.warning);
       setIsSubmitted(true);
-      setForm(emptyForm(defaultDivision));
+      setForm(emptyForm(firstOpenDivision));
     } catch {
       setError("Failed to submit registration. Please try again.");
     } finally {
@@ -236,13 +292,13 @@ export default function RobofestCategoryRegistrationForm({
     }
   };
 
-  if (registrationClosed) {
+  if (allDivisionsClosed) {
     return (
       <Alert variant="destructive">
         <AlertTitle>Registration closed</AlertTitle>
         <AlertDescription>
-          The registration deadline has passed. New team registrations are no
-          longer accepted online.
+          The registration deadline has passed for all divisions. New team
+          registrations are no longer accepted online.
         </AlertDescription>
       </Alert>
     );
@@ -327,13 +383,25 @@ export default function RobofestCategoryRegistrationForm({
         >
           <option value="">Select division</option>
           {divisionOptions.map((d) => (
-            <option key={d.value} value={d.value}>
+            <option key={d.value} value={d.value} disabled={d.closed}>
               {d.label}
             </option>
           ))}
         </select>
       </div>
 
+      {selectedDivisionClosed ? (
+        <Alert variant="destructive">
+          <AlertTitle>Division closed</AlertTitle>
+          <AlertDescription>
+            Registration for the {form.division} division has closed. Please
+            select another open division, or contact us if you need help.
+          </AlertDescription>
+        </Alert>
+      ) : null}
+
+      {!selectedDivisionClosed ? (
+      <>
       <div className="space-y-1.5">
         <label
           htmlFor={fieldId("age-category")}
@@ -649,6 +717,8 @@ export default function RobofestCategoryRegistrationForm({
             ? `Pay BDT ${totalAmount} to confirm registration`
             : "Submit registration"}
       </Button>
+      </>
+      ) : null}
     </form>
   );
 }

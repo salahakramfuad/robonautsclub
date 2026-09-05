@@ -14,7 +14,7 @@ import {
   resolveRobofestFee,
   type RobofestTeamMember,
 } from "@/lib/robofest-content";
-import { isRegistrationClosedByDate } from "@/lib/dateUtils";
+import { isRobofestDivisionRegistrationClosed } from "@/lib/robofest-deadlines";
 import { computeRobofestRegistrationTotal } from "@/lib/robofest-fee";
 import type { RobofestAgeCategory } from "@/lib/robofest-registration-options";
 import {
@@ -86,10 +86,10 @@ export async function submitRobofestRegistration(
     if (!validated.ok) return { success: false, error: validated.error };
 
     const content = await getRobofestContentFresh();
-    if (isRegistrationClosedByDate(content.registrationClosingDate ?? undefined)) {
+    if (isRobofestDivisionRegistrationClosed(content, validated.data.roundCity)) {
       return {
         success: false,
-        error: "Registration is closed. The deadline has passed.",
+        error: `Registration for the ${validated.data.roundCity} division is closed. The deadline has passed.`,
       };
     }
 
@@ -143,10 +143,10 @@ export async function initiateRobofestPaidCheckout(
     if (!validated.ok) return { success: false, error: validated.error };
 
     const content = await getRobofestContentFresh();
-    if (isRegistrationClosedByDate(content.registrationClosingDate ?? undefined)) {
+    if (isRobofestDivisionRegistrationClosed(content, validated.data.roundCity)) {
       return {
         success: false,
-        error: "Registration is closed. The deadline has passed.",
+        error: `Registration for the ${validated.data.roundCity} division is closed. The deadline has passed.`,
       };
     }
 

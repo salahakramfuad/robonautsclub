@@ -13,7 +13,7 @@ import type { RobofestCampusAmbassador } from "@/lib/robofest-campus-ambassadors
 import { getRobofestCategoryRules } from "@/lib/robofest-category-rules";
 import RobofestCategoryRegistrationForm from "@/components/RobofestCategoryRegistrationForm";
 import RobofestRegistrationCountdown from "@/components/RobofestRegistrationCountdown";
-import { isRegistrationClosedByDate } from "@/lib/dateUtils";
+import { resolveRobofestDivisionClosingDate } from "@/lib/robofest-deadlines";
 import { Button } from "@/components/ui/button";
 import RobofestIcon from "@/components/RobofestIcon";
 
@@ -319,12 +319,26 @@ export default function RobofestCategoryPage({
                     .
                   </li>
                 </ul>
-                {content.registrationClosingDate ? (
-                  <RobofestRegistrationCountdown
-                    closingDate={content.registrationClosingDate}
-                    className="mt-3"
-                    compact
-                  />
+                {content.rounds.some((round) =>
+                  resolveRobofestDivisionClosingDate(content, round.city),
+                ) ? (
+                  <div className="mt-3 space-y-2">
+                    {content.rounds.map((round) => {
+                      const closing = resolveRobofestDivisionClosingDate(
+                        content,
+                        round.city,
+                      );
+                      if (!closing) return null;
+                      return (
+                        <RobofestRegistrationCountdown
+                          key={round.city}
+                          closingDate={closing}
+                          label={`${round.city} Division`}
+                          compact
+                        />
+                      );
+                    })}
+                  </div>
                 ) : null}
               </div>
               <div className="px-5 sm:px-6 py-5">
@@ -336,9 +350,9 @@ export default function RobofestCategoryPage({
                   isPaid={fee.isPaid}
                   amount={fee.amount}
                   rulesPdf={rulesPdf || undefined}
-                  registrationClosed={isRegistrationClosedByDate(
-                    content.registrationClosingDate ?? undefined,
-                  )}
+                  globalRegistrationClosingDate={
+                    content.registrationClosingDate
+                  }
                 />
               </div>
             </div>

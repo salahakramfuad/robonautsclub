@@ -20,6 +20,7 @@ import {
 import { SITE_CONFIG } from "@/lib/site-config";
 import RobofestRegistrationCountdown from "@/components/RobofestRegistrationCountdown";
 import RobofestIcon from "@/components/RobofestIcon";
+import { resolveRobofestDivisionClosingDate } from "@/lib/robofest-deadlines";
 
 function CircuitBackdrop({ className = "" }: { className?: string }) {
   return (
@@ -292,11 +293,24 @@ export default async function RobofestLocalRoundPage() {
               </div>
             </div>
           </div>
-          {content.registrationClosingDate ? (
-            <div className="mt-4 sm:mt-5">
-              <RobofestRegistrationCountdown
-                closingDate={content.registrationClosingDate}
-              />
+          {content.rounds.some((round) =>
+            resolveRobofestDivisionClosingDate(content, round.city),
+          ) ? (
+            <div className="mt-4 sm:mt-5 space-y-2">
+              {content.rounds.map((round) => {
+                const closing = resolveRobofestDivisionClosingDate(
+                  content,
+                  round.city,
+                );
+                if (!closing) return null;
+                return (
+                  <RobofestRegistrationCountdown
+                    key={round.city}
+                    closingDate={closing}
+                    label={`${round.city} Division`}
+                  />
+                );
+              })}
             </div>
           ) : null}
         </div>
