@@ -1,9 +1,12 @@
 'use client'
 
-import { useMemo, useState, type ChangeEvent, type FormEvent } from 'react'
-import { useRouter } from 'next/navigation'
+import { useEffect, useMemo, useState, type ChangeEvent, type FormEvent } from 'react'
 import { Plus, X } from 'lucide-react'
-import type { RobofestContent } from '@/lib/robofest-content'
+import type {
+  RobofestContent,
+  RobofestRegistration,
+  RobofestTeamMember,
+} from '@/lib/robofest-content'
 import {
   computeRobofestRegistrationTotal,
   resolveRobofestFee,
@@ -24,7 +27,10 @@ import {
   PRIVATE_CANDIDATE_OPTION,
   SCHOOL_NOT_FOUND_OPTION,
 } from '@/lib/schoolDirectory'
-import { createRobofestRegistrationManual } from './actions'
+import {
+  createRobofestRegistrationManual,
+  updateRobofestRegistration,
+} from './actions'
 import {
   Sheet,
   SheetContent,
@@ -56,6 +62,7 @@ type FormState = {
   teamMembers: TeamMemberForm[]
   campusAmbassadorId: string
   notes: string
+  status: 'confirmed' | 'cancelled'
   paymentMode: 'paid_offline' | 'waived'
   amountPaid: string
   trxId: string
@@ -81,8 +88,114 @@ function resizeTeamMembers(
   return next
 }
 
+function mapMemberToForm(
+  member: RobofestTeamMember | undefined,
+  schools: string[],
+): TeamMemberForm {
+  if (!member) return emptyMember()
+  const school = (member.school || '').trim()
+  if (!school) return {
+    name: member.name || '',
+    email: member.email || '',
+    phone: member.phone || '',
+    schoolSelection: '',
+    customSchool: '',
+    branch: member.branch || '',
+    grade: member.grade || '',
+  }
+
+  if (school === PRIVATE_CANDIDATE_OPTION) {
+    return {
+      name: member.name || '',
+      email: member.email || '',
+      phone: member.phone || '',
+      schoolSelection: PRIVATE_CANDIDATE_OPTION,
+      customSchool: '',
+      branch: member.branch || '',
+      grade: member.grade || '',
+    }
+  }
+
+  const inDirectory = schools.some(
+    (s) => s.trim().toLowerCase() === school.toLowerCase(),
+  )
+  if (inDirectory && !member.schoolIsCustom) {
+    const match =
+      schools.find((s) => s.trim().toLowerCase() === school.toLowerCase()) ||
+      school
+    return {
+      name: member.name || '',
+      email: member.email || '',
+      phone: member.phone || '',
+      schoolSelection: match,
+      customSchool: '',
+      branch: member.branch || '',
+      grade: member.grade || '',
+    }
+  }
+
+  return {
+    name: member.name || '',
+    email: member.email || '',
+    phone: member.phone || '',
+    schoolSelection: SCHOOL_NOT_FOUND_OPTION,
+    customSchool: school,
+    branch: member.branch || '',
+    grade: member.grade || '',
+  }
+}
+
+function formFromRegistration(
+  registration: RobofestRegistration,
+  schools: string[],
+): FormState {
+  const age =
+    registration.ageCategory === 'innovators' ||
+    registration.ageCategory === 'explorer'
+      ? registration.ageCategory
+      : ''
+  const teamSize = Math.min(
+    4,
+    Math.max(
+      1,
+      registration.teamSize || registration.teamMembers?.length || 1,
+    ),
+  )
+  const members = (registration.teamMembers || [])
+    .slice(0, teamSize)
+    .map((m) => mapMemberToForm(m, schools))
+  while (members.length < teamSize) members.push(emptyMember())
+
+  const status: 'confirmed' | 'cancelled' =
+    registration.status === 'cancelled' ? 'cancelled' : 'confirmed'
+
+  return {
+    category: registration.category,
+    division: registration.roundCity,
+    ageCategory: age,
+    teamSize,
+    teamMembers: members,
+    campusAmbassadorId: registration.campusAmbassadorId || '',
+    notes: registration.notes || '',
+    status,
+    paymentMode: 'waived',
+    amountPaid: '0',
+    trxId: '',
+    sendEmail: false,
+  }
+}
+
 const selectClassName =
   'flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50'
+
+const readOnlyClassName =
+  'flex h-9 w-full items-center rounded-md border border-slate-200 bg-slate-50 px-3 py-1 text-sm text-slate-700'
+
+type SharedProps = {
+  content: RobofestContent
+  schools: string[]
+  campusAmbassadors: RobofestCampusAmbassador[]
+}
 
 export default function CreateRobofestRegistrationForm({
   content,
@@ -91,15 +204,11 @@ export default function CreateRobofestRegistrationForm({
   canViewPayments = true,
   canSendMail = true,
   onCreated,
-}: {
-  content: RobofestContent
-  schools: string[]
-  campusAmbassadors: RobofestCampusAmbassador[]
+}: SharedProps & {
   canViewPayments?: boolean
   canSendMail?: boolean
   onCreated?: () => void
 }) {
-  const router = useRouter()
   const [isOpen, setIsOpen] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState('')
@@ -134,6 +243,7 @@ export default function CreateRobofestRegistrationForm({
       teamMembers: [emptyMember()],
       campusAmbassadorId: '',
       notes: '',
+      status: 'confirmed',
       paymentMode: canViewPayments ? 'paid_offline' : 'waived',
       amountPaid: canViewPayments ? String(total) : '0',
       trxId: '',
@@ -271,7 +381,6 @@ export default function CreateRobofestRegistrationForm({
           }${result.teamNumber ? ` · Team ${result.teamNumber}` : ''}.`,
       )
       onCreated?.()
-      router.refresh()
       setTimeout(() => handleOpenChange(false), 800)
     } catch {
       setError('Failed to create registration. Please try again.')
@@ -343,173 +452,17 @@ export default function CreateRobofestRegistrationForm({
             Team number is assigned automatically and used as the team name.
           </p>
 
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1">
-              <label className="text-xs text-gray-500">Division</label>
-              <select
-                className={selectClassName}
-                value={form.division}
-                onChange={(e) =>
-                  setForm((prev) => ({ ...prev, division: e.target.value }))
-                }
-                required
-              >
-                {divisionOptions.map((d) => (
-                  <option key={d.value} value={d.value}>
-                    {d.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div className="space-y-1">
-              <label className="text-xs text-gray-500">Age category</label>
-              <select
-                className={selectClassName}
-                value={form.ageCategory}
-                onChange={updateAgeCategory}
-                required
-              >
-                <option value="">Select</option>
-                {ROBOFEST_AGE_CATEGORIES.map((c) => (
-                  <option key={c.value} value={c.value}>
-                    {c.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-
-          <div className="space-y-1">
-            <label className="text-xs text-gray-500">Team size</label>
-            <select
-              className={selectClassName}
-              value={form.teamSize}
-              onChange={updateTeamSize}
-            >
-              {[1, 2, 3, 4].map((n) => (
-                <option key={n} value={n}>
-                  {n} member{n === 1 ? '' : 's'}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {form.teamMembers.slice(0, form.teamSize).map((member, index) => (
-            <div
-              key={index}
-              className="rounded-lg border border-gray-100 p-3 space-y-2"
-            >
-              <p className="text-sm font-medium text-gray-800">
-                {`Team Member ${String(index + 1).padStart(2, '0')}`}
-              </p>
-              <div className="grid sm:grid-cols-2 gap-2">
-                <Input
-                  placeholder={
-                    index === 0 ? 'Name (Team Leader)' : 'Name'
-                  }
-                  value={member.name}
-                  onChange={updateMember(index, 'name')}
-                  required
-                />
-                <Input
-                  type="email"
-                  placeholder="Email"
-                  value={member.email}
-                  onChange={updateMember(index, 'email')}
-                  required
-                />
-                <Input
-                  placeholder="Phone (01XXXXXXXXX)"
-                  value={member.phone}
-                  onChange={updateMember(index, 'phone')}
-                  required
-                />
-                <select
-                  className={selectClassName}
-                  value={member.grade}
-                  onChange={updateMember(index, 'grade')}
-                  required
-                >
-                  <option value="">Grade</option>
-                  {gradeOptions.map((g) => (
-                    <option key={g} value={g}>
-                      {g}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <select
-                className={selectClassName}
-                value={member.schoolSelection}
-                onChange={updateMember(index, 'schoolSelection')}
-                required
-              >
-                <option value="">Institution</option>
-                {schools.map((school) => (
-                  <option key={school} value={school}>
-                    {school}
-                  </option>
-                ))}
-                <option value={PRIVATE_CANDIDATE_OPTION}>
-                  {PRIVATE_CANDIDATE_OPTION}
-                </option>
-                <option value={SCHOOL_NOT_FOUND_OPTION}>
-                  {SCHOOL_NOT_FOUND_OPTION}
-                </option>
-              </select>
-              {member.schoolSelection === SCHOOL_NOT_FOUND_OPTION ? (
-                <Input
-                  placeholder="Custom school name"
-                  value={member.customSchool}
-                  onChange={updateMember(index, 'customSchool')}
-                  required
-                />
-              ) : null}
-              <Input
-                placeholder="Branch (optional)"
-                value={member.branch}
-                onChange={updateMember(index, 'branch')}
-              />
-            </div>
-          ))}
-
-          <div className="space-y-1">
-            <label className="text-xs text-gray-500">
-              Campus ambassador <span className="text-red-500">*</span>
-            </label>
-            <select
-              className={selectClassName}
-              value={form.campusAmbassadorId}
-              onChange={(e) =>
-                setForm((prev) => ({
-                  ...prev,
-                  campusAmbassadorId: e.target.value,
-                }))
-              }
-              required
-            >
-              <option value="">Select campus ambassador</option>
-              {campusAmbassadors.map((a) => (
-                <option key={a.id} value={a.id}>
-                  {formatCampusAmbassadorLabel(a)}
-                </option>
-              ))}
-              <option value={ROBOFEST_CAMPUS_AMBASSADOR_NOT_APPLICABLE}>
-                {ROBOFEST_CAMPUS_AMBASSADOR_NOT_APPLICABLE_LABEL}
-              </option>
-            </select>
-          </div>
-
-          <div className="space-y-1">
-            <label className="text-xs text-gray-500">Notes (optional)</label>
-            <Textarea
-              rows={2}
-              value={form.notes}
-              onChange={(e) =>
-                setForm((prev) => ({ ...prev, notes: e.target.value }))
-              }
-            />
-          </div>
+          <RegistrationCoreFields
+            form={form}
+            setForm={setForm}
+            divisionOptions={divisionOptions}
+            gradeOptions={gradeOptions}
+            schools={schools}
+            campusAmbassadors={campusAmbassadors}
+            updateTeamSize={updateTeamSize}
+            updateAgeCategory={updateAgeCategory}
+            updateMember={updateMember}
+          />
 
           {canViewPayments ? (
             <div className="rounded-lg border border-gray-100 p-3 space-y-3">
@@ -618,5 +571,476 @@ export default function CreateRobofestRegistrationForm({
         </form>
       </SheetContent>
     </Sheet>
+  )
+}
+
+export function EditRobofestRegistrationForm({
+  registration,
+  open,
+  onOpenChange,
+  content,
+  schools,
+  campusAmbassadors,
+  onSaved,
+}: SharedProps & {
+  registration: RobofestRegistration | null
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  onSaved?: (registration: RobofestRegistration) => void
+}) {
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [error, setError] = useState('')
+  const [message, setMessage] = useState('')
+  const [form, setForm] = useState<FormState | null>(null)
+
+  const divisionOptions = useMemo(() => {
+    const fromRounds = content.rounds
+      .map((round) => {
+        const match = ROBOFEST_DIVISIONS.find((d) => d.value === round.city)
+        return match ?? { value: round.city, label: `${round.city} Division` }
+      })
+      .filter((d, i, arr) => arr.findIndex((x) => x.value === d.value) === i)
+    return fromRounds.length > 0 ? fromRounds : ROBOFEST_DIVISIONS
+  }, [content.rounds])
+
+  useEffect(() => {
+    if (open && registration) {
+      setError('')
+      setMessage('')
+      setForm(formFromRegistration(registration, schools))
+    }
+    if (!open) {
+      setForm(null)
+      setError('')
+      setMessage('')
+    }
+  }, [open, registration, schools])
+
+  const gradeOptions = getGradesForAgeCategory(form?.ageCategory || '')
+
+  const updateTeamSize = (event: ChangeEvent<HTMLSelectElement>) => {
+    const size = Math.min(4, Math.max(1, Number(event.target.value) || 1))
+    setForm((prev) =>
+      prev
+        ? {
+            ...prev,
+            teamSize: size,
+            teamMembers: resizeTeamMembers(prev.teamMembers, size),
+          }
+        : prev,
+    )
+  }
+
+  const updateAgeCategory = (event: ChangeEvent<HTMLSelectElement>) => {
+    const ageCategory = event.target.value as RobofestAgeCategory | ''
+    setForm((prev) =>
+      prev
+        ? {
+            ...prev,
+            ageCategory,
+            teamMembers: prev.teamMembers.map((member) => {
+              const allowed = getGradesForAgeCategory(ageCategory)
+              return {
+                ...member,
+                grade: allowed.includes(member.grade) ? member.grade : '',
+              }
+            }),
+          }
+        : prev,
+    )
+  }
+
+  const updateMember =
+    (index: number, field: keyof TeamMemberForm) =>
+    (event: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+      const value = event.target.value
+      setForm((prev) => {
+        if (!prev) return prev
+        const teamMembers = prev.teamMembers.map((member, i) =>
+          i === index ? { ...member, [field]: value } : member,
+        )
+        return { ...prev, teamMembers }
+      })
+    }
+
+  const handleSubmit = async (event: FormEvent) => {
+    event.preventDefault()
+    if (!registration || !form) return
+    setError('')
+    setMessage('')
+    setIsSubmitting(true)
+
+    try {
+      const result = await updateRobofestRegistration(registration.id, {
+        division: form.division,
+        ageCategory: form.ageCategory,
+        teamSize: form.teamSize,
+        teamMembers: form.teamMembers.slice(0, form.teamSize).map((m) => ({
+          name: m.name,
+          email: m.email,
+          phone: m.phone,
+          schoolSelection: m.schoolSelection,
+          customSchool: m.customSchool,
+          branch: m.branch,
+          grade: m.grade,
+        })),
+        campusAmbassadorId: form.campusAmbassadorId || undefined,
+        notes: form.notes,
+        status: form.status,
+      })
+
+      if (!result.success || !result.registration) {
+        setError(result.error || 'Failed to update registration.')
+        return
+      }
+
+      setMessage('Registration updated.')
+      onSaved?.(result.registration)
+      setTimeout(() => onOpenChange(false), 600)
+    } catch {
+      setError('Failed to update registration. Please try again.')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const ambassadorOptions = useMemo(() => {
+    const list = [...campusAmbassadors]
+    const currentId = registration?.campusAmbassadorId
+    if (
+      currentId &&
+      currentId !== ROBOFEST_CAMPUS_AMBASSADOR_NOT_APPLICABLE &&
+      !list.some((a) => a.id === currentId)
+    ) {
+      list.unshift({
+        id: currentId,
+        name: registration?.campusAmbassadorName || currentId,
+        school: registration?.campusAmbassadorSchool || '',
+        isActive: false,
+      })
+    }
+    return list
+  }, [campusAmbassadors, registration])
+
+  return (
+    <Sheet open={open} onOpenChange={onOpenChange}>
+      <SheetContent
+        side="right"
+        className="w-full sm:max-w-xl p-0 flex flex-col gap-0 overflow-hidden"
+      >
+        <div className="flex items-start justify-between gap-3 bg-cyan-700 px-4 py-4 text-white">
+          <div>
+            <SheetTitle className="text-lg font-bold text-white">
+              Edit registration
+            </SheetTitle>
+            <SheetDescription className="text-xs text-cyan-100 mt-1">
+              Update team details. Competition, team number, and payment stay
+              locked.
+            </SheetDescription>
+          </div>
+          <Button
+            type="button"
+            size="icon"
+            variant="ghost"
+            className="text-white hover:bg-white/10 hover:text-white"
+            onClick={() => onOpenChange(false)}
+          >
+            <X className="w-4 h-4" />
+          </Button>
+        </div>
+
+        {form && registration ? (
+          <form
+            onSubmit={handleSubmit}
+            className="flex-1 overflow-y-auto px-4 py-4 space-y-4"
+          >
+            {(error || message) && (
+              <Alert variant={error ? 'destructive' : 'default'}>
+                <AlertTitle>{error ? 'Could not save' : 'Saved'}</AlertTitle>
+                <AlertDescription>{error || message}</AlertDescription>
+              </Alert>
+            )}
+
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <label className="text-xs text-gray-500">Competition</label>
+                <div className={readOnlyClassName}>{registration.category}</div>
+              </div>
+              <div className="space-y-1">
+                <label className="text-xs text-gray-500">Team number</label>
+                <div className={readOnlyClassName}>
+                  {registration.teamNumber || registration.name || '—'}
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-1">
+              <label className="text-xs text-gray-500">Registration ID</label>
+              <div className={`${readOnlyClassName} font-mono text-xs`}>
+                {registration.registrationId || '—'}
+              </div>
+            </div>
+
+            <div className="space-y-1">
+              <label className="text-xs text-gray-500">Status</label>
+              <select
+                className={selectClassName}
+                value={form.status}
+                onChange={(e) =>
+                  setForm((prev) =>
+                    prev
+                      ? {
+                          ...prev,
+                          status: e.target.value as 'confirmed' | 'cancelled',
+                        }
+                      : prev,
+                  )
+                }
+              >
+                <option value="confirmed">Confirmed</option>
+                <option value="cancelled">Cancelled</option>
+              </select>
+            </div>
+
+            <RegistrationCoreFields
+              form={form}
+              setForm={(updater) => {
+                setForm((prev) => {
+                  if (!prev) return prev
+                  return typeof updater === 'function' ? updater(prev) : updater
+                })
+              }}
+              divisionOptions={divisionOptions}
+              gradeOptions={gradeOptions}
+              schools={schools}
+              campusAmbassadors={ambassadorOptions}
+              updateTeamSize={updateTeamSize}
+              updateAgeCategory={updateAgeCategory}
+              updateMember={updateMember}
+            />
+
+            {registration.paymentStatus ? (
+              <p className="rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-600">
+                Payment is locked ({registration.paymentStatus}
+                {registration.amountPaid != null
+                  ? ` · BDT ${registration.amountPaid}`
+                  : ''}
+                ).
+              </p>
+            ) : null}
+
+            <div className="flex gap-2 pt-2 pb-4">
+              <Button type="submit" disabled={isSubmitting} className="flex-1">
+                {isSubmitting ? 'Saving…' : 'Save changes'}
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                disabled={isSubmitting}
+                onClick={() => onOpenChange(false)}
+              >
+                Cancel
+              </Button>
+            </div>
+          </form>
+        ) : null}
+      </SheetContent>
+    </Sheet>
+  )
+}
+
+function RegistrationCoreFields({
+  form,
+  setForm,
+  divisionOptions,
+  gradeOptions,
+  schools,
+  campusAmbassadors,
+  updateTeamSize,
+  updateAgeCategory,
+  updateMember,
+}: {
+  form: FormState
+  setForm: (updater: FormState | ((prev: FormState) => FormState)) => void
+  divisionOptions: { value: string; label: string }[]
+  gradeOptions: readonly string[]
+  schools: string[]
+  campusAmbassadors: RobofestCampusAmbassador[]
+  updateTeamSize: (event: ChangeEvent<HTMLSelectElement>) => void
+  updateAgeCategory: (event: ChangeEvent<HTMLSelectElement>) => void
+  updateMember: (
+    index: number,
+    field: keyof TeamMemberForm,
+  ) => (event: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void
+}) {
+  return (
+    <>
+      <div className="grid grid-cols-2 gap-3">
+        <div className="space-y-1">
+          <label className="text-xs text-gray-500">Division</label>
+          <select
+            className={selectClassName}
+            value={form.division}
+            onChange={(e) =>
+              setForm((prev) => ({ ...prev, division: e.target.value }))
+            }
+            required
+          >
+            {divisionOptions.map((d) => (
+              <option key={d.value} value={d.value}>
+                {d.label}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div className="space-y-1">
+          <label className="text-xs text-gray-500">Age category</label>
+          <select
+            className={selectClassName}
+            value={form.ageCategory}
+            onChange={updateAgeCategory}
+            required
+          >
+            <option value="">Select</option>
+            {ROBOFEST_AGE_CATEGORIES.map((c) => (
+              <option key={c.value} value={c.value}>
+                {c.label}
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
+
+      <div className="space-y-1">
+        <label className="text-xs text-gray-500">Team size</label>
+        <select
+          className={selectClassName}
+          value={form.teamSize}
+          onChange={updateTeamSize}
+        >
+          {[1, 2, 3, 4].map((n) => (
+            <option key={n} value={n}>
+              {n} member{n === 1 ? '' : 's'}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      {form.teamMembers.slice(0, form.teamSize).map((member, index) => (
+        <div
+          key={index}
+          className="rounded-lg border border-gray-100 p-3 space-y-2"
+        >
+          <p className="text-sm font-medium text-gray-800">
+            {`Team Member ${String(index + 1).padStart(2, '0')}`}
+          </p>
+          <div className="grid sm:grid-cols-2 gap-2">
+            <Input
+              placeholder={index === 0 ? 'Name (Team Leader)' : 'Name'}
+              value={member.name}
+              onChange={updateMember(index, 'name')}
+              required
+            />
+            <Input
+              type="email"
+              placeholder="Email"
+              value={member.email}
+              onChange={updateMember(index, 'email')}
+              required
+            />
+            <Input
+              placeholder="Phone (01XXXXXXXXX)"
+              value={member.phone}
+              onChange={updateMember(index, 'phone')}
+              required
+            />
+            <select
+              className={selectClassName}
+              value={member.grade}
+              onChange={updateMember(index, 'grade')}
+              required
+            >
+              <option value="">Grade</option>
+              {gradeOptions.map((g) => (
+                <option key={g} value={g}>
+                  {g}
+                </option>
+              ))}
+            </select>
+          </div>
+          <select
+            className={selectClassName}
+            value={member.schoolSelection}
+            onChange={updateMember(index, 'schoolSelection')}
+            required
+          >
+            <option value="">Institution</option>
+            {schools.map((school) => (
+              <option key={school} value={school}>
+                {school}
+              </option>
+            ))}
+            <option value={PRIVATE_CANDIDATE_OPTION}>
+              {PRIVATE_CANDIDATE_OPTION}
+            </option>
+            <option value={SCHOOL_NOT_FOUND_OPTION}>
+              {SCHOOL_NOT_FOUND_OPTION}
+            </option>
+          </select>
+          {member.schoolSelection === SCHOOL_NOT_FOUND_OPTION ? (
+            <Input
+              placeholder="Custom school name"
+              value={member.customSchool}
+              onChange={updateMember(index, 'customSchool')}
+              required
+            />
+          ) : null}
+          <Input
+            placeholder="Branch (optional)"
+            value={member.branch}
+            onChange={updateMember(index, 'branch')}
+          />
+        </div>
+      ))}
+
+      <div className="space-y-1">
+        <label className="text-xs text-gray-500">
+          Campus ambassador <span className="text-red-500">*</span>
+        </label>
+        <select
+          className={selectClassName}
+          value={form.campusAmbassadorId}
+          onChange={(e) =>
+            setForm((prev) => ({
+              ...prev,
+              campusAmbassadorId: e.target.value,
+            }))
+          }
+          required
+        >
+          <option value="">Select campus ambassador</option>
+          {campusAmbassadors.map((a) => (
+            <option key={a.id} value={a.id}>
+              {formatCampusAmbassadorLabel(a)}
+              {a.isActive === false ? ' (inactive)' : ''}
+            </option>
+          ))}
+          <option value={ROBOFEST_CAMPUS_AMBASSADOR_NOT_APPLICABLE}>
+            {ROBOFEST_CAMPUS_AMBASSADOR_NOT_APPLICABLE_LABEL}
+          </option>
+        </select>
+      </div>
+
+      <div className="space-y-1">
+        <label className="text-xs text-gray-500">Notes (optional)</label>
+        <Textarea
+          rows={2}
+          value={form.notes}
+          onChange={(e) =>
+            setForm((prev) => ({ ...prev, notes: e.target.value }))
+          }
+        />
+      </div>
+    </>
   )
 }

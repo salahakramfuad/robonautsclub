@@ -112,6 +112,7 @@ export default function RobofestDashboardClient({
         goPrevPage={d.goPrevPage}
         setStatus={d.setStatus}
         setMemberAward={d.setMemberAward}
+        onRegistrationSaved={d.onRegistrationSaved}
         resendEmail={d.resendEmail}
         downloadConfirmationPdf={d.downloadConfirmationPdf}
         downloadMemberCertificate={d.downloadMemberCertificate}

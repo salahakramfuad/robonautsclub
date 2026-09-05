@@ -42,10 +42,33 @@ export type RobofestRegistrationInput = {
   notes?: string;
 };
 
+/** Options for edit-safe validation (preserve awards, schools, inactive CA). */
+export type ValidateRobofestRegistrationOptions = {
+  existingMembers?: RobofestTeamMember[];
+  existingCampusAmbassadorId?: string;
+  existingCampusAmbassadorName?: string;
+  existingCampusAmbassadorSchool?: string;
+};
+
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+function schoolUnchanged(
+  existing: RobofestTeamMember | undefined,
+  school: string,
+  schoolIsCustom: boolean,
+): boolean {
+  if (!existing) return false;
+  const existingSchool = (existing.school || "").trim();
+  if (!existingSchool) return false;
+  if (existingSchool.toLowerCase() !== school.trim().toLowerCase()) {
+    return false;
+  }
+  return Boolean(existing.schoolIsCustom) === schoolIsCustom;
+}
 
 export async function validateRobofestRegistrationInput(
   formData: RobofestRegistrationInput,
+  options: ValidateRobofestRegistrationOptions = {},
 ): Promise<
   | { ok: true; data: RobofestRegistrationFormData }
   | { ok: false; error: string }
@@ -77,9 +100,12 @@ export async function validateRobofestRegistrationInput(
     };
   }
 
+  const existingMembers = options.existingMembers || [];
+
   const teamMembers: RobofestTeamMember[] = [];
   for (let i = 0; i < list.length; i += 1) {
     const raw = list[i];
+    const existing = existingMembers[i];
     const memberName = raw?.name?.trim() ?? "";
     const email = raw?.email?.trim().toLowerCase() ?? "";
     const phone = raw?.phone?.trim().replace(/\s/g, "") ?? "";
@@ -125,7 +151,15 @@ export async function validateRobofestRegistrationInput(
     let schoolIsCustom = resolved.isCustom;
     let pendingSchoolId: string | undefined;
 
-    if (resolved.isCustom) {
+    if (
+      resolved.isCustom &&
+      schoolUnchanged(existing, resolved.school, true) &&
+      existing?.pendingSchoolId
+    ) {
+      school = existing.school || resolved.school;
+      schoolIsCustom = Boolean(existing.schoolIsCustom);
+      pendingSchoolId = existing.pendingSchoolId;
+    } else if (resolved.isCustom) {
       const pending = await createPendingSchoolIfNeeded(resolved.school, {
         requestedByName: memberName,
         requestedByEmail: email,
@@ -136,6 +170,9 @@ export async function validateRobofestRegistrationInput(
       pendingSchoolId = pending.pendingSchoolId;
     }
 
+    const awardCategoryId =
+      existing?.awardCategoryId?.trim() || ROBOFEST_DEFAULT_AWARD_CATEGORY_ID;
+
     teamMembers.push({
       name: memberName,
       email,
@@ -145,7 +182,7 @@ export async function validateRobofestRegistrationInput(
       pendingSchoolId,
       branch: branch || undefined,
       grade,
-      awardCategoryId: ROBOFEST_DEFAULT_AWARD_CATEGORY_ID,
+      awardCategoryId,
     });
   }
 
@@ -161,9 +198,19 @@ export async function validateRobofestRegistrationInput(
   if (!ambassadorId) {
     return { ok: false, error: "Campus ambassador is required." };
   }
+
+  const existingCaId = options.existingCampusAmbassadorId?.trim() ?? "";
+  const ambassadorUnchanged = Boolean(existingCaId) && ambassadorId === existingCaId;
+
   if (ambassadorId === ROBOFEST_CAMPUS_AMBASSADOR_NOT_APPLICABLE) {
     campusAmbassadorId = ROBOFEST_CAMPUS_AMBASSADOR_NOT_APPLICABLE;
     campusAmbassadorName = ROBOFEST_CAMPUS_AMBASSADOR_NOT_APPLICABLE_LABEL;
+  } else if (ambassadorUnchanged) {
+    campusAmbassadorId = existingCaId;
+    campusAmbassadorName =
+      options.existingCampusAmbassadorName?.trim() || undefined;
+    campusAmbassadorSchool =
+      options.existingCampusAmbassadorSchool?.trim() || undefined;
   } else {
     const ambassador = await getActiveRobofestCampusAmbassadorById(ambassadorId);
     if (!ambassador) {

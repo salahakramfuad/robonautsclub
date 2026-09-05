@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import type {
   RobofestContent,
   RobofestRegistration,
@@ -12,6 +13,7 @@ import type { StatusTone } from './types'
 import { RegistrationsOverview } from './RegistrationsOverview'
 import { RegistrationsToolbar } from './RegistrationsToolbar'
 import { RegistrationsTable } from './RegistrationsTable'
+import { EditRobofestRegistrationForm } from '../CreateRobofestRegistrationForm'
 
 type Stats = {
   total: number
@@ -71,6 +73,7 @@ export function RobofestRegistrationsTab({
   goPrevPage,
   setStatus,
   setMemberAward,
+  onRegistrationSaved,
   resendEmail,
   downloadConfirmationPdf,
   downloadMemberCertificate,
@@ -130,6 +133,7 @@ export function RobofestRegistrationsTab({
     memberIndex: number,
     awardCategoryId: string,
   ) => void
+  onRegistrationSaved: (registration: RobofestRegistration) => void
   resendEmail: (id: string) => void
   downloadConfirmationPdf: (registration: RobofestRegistration) => void
   downloadMemberCertificate: (
@@ -137,6 +141,8 @@ export function RobofestRegistrationsTab({
     memberIndex: number,
   ) => void
 }) {
+  const [editing, setEditing] = useState<RobofestRegistration | null>(null)
+
   return (
     <TabsContent value="registrations" className="space-y-4 w-full min-w-0">
       <Tabs
@@ -228,11 +234,28 @@ export function RobofestRegistrationsTab({
           goPrevPage={goPrevPage}
           setStatus={setStatus}
           setMemberAward={setMemberAward}
+          onEdit={(registration) => setEditing(registration)}
           resendEmail={resendEmail}
           downloadConfirmationPdf={downloadConfirmationPdf}
           downloadMemberCertificate={downloadMemberCertificate}
         />
       </Tabs>
+
+      {canEdit ? (
+        <EditRobofestRegistrationForm
+          registration={editing}
+          open={Boolean(editing)}
+          onOpenChange={(next) => {
+            if (!next) setEditing(null)
+          }}
+          content={content}
+          schools={schools}
+          campusAmbassadors={campusAmbassadors}
+          onSaved={(registration) => {
+            onRegistrationSaved(registration)
+          }}
+        />
+      ) : null}
     </TabsContent>
   )
 }
