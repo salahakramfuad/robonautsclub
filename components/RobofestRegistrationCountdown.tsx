@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useSyncExternalStore } from "react";
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import {
   formatRegistrationClosingLabel,
@@ -63,6 +64,7 @@ export default function RobofestRegistrationCountdown({
   /** Optional division label, e.g. "Chittagong Division". */
   label?: string;
 }) {
+  const t = useTranslations("robofest.countdown");
   const nowSeconds = useSyncExternalStore(
     subscribeToSecondTicks,
     getClientNowSeconds,
@@ -83,8 +85,8 @@ export default function RobofestRegistrationCountdown({
   );
 
   const closesLabel = label
-    ? `Registration closes · ${label}`
-    : "Registration closes";
+    ? t("closesDivision", { name: label })
+    : t("closes");
 
   if (remaining?.expired) {
     return (
@@ -94,26 +96,27 @@ export default function RobofestRegistrationCountdown({
           className,
         )}
       >
-        {label ? `${label} registration closed` : "Registration closed"}
+        {label ? t("closedDivision", { name: label }) : t("closed")}
         <span className="ml-2 font-normal text-rose-700/80">
-          (deadline was {dateLabel})
+          {t("deadlineWas", { title: dateLabel })}
         </span>
       </div>
     );
   }
 
+  const placeholder = t("placeholder");
   const units = remaining
     ? ([
-        { label: "Days", value: String(remaining.days) },
-        { label: "Hours", value: pad(remaining.hours) },
-        { label: "Mins", value: pad(remaining.minutes) },
-        { label: "Secs", value: pad(remaining.seconds) },
+        { label: t("days"), value: String(remaining.days) },
+        { label: t("hours"), value: pad(remaining.hours) },
+        { label: t("mins"), value: pad(remaining.minutes) },
+        { label: t("secs"), value: pad(remaining.seconds) },
       ] as const)
     : ([
-        { label: "Days", value: "—" },
-        { label: "Hours", value: "—" },
-        { label: "Mins", value: "—" },
-        { label: "Secs", value: "—" },
+        { label: t("days"), value: placeholder },
+        { label: t("hours"), value: placeholder },
+        { label: t("mins"), value: placeholder },
+        { label: t("secs"), value: placeholder },
       ] as const);
 
   return (

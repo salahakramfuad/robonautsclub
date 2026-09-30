@@ -1,31 +1,38 @@
 import { Metadata } from 'next'
 import { Images } from 'lucide-react'
+import { getTranslations, setRequestLocale } from 'next-intl/server'
 import { PAGE_SEO, buildPageMetadata } from '@/lib/seo-metadata'
 import { effectiveGalleryDisplayRaw } from '@/lib/publicContentDates'
 import RoboHudHero from '@/components/RoboHudHero'
 import GalleryAlbumCard from '@/components/gallery/GalleryAlbumCard'
 import { getGalleryGroups } from './actions'
 
-export const metadata: Metadata = buildPageMetadata({
-  title: PAGE_SEO.gallery.title,
-  description: PAGE_SEO.gallery.description,
-  path: '/gallery',
-  absoluteTitle: true,
-  ogImage: {
-    url: '/robofest/robofest.jpg',
-    width: 1200,
-    height: 630,
-    alt: 'Robonauts Gallery',
-  },
-})
+type Props = { params: Promise<{ locale: string }> }
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { locale } = await params
+  return buildPageMetadata({
+    title: PAGE_SEO.gallery.title,
+    description: PAGE_SEO.gallery.description,
+    path: '/gallery',
+    absoluteTitle: true,
+    locale,
+    ogImage: {
+      url: '/robofest/robofest.jpg',
+      width: 1200,
+      height: 630,
+      alt: 'Robonauts Gallery',
+    },
+  })
+}
 
 export const revalidate = 1800
 
-function formatDisplayDate(iso: string | Date | null) {
+function formatDisplayDate(iso: string | Date | null, locale: string) {
   if (iso == null) return ''
   try {
     const d = iso instanceof Date ? iso : new Date(iso)
-    return new Intl.DateTimeFormat('en-GB', {
+    return new Intl.DateTimeFormat(locale === 'bn' ? 'bn-BD' : 'en-GB', {
       day: 'numeric',
       month: 'long',
       year: 'numeric',
@@ -35,7 +42,10 @@ function formatDisplayDate(iso: string | Date | null) {
   }
 }
 
-export default async function GalleryPage() {
+export default async function GalleryPage({ params }: Props) {
+  const { locale } = await params
+  setRequestLocale(locale)
+  const t = await getTranslations('gallery.list')
   const groups = await getGalleryGroups()
   const albumCount = groups.length
   const photoCount = groups.reduce((sum, g) => sum + (g.imageCount ?? g.images.length), 0)
@@ -46,24 +56,20 @@ export default async function GalleryPage() {
         <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-cyan-300/25 bg-white/5 px-3 py-1.5 shadow-[0_0_24px_rgba(34,211,238,0.15)] backdrop-blur-sm sm:mb-5 sm:px-4">
           <Images className="size-3.5 text-cyan-200 sm:size-4" aria-hidden />
           <span className="text-[11px] font-semibold uppercase tracking-[0.22em] text-cyan-100 sm:text-xs">
-            Robogallery
+            {t('badge')}
           </span>
         </div>
-        <h1 className="text-3xl font-extrabold tracking-tight sm:text-4xl md:text-5xl">Gallery</h1>
+        <h1 className="text-3xl font-extrabold tracking-tight sm:text-4xl md:text-5xl">{t('title')}</h1>
         <p className="mx-auto mt-3 max-w-2xl text-sm leading-relaxed text-sky-100/90 sm:mt-4 sm:text-base md:text-lg">
-          Snapshots from workshops, competitions, and community events.
+          {t('subtitle')}
         </p>
         {albumCount > 0 ? (
           <p className="mt-5 inline-flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-xs font-medium text-cyan-100/80 sm:mt-6 sm:text-sm">
-            <span>
-              {albumCount} album{albumCount === 1 ? '' : 's'}
-            </span>
+            <span>{t('albumCount', { count: albumCount })}</span>
             <span className="hidden text-cyan-300/40 sm:inline" aria-hidden>
               ·
             </span>
-            <span>
-              {photoCount} photo{photoCount === 1 ? '' : 's'}
-            </span>
+            <span>{t('photoCount', { count: photoCount })}</span>
           </p>
         ) : null}
       </RoboHudHero>
@@ -81,14 +87,14 @@ export default async function GalleryPage() {
                 <div className="mx-auto mb-4 flex size-14 items-center justify-center rounded-2xl bg-indigo-50 ring-1 ring-indigo-100">
                   <Images className="size-7 text-indigo-400" aria-hidden />
                 </div>
-                <p className="text-base font-medium text-gray-700 sm:text-lg">No gallery albums yet.</p>
-                <p className="mt-2 text-sm text-gray-500">Check back soon for moments from the lab and stage.</p>
+                <p className="text-base font-medium text-gray-700 sm:text-lg">{t('emptyTitle')}</p>
+                <p className="mt-2 text-sm text-gray-500">{t('emptySubtitle')}</p>
               </div>
             </div>
           ) : (
             <ul className="m-0 grid list-none grid-cols-1 gap-6 p-0 sm:grid-cols-2 sm:gap-7 lg:grid-cols-3 lg:gap-8">
               {groups.map((group, index) => {
-                const dateLine = formatDisplayDate(effectiveGalleryDisplayRaw(group))
+                const dateLine = formatDisplayDate(effectiveGalleryDisplayRaw(group), locale)
                 const featured = index === 0
                 return (
                   <li key={group.id} className={featured ? 'sm:col-span-2 lg:col-span-2' : 'min-w-0'}>

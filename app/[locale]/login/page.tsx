@@ -1,7 +1,8 @@
 'use client'
 
 import { useState, Suspense } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useSearchParams } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { useForm } from 'react-hook-form'
 import { standardSchemaResolver } from '@hookform/resolvers/standard-schema'
 import {
@@ -11,6 +12,8 @@ import {
   type ForgotPasswordFormValues,
 } from '@/lib/validation/auth'
 import { X, Mail, Sparkles } from 'lucide-react'
+import { Link } from '@/i18n/navigation'
+import LanguageToggle from '@/components/LanguageToggle'
 import { Card, CardContent } from '@/components/ui/card'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
@@ -27,7 +30,7 @@ import {
 } from '@/components/ui/form'
 
 function LoginForm() {
-  const router = useRouter()
+  const t = useTranslations('auth')
   const searchParams = useSearchParams()
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
@@ -66,17 +69,17 @@ function LoginForm() {
         setError(
           typeof data.error === 'string'
             ? data.error
-            : 'Invalid email or password',
+            : t('errors.invalidCredentials'),
         )
         return
       }
 
       const redirectTo = searchParams.get('redirect') || '/dashboard'
-      router.push(redirectTo)
-      router.refresh()
+      // Dashboard is outside the locale tree — hard navigate.
+      window.location.href = redirectTo
     } catch (err) {
       console.error('Login error:', err)
-      setError('Failed to sign in. Please try again.')
+      setError(t('errors.signInFailed'))
     } finally {
       setLoading(false)
     }
@@ -94,7 +97,7 @@ function LoginForm() {
         body: JSON.stringify({ email: values.email.trim() }),
       })
       if (!res.ok) {
-        setForgotPasswordError('Failed to send reset email. Please try again.')
+        setForgotPasswordError(t('errors.forgotFailed'))
         return
       }
       setLastResetEmail(values.email.trim())
@@ -106,7 +109,7 @@ function LoginForm() {
       }, 3000)
     } catch (err) {
       console.error('Password reset error:', err)
-      setForgotPasswordError('Failed to send reset email. Please try again.')
+      setForgotPasswordError(t('errors.forgotFailed'))
     } finally {
       setForgotPasswordLoading(false)
     }
@@ -121,18 +124,20 @@ function LoginForm() {
         <div className="absolute bottom-0 left-0 w-96 h-96 bg-blue-200 rounded-full blur-3xl"></div>
       </div>
 
-      <Button
-        type="button"
-        variant="ghost"
-        size="icon"
-        onClick={() => {
-          window.location.href = '/'
-        }}
-        className="absolute top-4 right-4 z-20 rounded-full bg-white/90 hover:bg-white shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-110"
-        aria-label="Go back"
-      >
-        <X className="w-6 h-6 text-gray-600" />
-      </Button>
+      <div className="absolute top-4 right-4 z-20 flex items-center gap-2">
+        <LanguageToggle variant="standalone" />
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          asChild
+          className="rounded-full bg-white/90 hover:bg-white shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-110"
+        >
+          <Link href="/" prefetch={false} aria-label={t('login.closeAria')}>
+            <X className="w-6 h-6 text-gray-600" />
+          </Link>
+        </Button>
+      </div>
 
       <div className="max-w-md w-full relative z-10 animate-fade-in-up">
         <Card className="bg-white/95 backdrop-blur-xl shadow-2xl border-white/20">
@@ -142,9 +147,9 @@ function LoginForm() {
                 <Sparkles className="w-8 h-8 text-white" />
               </div>
               <h1 className="text-3xl font-bold bg-gradient-to-r from-indigo-600 to-blue-600 bg-clip-text text-transparent mb-2">
-                Admin Login
+                {t('login.title')}
               </h1>
-              <p className="text-gray-600">Sign in to access the dashboard</p>
+              <p className="text-gray-600">{t('login.subtitle')}</p>
             </div>
 
             <Form {...loginForm}>
@@ -160,11 +165,11 @@ function LoginForm() {
                   name="email"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-gray-700">Email Address</FormLabel>
+                      <FormLabel className="text-gray-700">{t('login.emailLabel')}</FormLabel>
                       <FormControl>
                         <Input
                           type="email"
-                          placeholder="admin@example.com"
+                          placeholder={t('login.emailPlaceholder')}
                           disabled={loading}
                           className="border-2 border-gray-200 rounded-lg py-3 h-auto"
                           {...field}
@@ -180,11 +185,11 @@ function LoginForm() {
                   name="password"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-gray-700">Password</FormLabel>
+                      <FormLabel className="text-gray-700">{t('login.passwordLabel')}</FormLabel>
                       <FormControl>
                         <Input
                           type="password"
-                          placeholder="Enter your password"
+                          placeholder={t('login.passwordPlaceholder')}
                           disabled={loading}
                           className="border-2 border-gray-200 rounded-lg py-3 h-auto"
                           {...field}
@@ -208,7 +213,7 @@ function LoginForm() {
                     className="text-sm text-indigo-600 hover:text-indigo-800 font-medium h-auto p-0"
                     disabled={loading}
                   >
-                    Forgot Password?
+                    {t('login.forgot')}
                   </Button>
                 </div>
 
@@ -218,7 +223,7 @@ function LoginForm() {
                   size="lg"
                   className="w-full py-6 bg-gradient-to-r from-indigo-500 to-blue-600 hover:from-indigo-600 hover:to-blue-700 text-white font-semibold shadow-lg hover:shadow-xl"
                 >
-                  {loading ? 'Signing in...' : 'Sign In'}
+                  {loading ? t('login.submitting') : t('login.submit')}
                 </Button>
               </form>
             </Form>
@@ -239,9 +244,9 @@ function LoginForm() {
         }}
       >
         <DialogContent className="sm:max-w-md bg-white/95 backdrop-blur-xl border-white/20">
-          <DialogTitle className="text-2xl font-bold text-gray-900">Reset Password</DialogTitle>
+          <DialogTitle className="text-2xl font-bold text-gray-900">{t('forgot.title')}</DialogTitle>
           <DialogDescription className="sr-only">
-            Reset your account password by entering your email address to receive a reset link.
+            {t('forgot.description')}
           </DialogDescription>
 
           {forgotPasswordSuccess ? (
@@ -249,19 +254,19 @@ function LoginForm() {
               <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-4">
                 <Mail className="w-8 h-8 text-green-600" />
               </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Check Your Email</h3>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">{t('forgot.successTitle')}</h3>
               <p className="text-gray-600 text-sm">
-                We&apos;ve sent a password reset link to <strong>{lastResetEmail}</strong>
+                {t('forgot.successBody', { name: lastResetEmail })}
               </p>
               <p className="text-gray-500 text-xs mt-2">
-                Please check your inbox and follow the instructions to reset your password.
+                {t('forgot.successHint')}
               </p>
             </div>
           ) : (
             <Form {...forgotForm}>
               <form onSubmit={forgotForm.handleSubmit(onForgotSubmit)} className="space-y-4">
                 <p className="text-gray-600 text-sm">
-                  Enter your email address and we&apos;ll send you a link to reset your password.
+                  {t('forgot.intro')}
                 </p>
 
                 {forgotPasswordError && (
@@ -275,11 +280,11 @@ function LoginForm() {
                   name="email"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-gray-700">Email Address</FormLabel>
+                      <FormLabel className="text-gray-700">{t('login.emailLabel')}</FormLabel>
                       <FormControl>
                         <Input
                           type="email"
-                          placeholder="Enter your email"
+                          placeholder={t('login.emailPlaceholder')}
                           disabled={forgotPasswordLoading}
                           className="border-2 border-gray-200 rounded-lg py-3 h-auto"
                           {...field}
@@ -302,14 +307,14 @@ function LoginForm() {
                     disabled={forgotPasswordLoading}
                     className="flex-1"
                   >
-                    Cancel
+                    {t('forgot.cancel')}
                   </Button>
                   <Button
                     type="submit"
                     disabled={forgotPasswordLoading}
                     className="flex-1 bg-gradient-to-r from-indigo-500 to-blue-600 hover:from-indigo-600 hover:to-blue-700 text-white shadow-md hover:shadow-lg"
                   >
-                    {forgotPasswordLoading ? 'Sending...' : 'Send Reset Link'}
+                    {forgotPasswordLoading ? t('forgot.sending') : t('forgot.send')}
                   </Button>
                 </div>
               </form>

@@ -1,8 +1,10 @@
-import Link from 'next/link'
 import { Metadata } from 'next'
+import { getTranslations, setRequestLocale } from 'next-intl/server'
+import { Link } from '@/i18n/navigation'
 import { notFound } from 'next/navigation'
 import Script from 'next/script'
 import { ArrowLeft } from 'lucide-react'
+import { pickLocalized } from '@/lib/i18n-localized'
 import { SITE_CONFIG } from '@/lib/site-config'
 import { NEWS_ARTICLE_IMAGES_PREVIEW_MAX } from '@/lib/media-gallery'
 import { effectiveNewsDisplayRaw } from '@/lib/publicContentDates'
@@ -21,7 +23,7 @@ import { getNewsArticleBySlug } from '../actions'
 
 export const revalidate = 1800
 
-type Props = { params: Promise<{ slug: string }> }
+type Props = { params: Promise<{ locale: string; slug: string }> }
 
 function toSchemaIso(raw: string | Date | null | undefined): string | undefined {
   if (!raw) return undefined
@@ -30,37 +32,46 @@ function toSchemaIso(raw: string | Date | null | undefined): string | undefined 
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { slug } = await params
+  const { slug, locale } = await params
+  setRequestLocale(locale)
   const article = await getNewsArticleBySlug(slug)
   if (!article) {
     return { title: 'Article' }
   }
 
-  const description = excerptBody(article.body, 160)
+  const title = pickLocalized(locale, article.title, article.titleBn)
+  const body = pickLocalized(locale, article.body, article.bodyBn)
+  const description = excerptBody(body, 160)
   const path = `/news/${article.slug}`
 
   return buildPageMetadata({
-    title: `${article.title} | ${SITE_CONFIG.name}`,
+    title: `${title} | ${SITE_CONFIG.name}`,
     description,
     path,
     absoluteTitle: true,
+    locale,
     ogType: 'article',
     ogImage: article.coverImageUrl
-      ? { url: article.coverImageUrl, alt: article.title }
+      ? { url: article.coverImageUrl, alt: title }
       : {
           url: '/roboclass.jpg',
           width: 1200,
           height: 630,
-          alt: article.title,
+          alt: title,
         },
   })
 }
 
 export default async function NewsArticlePage({ params }: Props) {
-  const { slug } = await params
+  const { slug, locale } = await params
+  setRequestLocale(locale)
+  const t = await getTranslations('news.article')
+  const tBreadcrumb = await getTranslations('breadcrumbs')
   const article = await getNewsArticleBySlug(slug)
   if (!article) notFound()
 
+  const title = pickLocalized(locale, article.title, article.titleBn)
+  const body = pickLocalized(locale, article.body, article.bodyBn)
   const extraImages = (article.images ?? []).filter(
     (u): u is string => typeof u === 'string' && Boolean(u.trim()),
   )
@@ -72,12 +83,12 @@ export default async function NewsArticlePage({ params }: Props) {
   const photosHref = `/news/${article.slug}/photos`
   const extraPhotoCount = Math.max(0, totalWithCover - 1)
   const articlePath = `/news/${article.slug}`
-  const description = excerptBody(article.body, 160)
+  const description = excerptBody(body, 160)
   const datePublished = toSchemaIso(article.publishedAt ?? article.createdAt)
   const dateModified = toSchemaIso(article.updatedAt)
 
   const articleSchema = getArticleSchema({
-    title: article.title,
+    title,
     description,
     path: articlePath,
     imageUrl: article.coverImageUrl,
@@ -86,9 +97,9 @@ export default async function NewsArticlePage({ params }: Props) {
   })
 
   const breadcrumbSchema = getBreadcrumbSchema([
-    { name: 'Home', url: '/' },
-    { name: 'News', url: '/news' },
-    { name: article.title, url: articlePath },
+    { name: tBreadcrumb('home'), url: '/' },
+    { name: tBreadcrumb('news'), url: '/news' },
+    { name: title, url: articlePath },
   ])
 
   return (
@@ -126,7 +137,7 @@ export default async function NewsArticlePage({ params }: Props) {
             </time>
           ) : null}
           <h1 className="mt-3 max-w-4xl text-3xl font-extrabold tracking-tight text-gray-900 sm:mt-4 sm:text-4xl md:text-[2.75rem] md:leading-[1.15]">
-            {article.title}
+            {title}
           </h1>
         </header>
 
@@ -137,7 +148,9 @@ export default async function NewsArticlePage({ params }: Props) {
               extraUrls={extraImages}
               photoCountLabel={
                 extraPhotoCount > 0
-                  ? `+${extraPhotoCount} photo${extraPhotoCount === 1 ? '' : 's'}`
+                  ? extraPhotoCount === 1
+                    ? t('photoCountOne', { count: extraPhotoCount })
+                    : t('photoCountOther', { count: extraPhotoCount })
                   : undefined
               }
             />
@@ -152,7 +165,7 @@ export default async function NewsArticlePage({ params }: Props) {
           <div className="min-w-0">
             <div className="mx-auto max-w-[48rem] lg:mx-0">
               <p className="whitespace-pre-wrap text-base leading-[1.8] text-gray-800 sm:text-lg sm:leading-[1.85]">
-                {article.body}
+                {body}
               </p>
             </div>
 
@@ -170,16 +183,16 @@ export default async function NewsArticlePage({ params }: Props) {
               {displayLabel ? (
                 <div>
                   <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-400">
-                    Published
+                    {t('published')}
                   </p>
                   <p className="mt-1.5 text-sm font-medium text-gray-800">{displayLabel}</p>
                 </div>
               ) : null}
               <div>
                 <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-400">
-                  Robonauts
+                  {t('brand')}
                 </p>
-                <p className="mt-1.5 text-sm font-medium text-gray-800">News &amp; Community</p>
+                <p className="mt-1.5 text-sm font-medium text-gray-800">{t('tagline')}</p>
               </div>
             </div>
           </aside>

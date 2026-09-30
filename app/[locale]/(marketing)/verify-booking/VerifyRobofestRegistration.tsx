@@ -12,7 +12,8 @@ import {
 } from 'lucide-react'
 import { format } from 'date-fns'
 import Image from 'next/image'
-import Link from 'next/link'
+import { getTranslations } from 'next-intl/server'
+import { Link } from '@/i18n/navigation'
 import type { RobofestContent, RobofestRegistration } from '@/lib/robofest-content'
 import {
   resolveRobofestRoundDateLabel,
@@ -54,25 +55,32 @@ function resolveCertificateAwardee(
       name:
         registration.name?.trim() ||
         registration.email?.trim() ||
-        'Participant',
+        '',
       awardCategoryId: ROBOFEST_DEFAULT_AWARD_CATEGORY_ID,
     }
   }
   return null
 }
 
-export default function VerifyRobofestRegistration({
+export default async function VerifyRobofestRegistration({
   registration,
   content,
   qrCodeDataURL,
   certificateMemberIndex,
 }: Props) {
+  const t = await getTranslations('verify.robofest')
+  const tBooking = await getTranslations('verify.booking')
+  const tForm = await getTranslations('robofest.form')
   const teamMembers = registration.teamMembers || []
   const registeredAt = registration.createdAt
     ? new Date(registration.createdAt)
     : null
   const ageLabel = registration.ageCategory
-    ? formatAgeCategoryLabel(registration.ageCategory)
+    ? registration.ageCategory === 'explorer'
+      ? tForm('ageExplorer')
+      : registration.ageCategory === 'innovators'
+        ? tForm('ageInnovators')
+        : formatAgeCategoryLabel(registration.ageCategory)
     : null
   const eventDate = resolveRobofestRoundDateLabel(
     content,
@@ -113,20 +121,20 @@ export default function VerifyRobofestRegistration({
                 <CheckCircle className="w-10 h-10 text-white" />
               </div>
               <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-cyan-100 mb-2">
-                RoboFest Bangladesh 2026
+                {t('certificateEvent')}
               </p>
               <h1 className="text-2xl sm:text-3xl font-extrabold text-white mb-2 tracking-tight">
-                Certificate Verified
+                {t('certificateVerifiedTitle')}
               </h1>
               <p className="text-sm text-cyan-50 font-medium">
-                This award certificate is authentic
+                {t('certificateAuthentic')}
               </p>
             </div>
 
             <div className="p-6 sm:p-8 space-y-5">
               <div className="rounded-xl border-2 border-cyan-200 bg-cyan-50/60 p-4">
                 <p className="text-xs font-semibold uppercase tracking-wider text-cyan-700 mb-1">
-                  Registration ID
+                  {tBooking('idLabel')}
                 </p>
                 <div className="flex items-center gap-2 flex-wrap">
                   <p className="text-xl font-bold font-mono text-slate-900">
@@ -135,7 +143,7 @@ export default function VerifyRobofestRegistration({
                   {registration.registrationId ? (
                     <CopyButton
                       text={registration.registrationId}
-                      label="Registration ID"
+                      label={tBooking('idLabel')}
                     />
                   ) : null}
                 </div>
@@ -143,14 +151,14 @@ export default function VerifyRobofestRegistration({
 
               <div className="rounded-xl border border-slate-200 bg-slate-50/80 p-4">
                 <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">
-                  Name
+                  {t('name')}
                 </p>
-                <p className="text-xl font-bold text-slate-900">{awardee.name}</p>
+                <p className="text-xl font-bold text-slate-900">{awardee.name || t('participantFallback')}</p>
               </div>
 
               <div className="rounded-xl border border-slate-200 bg-slate-50/80 p-4">
                 <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2">
-                  Position
+                  {t('position')}
                 </p>
                 <Badge className="inline-flex items-center gap-1.5 bg-cyan-700 hover:bg-cyan-700 text-white border-0 text-sm px-3 py-1.5">
                   <Award className="w-4 h-4" />
@@ -164,7 +172,7 @@ export default function VerifyRobofestRegistration({
                 className="w-full border-slate-200"
               >
                 <Link href="/robofest" prefetch={false}>
-                  Back to Robofest
+                  {t('back')}
                 </Link>
               </Button>
             </div>
@@ -182,11 +190,10 @@ export default function VerifyRobofestRegistration({
             <ShieldCheck className="w-8 h-8 text-amber-700" />
           </div>
           <h1 className="text-xl font-bold text-slate-900 mb-2">
-            Certificate member not found
+            {t('memberNotFoundTitle')}
           </h1>
           <p className="text-sm text-slate-600 mb-6">
-            This registration is valid, but the certificate member index does
-            not match a team member.
+            {t('memberNotFoundBody')}
           </p>
           <p className="text-xs font-mono text-slate-500 mb-6">
             {registration.registrationId}
@@ -196,7 +203,7 @@ export default function VerifyRobofestRegistration({
               href={`/verify-booking?registrationId=${encodeURIComponent(registration.registrationId || '')}`}
               prefetch={false}
             >
-              View full registration
+              {t('viewFull')}
             </Link>
           </Button>
         </div>
@@ -219,17 +226,17 @@ export default function VerifyRobofestRegistration({
                 <CheckCircle className="w-14 h-14 sm:w-16 sm:h-16 text-white" />
               </div>
               <p className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.2em] text-cyan-100 mb-2">
-                RoboFest Bangladesh 2026
+                {t('certificateEvent')}
               </p>
               <h1 className="text-3xl sm:text-4xl font-extrabold text-white mb-2 tracking-tight">
-                Team Registration Verified
+                {t('teamVerifiedTitle')}
               </h1>
               <p className="text-base sm:text-lg text-cyan-50 font-medium">
-                This Robofest team registration is valid and confirmed
+                {t('teamVerifiedSubtitle')}
               </p>
               <Badge className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-white/20 hover:bg-white/30 text-white border-0 backdrop-blur-sm rounded-full text-sm font-semibold">
                 <ShieldCheck className="w-5 h-5" />
-                Valid Robofest Registration
+                {t('validBadge')}
               </Badge>
             </div>
           </div>
@@ -243,7 +250,7 @@ export default function VerifyRobofestRegistration({
                       <ShieldCheck className="w-5 h-5 text-cyan-700" />
                     </div>
                     <p className="text-sm font-semibold text-cyan-700 uppercase tracking-wider">
-                      Registration ID
+                      {tBooking('idLabel')}
                     </p>
                   </div>
                   <div className="flex items-center gap-2 flex-wrap">
@@ -253,12 +260,12 @@ export default function VerifyRobofestRegistration({
                     {registration.registrationId ? (
                       <CopyButton
                         text={registration.registrationId}
-                        label="Registration ID"
+                        label={tBooking("idLabel")}
                       />
                     ) : null}
                   </div>
                   <p className="text-xs text-cyan-800 mt-2 font-medium">
-                    Save this number for check-in and records
+                    {t('saveId')}
                   </p>
                 </div>
 
@@ -267,7 +274,7 @@ export default function VerifyRobofestRegistration({
                     <div className="bg-white p-4 rounded-xl shadow-lg border-2 border-cyan-200 mb-3">
                       <Image
                         src={qrCodeDataURL}
-                        alt="QR Code for Robofest registration verification"
+                        alt={tBooking("qrAlt")}
                         width={144}
                         height={144}
                         className="w-32 h-32 sm:w-36 sm:h-36"
@@ -276,7 +283,7 @@ export default function VerifyRobofestRegistration({
                     </div>
                     <div className="flex items-center gap-2 text-xs text-slate-600">
                       <QrCode className="w-4 h-4" />
-                      <span className="font-medium">Scan to verify</span>
+                      <span className="font-medium">{tBooking('scanVerify')}</span>
                     </div>
                   </div>
                 ) : null}
@@ -290,21 +297,21 @@ export default function VerifyRobofestRegistration({
                     <Trophy className="w-6 h-6 text-cyan-700" />
                   </div>
                   <h2 className="text-xl sm:text-2xl font-bold text-slate-900">
-                    Competition
+                    {t('competitionSection')}
                   </h2>
                 </div>
                 <div className="space-y-4">
                   <div className="bg-white rounded-xl p-4 border border-slate-200">
                     <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">
-                      Event
+                      {t('eventLabel')}
                     </p>
                     <p className="text-base sm:text-lg font-bold text-slate-900">
-                      {content.headline || 'RoboFest Bangladesh 2026'}
+                      {content.headline || t('eventFallback')}
                     </p>
                   </div>
                   <div className="bg-white rounded-xl p-4 border border-slate-200">
                     <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">
-                      Competition
+                      {t('competitionLabel')}
                     </p>
                     <p className="text-base font-bold text-slate-900">
                       {registration.category}
@@ -312,7 +319,7 @@ export default function VerifyRobofestRegistration({
                   </div>
                   <div className="bg-white rounded-xl p-4 border border-slate-200">
                     <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">
-                      Division
+                      {t('divisionLabel')}
                     </p>
                     <p className="text-base font-semibold text-slate-900">
                       {registration.roundCity}
@@ -321,7 +328,7 @@ export default function VerifyRobofestRegistration({
                   {ageLabel ? (
                     <div className="bg-white rounded-xl p-4 border border-slate-200">
                       <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">
-                        Category
+                        {t('categoryLabel')}
                       </p>
                       <p className="text-base font-semibold text-slate-900">
                         {ageLabel}
@@ -332,7 +339,7 @@ export default function VerifyRobofestRegistration({
                     <div className="flex items-center gap-2 mb-1.5">
                       <Calendar className="w-4 h-4 text-slate-500" />
                       <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
-                        Event date
+                        {t('eventDateLabel')}
                       </p>
                     </div>
                     <p className="text-base font-semibold text-slate-900">
@@ -343,7 +350,7 @@ export default function VerifyRobofestRegistration({
                     <div className="flex items-center gap-2 mb-1.5">
                       <MapPin className="w-4 h-4 text-slate-500" />
                       <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
-                        Venue
+                        {tBooking('venue')}
                       </p>
                     </div>
                     <p className="text-base font-semibold text-slate-900">
@@ -359,13 +366,13 @@ export default function VerifyRobofestRegistration({
                     <Users className="w-6 h-6 text-cyan-700" />
                   </div>
                   <h2 className="text-xl sm:text-2xl font-bold text-slate-900">
-                    Team
+                    {t('teamSection')}
                   </h2>
                 </div>
                 <div className="space-y-4">
                   <div className="bg-white rounded-xl p-4 border border-slate-200">
                     <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">
-                      Team Number
+                      {t('teamNumber')}
                     </p>
                     <p className="text-base sm:text-lg font-bold font-mono text-cyan-800">
                       {teamNumber}
@@ -375,7 +382,7 @@ export default function VerifyRobofestRegistration({
                     <div className="flex items-center gap-2 mb-1.5">
                       <Mail className="w-4 h-4 text-slate-500" />
                       <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
-                        Team Lead Email
+                        {t('teamLeadEmail')}
                       </p>
                     </div>
                     <p className="text-base font-semibold text-slate-900 break-all">
@@ -386,7 +393,7 @@ export default function VerifyRobofestRegistration({
                     <div className="flex items-center gap-2 mb-1.5">
                       <Phone className="w-4 h-4 text-slate-500" />
                       <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
-                        Team lead Contact
+                        {t('teamLeadContact')}
                       </p>
                     </div>
                     <p className="text-base font-semibold text-slate-900">
@@ -396,10 +403,10 @@ export default function VerifyRobofestRegistration({
                   {registration.paymentStatus === 'paid' ? (
                     <div className="bg-emerald-50 rounded-xl p-4 border border-emerald-200">
                       <p className="text-xs font-semibold text-emerald-700 uppercase tracking-wider mb-1.5">
-                        Payment
+                        {t('payment')}
                       </p>
                       <p className="text-sm font-bold text-emerald-900">
-                        Paid
+                        {t('paid')}
                         {registration.amountPaid != null
                           ? ` · BDT ${registration.amountPaid}`
                           : ''}
@@ -410,7 +417,7 @@ export default function VerifyRobofestRegistration({
                   {registeredAt && !Number.isNaN(registeredAt.getTime()) ? (
                     <div className="bg-cyan-50 rounded-xl p-4 border border-cyan-200">
                       <p className="text-xs font-semibold text-cyan-800 uppercase tracking-wider mb-1.5">
-                        Registered on
+                        {t('registeredOn')}
                       </p>
                       <p className="text-sm font-bold text-cyan-950">
                         {format(registeredAt, 'MMMM d, yyyy')}
@@ -428,13 +435,12 @@ export default function VerifyRobofestRegistration({
                 </div>
                 <div>
                   <h3 className="text-lg sm:text-xl font-bold text-slate-900">
-                    Team Members
+                    {t('membersTitle')}
                   </h3>
                   <p className="text-sm text-slate-500">
-                    {registration.teamSize || teamMembers.length || 0} member
-                    {(registration.teamSize || teamMembers.length) === 1
-                      ? ''
-                      : 's'}
+                    {t('membersCount', {
+                      count: registration.teamSize || teamMembers.length || 0,
+                    })}
                   </p>
                 </div>
               </div>
@@ -453,7 +459,7 @@ export default function VerifyRobofestRegistration({
                         . {member.name}
                         {index === 0 && (
                           <span className="ml-1 text-xs font-normal text-slate-600">
-                            (Team Leader)
+                            {t('teamLeader')}
                           </span>
                         )}
                       </p>
@@ -471,14 +477,14 @@ export default function VerifyRobofestRegistration({
                 </ul>
               ) : (
                 <div className="bg-white rounded-xl p-4 border border-slate-200 text-sm text-slate-500">
-                  No detailed member roster on file for this registration.
+                  {t('noRoster')}
                 </div>
               )}
 
               {registration.campusAmbassadorName ? (
                 <div className="mt-4 bg-white rounded-xl p-4 border border-slate-200">
                   <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">
-                    Campus ambassador
+                    {t('campusAmbassador')}
                   </p>
                   <p className="text-sm font-semibold text-slate-900">
                     {registration.campusAmbassadorName}
@@ -492,7 +498,7 @@ export default function VerifyRobofestRegistration({
               {registration.notes ? (
                 <div className="mt-4 bg-white rounded-xl p-4 border border-slate-200">
                   <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">
-                    Notes
+                    {t('notes')}
                   </p>
                   <p className="text-sm text-slate-700 whitespace-pre-wrap">
                     {registration.notes}
@@ -506,7 +512,7 @@ export default function VerifyRobofestRegistration({
                 <div className="flex items-center gap-2 text-slate-600">
                   <QrCode className="w-5 h-5 text-cyan-700" />
                   <p className="text-sm font-medium">
-                    Scan the QR on your Robofest confirmation PDF to reopen this page
+                    {t('qrNote')}
                   </p>
                 </div>
                 <div className="flex gap-3 flex-wrap justify-center">
@@ -516,7 +522,7 @@ export default function VerifyRobofestRegistration({
                     className="text-cyan-700 hover:text-cyan-800 hover:bg-cyan-50"
                   >
                     <Link href="/robofest" prefetch={false}>
-                      View Robofest
+                      {t('viewRobofest')}
                     </Link>
                   </Button>
                   <Button
@@ -525,7 +531,7 @@ export default function VerifyRobofestRegistration({
                     className="text-slate-600 hover:text-slate-700 hover:bg-slate-100"
                   >
                     <Link href="/" prefetch={false}>
-                      Back to Home
+                      {tBooking('backHome')}
                     </Link>
                   </Button>
                 </div>
@@ -540,7 +546,7 @@ export default function VerifyRobofestRegistration({
             className="inline-flex items-center gap-2 px-4 py-2 bg-white/80 backdrop-blur-sm shadow-md text-xs font-semibold text-slate-700"
           >
             <ShieldCheck className="w-4 h-4 text-cyan-700" />
-            Securely verified by {SITE_CONFIG.name}
+            {tBooking('trustBadge', { name: SITE_CONFIG.name })}
           </Badge>
         </div>
       </div>

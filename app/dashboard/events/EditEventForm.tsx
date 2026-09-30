@@ -30,22 +30,32 @@ function parseEventDates(date: string | string[] | undefined): string[] {
 function editEventFormDefaults(event: Event): DashboardEventFormValues {
   return {
     title: event.title || '',
+    titleBn: event.titleBn || '',
     dates: parseEventDates(event.date),
     description: event.description || '',
+    descriptionBn: event.descriptionBn || '',
     time: event.time || '9:00 AM - 5:00 PM',
+    timeBn: event.timeBn || '',
     location: event.location || '',
+    locationBn: event.locationBn || '',
     venue: event.venue || '',
+    venueBn: event.venueBn || '',
     fullDescription: event.fullDescription || '',
+    fullDescriptionBn: event.fullDescriptionBn || '',
     eligibility: event.eligibility || '',
+    eligibilityBn: event.eligibilityBn || '',
     agenda: event.agenda || '',
+    agendaBn: event.agendaBn || '',
     image: event.image || '',
     tags: event.tags || [],
+    tagsBn: event.tagsBn || [],
     isPaid: event.isPaid ?? false,
     amount: event.amount ?? ('' as '' | number),
     paymentBkashNumber: event.paymentBkashNumber ?? '',
     categories: Array.isArray(event.categories)
       ? event.categories.map((category) => ({
           name: category.name || '',
+          nameBn: category.nameBn || '',
           amount: category.amount ?? ('' as '' | number),
         }))
       : [],
@@ -53,7 +63,9 @@ function editEventFormDefaults(event: Event): DashboardEventFormValues {
       (typeof event.registrationClosingDate === 'string' ? event.registrationClosingDate : '') ?? '',
     registrationDisabled: event.registrationDisabled ?? false,
     contactPersonName: event.contactPersonName ?? '',
+    contactPersonNameBn: event.contactPersonNameBn ?? '',
     contactPersonDesignation: event.contactPersonDesignation ?? '',
+    contactPersonDesignationBn: event.contactPersonDesignationBn ?? '',
     contactPersonMobileOrEmail: event.contactPersonMobileOrEmail ?? '',
     customFormFields: Array.isArray(event.customFormFields) ? (event.customFormFields as EventCustomFormField[]) : [],
     defaultRegistrationFields: normalizeDefaultRegistrationFields(event.defaultRegistrationFields, {
@@ -179,6 +191,7 @@ export default function EditEventForm({ event, onClose }: EditEventFormProps) {
     const validCategories = values.categories
       .map((category) => ({
         name: category.name.trim(),
+        nameBn: (category.nameBn ?? '').trim(),
         amount:
           category.amount === '' || category.amount == null || Number.isNaN(Number(category.amount))
             ? undefined
@@ -201,12 +214,15 @@ export default function EditEventForm({ event, onClose }: EditEventFormProps) {
         paymentBkashNumber: '',
         categories: validCategories.map((category) => ({
           name: category.name,
+          nameBn: category.nameBn || undefined,
           amount: values.isPaid ? category.amount : undefined,
         })),
         registrationClosingDate: values.registrationClosingDate?.trim() ?? '',
         registrationDisabled: values.registrationDisabled,
         contactPersonName: values.contactPersonName.trim(),
+        contactPersonNameBn: values.contactPersonNameBn.trim(),
         contactPersonDesignation: values.contactPersonDesignation.trim(),
+        contactPersonDesignationBn: values.contactPersonDesignationBn.trim(),
         contactPersonMobileOrEmail: values.contactPersonMobileOrEmail.trim(),
         customFormFields: values.customFormFields,
         defaultRegistrationFields: values.defaultRegistrationFields as Event['defaultRegistrationFields'],
@@ -460,7 +476,19 @@ export default function EditEventForm({ event, onClose }: EditEventFormProps) {
                       }}
                       placeholder="Category name (e.g. Junior, Senior)"
                       disabled={loading}
-                      className="md:col-span-3 w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400 transition-all"
+                      className="md:col-span-2 w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400 transition-all"
+                    />
+                    <input
+                      type="text"
+                      value={category.nameBn ?? ''}
+                      onChange={(e) => {
+                        const categories = [...form.getValues('categories')]
+                        categories[index] = { ...categories[index], nameBn: e.target.value }
+                        form.setValue('categories', categories)
+                      }}
+                      placeholder="Bengali name (optional)"
+                      disabled={loading}
+                      className="md:col-span-1 w-full px-4 py-2.5 border-2 border-amber-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-300 focus:border-amber-300 transition-all"
                     />
                     <button
                       type="button"
@@ -480,7 +508,10 @@ export default function EditEventForm({ event, onClose }: EditEventFormProps) {
                 <button
                   type="button"
                   onClick={() =>
-                    form.setValue('categories', [...form.getValues('categories'), { name: '', amount: '' }])
+                    form.setValue('categories', [
+                      ...form.getValues('categories'),
+                      { name: '', nameBn: '', amount: '' },
+                    ])
                   }
                   disabled={loading}
                   className="px-4 py-2.5 border-2 border-cyan-200 text-cyan-800 rounded-xl hover:bg-cyan-50 transition-all text-sm font-medium"
@@ -799,6 +830,117 @@ export default function EditEventForm({ event, onClose }: EditEventFormProps) {
                 disabled={loading}
               />
             </div>
+
+            <details className="rounded-xl border border-amber-200/80 bg-amber-50/40 p-4">
+              <summary className="cursor-pointer text-sm font-semibold text-amber-900">
+                Bengali (optional)
+              </summary>
+              <p className="mt-1 text-xs text-amber-800/80">
+                Shown on the public site when the visitor selects Bangla. Leave blank to fall back to English.
+              </p>
+              <div className="mt-4 space-y-3">
+                <input
+                  type="text"
+                  value={formData.titleBn}
+                  onChange={(e) => form.setValue('titleBn', e.target.value)}
+                  placeholder="Event name (Bengali)"
+                  disabled={loading}
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-300 focus:border-amber-300 transition-all"
+                />
+                <textarea
+                  rows={2}
+                  value={formData.descriptionBn}
+                  onChange={(e) => form.setValue('descriptionBn', e.target.value)}
+                  placeholder="Short description (Bengali)"
+                  disabled={loading}
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-300 focus:border-amber-300 transition-all resize-none"
+                />
+                <textarea
+                  rows={3}
+                  value={formData.fullDescriptionBn}
+                  onChange={(e) => form.setValue('fullDescriptionBn', e.target.value)}
+                  placeholder="Full description (Bengali)"
+                  disabled={loading}
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-300 focus:border-amber-300 transition-all resize-none"
+                />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <input
+                    type="text"
+                    value={formData.timeBn}
+                    onChange={(e) => form.setValue('timeBn', e.target.value)}
+                    placeholder="Time (Bengali)"
+                    disabled={loading}
+                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-300 focus:border-amber-300 transition-all"
+                  />
+                  <input
+                    type="text"
+                    value={formData.eligibilityBn}
+                    onChange={(e) => form.setValue('eligibilityBn', e.target.value)}
+                    placeholder="Eligibility (Bengali)"
+                    disabled={loading}
+                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-300 focus:border-amber-300 transition-all"
+                  />
+                  <input
+                    type="text"
+                    value={formData.locationBn}
+                    onChange={(e) => form.setValue('locationBn', e.target.value)}
+                    placeholder="Location (Bengali)"
+                    disabled={loading}
+                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-300 focus:border-amber-300 transition-all"
+                  />
+                  <input
+                    type="text"
+                    value={formData.venueBn}
+                    onChange={(e) => form.setValue('venueBn', e.target.value)}
+                    placeholder="Venue (Bengali)"
+                    disabled={loading}
+                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-300 focus:border-amber-300 transition-all"
+                  />
+                </div>
+                <textarea
+                  rows={3}
+                  value={formData.agendaBn}
+                  onChange={(e) => form.setValue('agendaBn', e.target.value)}
+                  placeholder="Agenda (Bengali)"
+                  disabled={loading}
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-300 focus:border-amber-300 transition-all resize-none"
+                />
+                <input
+                  type="text"
+                  value={(formData.tagsBn ?? []).join(', ')}
+                  onChange={(e) =>
+                    form.setValue(
+                      'tagsBn',
+                      e.target.value
+                        .split(',')
+                        .map((tag) => tag.trim())
+                        .filter(Boolean),
+                    )
+                  }
+                  placeholder="Tags (Bengali), comma-separated"
+                  disabled={loading}
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-300 focus:border-amber-300 transition-all"
+                />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <input
+                    type="text"
+                    value={formData.contactPersonNameBn}
+                    onChange={(e) => form.setValue('contactPersonNameBn', e.target.value)}
+                    placeholder="Contact person name (Bengali)"
+                    disabled={loading}
+                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-300 focus:border-amber-300 transition-all"
+                  />
+                  <input
+                    type="text"
+                    value={formData.contactPersonDesignationBn}
+                    onChange={(e) => form.setValue('contactPersonDesignationBn', e.target.value)}
+                    placeholder="Designation (Bengali)"
+                    disabled={loading}
+                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-300 focus:border-amber-300 transition-all"
+                  />
+                </div>
+              </div>
+            </details>
 
             <div className="space-y-2">
               <div className="space-y-3 border-2 border-gray-200 rounded-xl p-4">

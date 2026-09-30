@@ -1,8 +1,10 @@
-import Link from 'next/link'
 import { Metadata } from 'next'
+import { getTranslations, setRequestLocale } from 'next-intl/server'
+import { Link } from '@/i18n/navigation'
 import { notFound } from 'next/navigation'
 import { ArrowLeft, Images } from 'lucide-react'
 import { SITE_CONFIG } from '@/lib/site-config'
+import { pickLocalized } from '@/lib/i18n-localized'
 import { collectArticleImageUrls } from '@/lib/news-ui'
 import { buildPageMetadata } from '@/lib/seo-metadata'
 import { getNewsArticleBySlug } from '../../actions'
@@ -10,39 +12,45 @@ import NewsPhotosGrid from '@/components/news/NewsPhotosGrid'
 
 export const revalidate = 1800
 
-type Props = { params: Promise<{ slug: string }> }
+type Props = { params: Promise<{ locale: string; slug: string }> }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { slug } = await params
+  const { slug, locale } = await params
+  setRequestLocale(locale)
   const article = await getNewsArticleBySlug(slug)
   if (!article) {
     return { title: 'Photos' }
   }
 
+  const title = pickLocalized(locale, article.title, article.titleBn)
   const path = `/news/${article.slug}/photos`
   const urls = collectArticleImageUrls(article)
 
   return buildPageMetadata({
-    title: `Photos — ${article.title} | ${SITE_CONFIG.name}`,
-    description: `Images from "${article.title}" at Robonauts.`,
+    title: `Photos — ${title} | ${SITE_CONFIG.name}`,
+    description: `Images from "${title}" at Robonauts.`,
     path,
     absoluteTitle: true,
+    locale,
     ogImage: urls[0]
-      ? { url: urls[0], alt: article.title }
+      ? { url: urls[0], alt: title }
       : {
           url: '/roboclass.jpg',
           width: 1200,
           height: 630,
-          alt: article.title,
+          alt: title,
         },
   })
 }
 
 export default async function NewsArticlePhotosPage({ params }: Props) {
-  const { slug } = await params
+  const { slug, locale } = await params
+  setRequestLocale(locale)
+  const t = await getTranslations('news.article')
   const article = await getNewsArticleBySlug(slug)
   if (!article) notFound()
 
+  const title = pickLocalized(locale, article.title, article.titleBn)
   const urls = collectArticleImageUrls(article)
   if (urls.length === 0) notFound()
 
@@ -63,21 +71,21 @@ export default async function NewsArticlePhotosPage({ params }: Props) {
             className="inline-flex items-center gap-2 rounded-md text-sm font-medium text-sky-200 transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-300 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950"
           >
             <ArrowLeft className="size-4" aria-hidden />
-            Back to article
+            {t('photosBack')}
           </Link>
 
           <div className="mt-6 sm:mt-8">
             <div className="mb-3 inline-flex items-center gap-2 text-sky-200">
               <Images className="size-4 sm:size-5" aria-hidden />
               <span className="text-[11px] font-semibold uppercase tracking-[0.22em] sm:text-xs">
-                Photos
+                {t('photosBadge')}
               </span>
             </div>
             <h1 className="max-w-4xl text-2xl font-extrabold tracking-tight sm:text-3xl md:text-4xl">
-              {article.title}
+              {title}
             </h1>
             <p className="mt-2 text-sm text-blue-100/90 sm:text-base">
-              {urls.length} photo{urls.length === 1 ? '' : 's'}
+              {t('photosCount', { count: urls.length })}
             </p>
           </div>
         </div>

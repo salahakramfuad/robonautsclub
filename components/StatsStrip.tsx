@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import { useTranslations } from 'next-intl'
 import { cn } from '@/lib/utils'
 
 type Stat = {
@@ -8,12 +9,6 @@ type Stat = {
   suffix: string
   label: string
 }
-
-const DEFAULT_STATS: Stat[] = [
-  { end: 50, suffix: '+', label: 'Participants' },
-  { end: 15, suffix: '+', label: 'Awards' },
-  { end: 100, suffix: '%', label: 'Satisfaction' },
-]
 
 function useInView<T extends HTMLElement>() {
   const ref = useRef<T | null>(null)
@@ -81,12 +76,21 @@ function AnimatedValue({
 }
 
 export default function StatsStrip({
-  stats = DEFAULT_STATS,
+  stats,
   tone = 'dark',
 }: {
   stats?: Stat[]
   tone?: 'dark' | 'light'
 }) {
+  const t = useTranslations('home.stats')
+  const resolvedStats =
+    stats ??
+    ([
+      { end: 50, suffix: '+', label: t('participants') },
+      { end: 15, suffix: '+', label: t('awards') },
+      { end: 100, suffix: '%', label: t('satisfaction') },
+    ] satisfies Stat[])
+
   const { ref, inView } = useInView<HTMLDivElement>()
   const dark = tone === 'dark'
 
@@ -95,7 +99,7 @@ export default function StatsStrip({
       ref={ref}
       className="grid grid-cols-2 gap-8 sm:grid-cols-3 sm:gap-10"
     >
-      {stats.map((stat, index) => (
+      {resolvedStats.map((stat, index) => (
         <div
           key={stat.label}
           className={cn('text-left', index === 2 && 'col-span-2 sm:col-span-1')}

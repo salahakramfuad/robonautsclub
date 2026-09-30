@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Script from "next/script";
 import { notFound } from "next/navigation";
-import { getPublicEnglishMediumSchools } from "@/app/(marketing)/events/public-data";
+import { getTranslations, setRequestLocale } from "next-intl/server";
+import { getPublicEnglishMediumSchools } from "@/app/[locale]/(marketing)/events/public-data";
 import { getPublicRobofestCampusAmbassadors } from "@/lib/robofest-campus-ambassadors-db";
 import {
   getActiveRobofestCategories,
@@ -27,7 +28,7 @@ import RobofestCategoryPage from "@/components/RobofestCategoryPage";
 export const revalidate = 1800;
 
 type PageProps = {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ locale: string; slug: string }>;
 };
 
 export function generateStaticParams() {
@@ -37,7 +38,8 @@ export function generateStaticParams() {
 export async function generateMetadata({
   params,
 }: PageProps): Promise<Metadata> {
-  const { slug } = await params;
+  const { slug, locale } = await params;
+  setRequestLocale(locale);
   const content = await getRobofestContent();
   const category = getRobofestCategoryFromContent(content, slug);
   if (!category) {
@@ -95,7 +97,9 @@ export async function generateMetadata({
 }
 
 export default async function RobofestCategoryRoute({ params }: PageProps) {
-  const { slug } = await params;
+  const { slug, locale } = await params;
+  setRequestLocale(locale);
+  const tBreadcrumb = await getTranslations("breadcrumbs");
   const content = await getRobofestContent();
   const category = getRobofestCategoryFromContent(content, slug);
   if (!category) {
@@ -117,8 +121,8 @@ export default async function RobofestCategoryRoute({ params }: PageProps) {
   const categoryUrl = getRobofestCategoryHref(category.slug);
 
   const breadcrumbSchema = getBreadcrumbSchema([
-    { name: "Home", url: "/" },
-    { name: "Robofest Bangladesh", url: "/robofest" },
+    { name: tBreadcrumb("home"), url: "/" },
+    { name: tBreadcrumb("robofest"), url: "/robofest" },
     { name: category.name, url: categoryUrl },
   ]);
 

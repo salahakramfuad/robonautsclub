@@ -1,4 +1,5 @@
 import { Metadata } from 'next'
+import { getTranslations, setRequestLocale } from 'next-intl/server'
 import { PAGE_SEO, buildPageMetadata } from '@/lib/seo-metadata'
 import { getPublishedNews } from './actions'
 import NewsHero from '@/components/news/NewsHero'
@@ -6,22 +7,31 @@ import FeaturedNewsCard from '@/components/news/FeaturedNewsCard'
 import NewsCard from '@/components/news/NewsCard'
 import NewsEmptyState from '@/components/news/NewsEmptyState'
 
-export const metadata: Metadata = buildPageMetadata({
-  title: PAGE_SEO.news.title,
-  description: PAGE_SEO.news.description,
-  path: '/news',
-  absoluteTitle: true,
-  ogImage: {
-    url: '/roboclass.jpg',
-    width: 1200,
-    height: 630,
-    alt: 'Robonauts News',
-  },
-})
+type Props = { params: Promise<{ locale: string }> }
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { locale } = await params
+  return buildPageMetadata({
+    title: PAGE_SEO.news.title,
+    description: PAGE_SEO.news.description,
+    path: '/news',
+    absoluteTitle: true,
+    locale,
+    ogImage: {
+      url: '/roboclass.jpg',
+      width: 1200,
+      height: 630,
+      alt: 'Robonauts News',
+    },
+  })
+}
 
 export const revalidate = 1800
 
-export default async function NewsPage() {
+export default async function NewsPage({ params }: Props) {
+  const { locale } = await params
+  setRequestLocale(locale)
+  const t = await getTranslations('news.list')
   const articles = await getPublishedNews()
   const [featured, ...rest] = articles
 
@@ -41,7 +51,7 @@ export default async function NewsPage() {
             <div className="space-y-12 sm:space-y-14 md:space-y-16">
               <section aria-labelledby="featured-story-heading">
                 <h2 id="featured-story-heading" className="sr-only">
-                  Featured story
+                  {t('featuredSr')}
                 </h2>
                 <FeaturedNewsCard article={featured} />
               </section>
@@ -50,13 +60,13 @@ export default async function NewsPage() {
                 <section aria-labelledby="latest-stories-heading">
                   <div className="mb-6 sm:mb-8">
                     <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-indigo-600 sm:text-xs">
-                      From the community
+                      {t('latestEyebrow')}
                     </p>
                     <h2
                       id="latest-stories-heading"
                       className="mt-2 text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl"
                     >
-                      Latest Stories
+                      {t('latestTitle')}
                     </h2>
                   </div>
                   <ul className="m-0 grid list-none grid-cols-1 gap-6 p-0 sm:grid-cols-2 sm:gap-7 lg:grid-cols-3 lg:gap-8">

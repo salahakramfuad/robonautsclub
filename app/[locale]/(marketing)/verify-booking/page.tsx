@@ -6,9 +6,10 @@ import type { Booking } from '@/types/booking'
 import type { Event } from '@/types/event'
 import type { RobofestContent, RobofestRegistration } from '@/lib/robofest-content'
 import { format } from 'date-fns'
-import Link from 'next/link'
 import Image from 'next/image'
 import type { Metadata } from 'next'
+import { getTranslations, setRequestLocale } from 'next-intl/server'
+import { Link } from '@/i18n/navigation'
 import { SITE_CONFIG, resolvePublicBaseUrl } from '@/lib/site-config'
 import { buildPageMetadata } from '@/lib/seo-metadata'
 import CopyButton from './CopyButton'
@@ -21,28 +22,38 @@ import { Button } from '@/components/ui/button'
 
 export const dynamic = 'force-dynamic'
 
-export const metadata: Metadata = buildPageMetadata({
-  title: 'Verify Registration',
-  description: `Verify your event registration with ${SITE_CONFIG.name}. Enter your registration ID to confirm your registration and view event details.`,
-  path: '/verify-booking',
-  noindex: true,
-  ogImage: {
-    url: '/robotics-event.jpg',
-    width: 1200,
-    height: 630,
-    alt: `${SITE_CONFIG.name} - Verify Registration`,
-  },
-  keywords: [
-    'verify registration',
-    'event verification',
-    'robotics event registration',
-    'registration confirmation',
-    `${SITE_CONFIG.name} verification`,
-  ],
-})
-
 interface VerificationPageProps {
+  params: Promise<{ locale: string }>
   searchParams: Promise<{ registrationId?: string; member?: string }>
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>
+}): Promise<Metadata> {
+  const { locale } = await params
+  setRequestLocale(locale)
+  const t = await getTranslations('verify.meta')
+  return buildPageMetadata({
+    title: t('title'),
+    description: t('description'),
+    path: '/verify-booking',
+    noindex: true,
+    ogImage: {
+      url: '/robotics-event.jpg',
+      width: 1200,
+      height: 630,
+      alt: `${SITE_CONFIG.name} - ${t('title')}`,
+    },
+    keywords: [
+      'verify registration',
+      'event verification',
+      'robotics event registration',
+      'registration confirmation',
+      `${SITE_CONFIG.name} verification`,
+    ],
+  })
 }
 
 type VerificationLookup =
@@ -119,10 +130,13 @@ async function getBookingByRegistrationId(
   }
 }
 
-export default async function VerifyBookingPage({ searchParams }: VerificationPageProps) {
-  const params = await searchParams
-  const registrationId = params.registrationId
-  const memberRaw = params.member?.trim()
+export default async function VerifyBookingPage({ params, searchParams }: VerificationPageProps) {
+  const { locale } = await params
+  setRequestLocale(locale)
+  const t = await getTranslations('verify.booking')
+  const search = await searchParams
+  const registrationId = search.registrationId
+  const memberRaw = search.member?.trim()
   const certificateMemberIndex =
     memberRaw != null && memberRaw !== '' && /^\d+$/.test(memberRaw)
       ? Number.parseInt(memberRaw, 10)
@@ -143,32 +157,32 @@ export default async function VerifyBookingPage({ searchParams }: VerificationPa
             <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-linear-to-br from-red-100 to-red-200 flex items-center justify-center mx-auto mb-6 shadow-lg">
               <XCircle className="w-12 h-12 sm:w-14 sm:h-14 text-red-500" />
             </div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3">Registration Number Required</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3">{t('missingIdTitle')}</h1>
             <p className="text-gray-600 mb-4 leading-relaxed">
-              Please provide a registration number to verify your registration.
+              {t('missingIdBody')}
             </p>
             <Alert className="mt-6 border-blue-200 bg-blue-50 text-left">
-              <AlertTitle className="text-blue-900">Where to find your registration number:</AlertTitle>
+              <AlertTitle className="text-blue-900">{t('whereToFindTitle')}</AlertTitle>
               <AlertDescription>
                 <ul className="text-sm text-blue-800 space-y-1 mt-2">
                   <li className="flex items-center gap-2">
                     <span className="text-blue-500">•</span>
-                    In your confirmation email
+                    {t('whereEmail')}
                   </li>
                   <li className="flex items-center gap-2">
                     <span className="text-blue-500">•</span>
-                    On your PDF confirmation document
+                    {t('wherePdf')}
                   </li>
                   <li className="flex items-center gap-2">
                     <span className="text-blue-500">•</span>
-                    Format: REG-YYYYMMDD-XXXXX
+                    {t('whereFormat')}
                   </li>
                 </ul>
               </AlertDescription>
             </Alert>
             <Button asChild className="mt-6 bg-indigo-600 hover:bg-indigo-700 text-white shadow-md hover:shadow-lg">
               <Link href="/events" prefetch={false}>
-                View All Events
+                {t('viewAllEvents')}
               </Link>
             </Button>
           </CardContent>
@@ -200,35 +214,35 @@ export default async function VerifyBookingPage({ searchParams }: VerificationPa
             <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-linear-to-br from-red-100 to-orange-100 flex items-center justify-center mx-auto mb-6 shadow-lg">
               <XCircle className="w-12 h-12 sm:w-14 sm:h-14 text-red-500" />
             </div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3">Registration Not Found</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3">{t('notFoundTitle')}</h1>
             <p className="text-gray-600 mb-4 leading-relaxed">
-              The registration number you provided could not be found in our database.
+              {t('notFoundBody')}
             </p>
 
             {/* Registration ID Display */}
             <Card className="bg-gray-50 border-2 border-gray-200 mb-6">
               <CardContent className="p-4">
-                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Registration Number</p>
+                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">{t('regNumberLabel')}</p>
                 <p className="text-lg font-mono font-bold text-gray-900 break-all">{registrationId}</p>
               </CardContent>
             </Card>
 
             {/* Help Section */}
             <Alert className="mb-6 border-amber-200 bg-amber-50 text-left">
-              <AlertTitle className="text-amber-900">Please check:</AlertTitle>
+              <AlertTitle className="text-amber-900">{t('checkTitle')}</AlertTitle>
               <AlertDescription>
                 <ul className="text-sm text-amber-800 space-y-1.5 mt-2">
                   <li className="flex items-start gap-2">
                     <span className="text-amber-600 mt-0.5">•</span>
-                    <span>The registration number is correct (format: <code className="bg-amber-100 px-1 rounded font-mono">REG-YYYYMMDD-XXXXX</code>)</span>
+                    <span>{t('checkFormat')}</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <span className="text-amber-600 mt-0.5">•</span>
-                    <span>There are no extra spaces or characters</span>
+                    <span>{t('checkSpaces')}</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <span className="text-amber-600 mt-0.5">•</span>
-                    <span>The registration was completed successfully</span>
+                    <span>{t('checkCompleted')}</span>
                   </li>
                 </ul>
               </AlertDescription>
@@ -237,7 +251,7 @@ export default async function VerifyBookingPage({ searchParams }: VerificationPa
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <Button asChild className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-md hover:shadow-lg">
                 <Link href="/events" prefetch={false}>
-                  View Events
+                  {t('viewEvents')}
                 </Link>
               </Button>
               <RetryButton />
@@ -292,14 +306,14 @@ export default async function VerifyBookingPage({ searchParams }: VerificationPa
                 <CheckCircle className="w-14 h-14 sm:w-16 sm:h-16 text-white" />
               </div>
               <h1 className="text-3xl sm:text-4xl font-extrabold text-white mb-2 sm:mb-3 tracking-tight">
-                Registration Verified
+                {t('verifiedTitle')}
               </h1>
               <p className="text-base sm:text-lg text-green-50 font-medium">
-                Your registration has been successfully verified and confirmed
+                {t('verifiedSubtitle')}
               </p>
               <Badge className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-white/20 hover:bg-white/30 text-white border-0 backdrop-blur-sm rounded-full text-sm font-semibold">
                 <ShieldCheck className="w-5 h-5" />
-                Valid Registration
+                {t('validBadge')}
               </Badge>
             </div>
           </div>
@@ -319,17 +333,17 @@ export default async function VerifyBookingPage({ searchParams }: VerificationPa
                         <ShieldCheck className="w-5 h-5 text-indigo-600" />
                       </div>
                       <p className="text-sm font-semibold text-indigo-600 uppercase tracking-wider">
-                        Registration ID
+                        {t('idLabel')}
                       </p>
                     </div>
                     <div className="flex items-center gap-2">
                       <p className="text-2xl sm:text-3xl font-bold text-indigo-900 font-mono tracking-tight">
                         {booking.registrationId}
                       </p>
-                      <CopyButton text={booking.registrationId} label="Registration ID" />
+                      <CopyButton text={booking.registrationId} label={t("idLabel")} />
                     </div>
                     <p className="text-xs text-indigo-700 mt-2 font-medium">
-                      Save this number for your records
+                      {t('saveId')}
                     </p>
                   </div>
                   
@@ -338,7 +352,7 @@ export default async function VerifyBookingPage({ searchParams }: VerificationPa
                       <div className="bg-white p-4 rounded-xl shadow-lg border-2 border-indigo-200 mb-3">
                         <Image
                           src={qrCodeDataURL}
-                          alt="QR Code for registration verification"
+                          alt={t("qrAlt")}
                           width={144}
                           height={144}
                           className="w-32 h-32 sm:w-36 sm:h-36"
@@ -347,7 +361,7 @@ export default async function VerifyBookingPage({ searchParams }: VerificationPa
                       </div>
                       <div className="flex items-center gap-2 text-xs text-gray-600">
                         <QrCode className="w-4 h-4" />
-                        <span className="font-medium">Scan to verify</span>
+                        <span className="font-medium">{t('scanVerify')}</span>
                       </div>
                     </div>
                   )}
@@ -357,23 +371,23 @@ export default async function VerifyBookingPage({ searchParams }: VerificationPa
 
             {/* Details Grid */}
             <div className="grid md:grid-cols-2 gap-6 sm:gap-8 mb-6 sm:mb-8">
-              {/* Event Details Card */}
+              {/* {t('eventDetails')} Card */}
               <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl p-6 sm:p-7 border border-gray-200 shadow-md hover:shadow-lg transition-shadow">
                 <div className="flex items-center gap-3 mb-5 pb-4 border-b border-gray-300">
                   <div className="w-12 h-12 rounded-xl bg-indigo-100 flex items-center justify-center">
                     <Calendar className="w-6 h-6 text-indigo-600" />
                   </div>
-                  <h2 className="text-xl sm:text-2xl font-bold text-gray-900">Event Details</h2>
+                  <h2 className="text-xl sm:text-2xl font-bold text-gray-900">{t('eventDetails')}</h2>
                 </div>
                 <div className="space-y-4">
                   <div className="bg-white rounded-xl p-4 border border-gray-200">
-                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Event Name</p>
+                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">{t('eventName')}</p>
                     <p className="text-base sm:text-lg font-bold text-gray-900 leading-relaxed">{event.title}</p>
                   </div>
                   <div className="bg-white rounded-xl p-4 border border-gray-200">
                     <div className="flex items-center gap-2 mb-1.5">
                       <Calendar className="w-4 h-4 text-gray-500" />
-                      <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Date</p>
+                      <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">{t('date')}</p>
                     </div>
                     <p className="text-base font-semibold text-gray-900">{formattedDate}</p>
                   </div>
@@ -381,7 +395,7 @@ export default async function VerifyBookingPage({ searchParams }: VerificationPa
                     <div className="bg-white rounded-xl p-4 border border-gray-200">
                       <div className="flex items-center gap-2 mb-1.5">
                         <Clock className="w-4 h-4 text-gray-500" />
-                        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Time</p>
+                        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">{t('time')}</p>
                       </div>
                       <p className="text-base font-semibold text-gray-900">{event.time}</p>
                     </div>
@@ -390,7 +404,7 @@ export default async function VerifyBookingPage({ searchParams }: VerificationPa
                     <div className="bg-white rounded-xl p-4 border border-gray-200">
                       <div className="flex items-center gap-2 mb-1.5">
                         <MapPin className="w-4 h-4 text-gray-500" />
-                        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Venue</p>
+                        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">{t('venue')}</p>
                       </div>
                       <p className="text-base font-semibold text-gray-900 leading-relaxed">
                         {event.venue || event.location}
@@ -399,7 +413,7 @@ export default async function VerifyBookingPage({ searchParams }: VerificationPa
                   )}
                   {event.eligibility && (
                     <div className="bg-blue-50 rounded-xl p-4 border border-blue-200">
-                      <p className="text-xs font-semibold text-blue-700 uppercase tracking-wider mb-1.5">Eligibility</p>
+                      <p className="text-xs font-semibold text-blue-700 uppercase tracking-wider mb-1.5">{t('eligibility')}</p>
                       <p className="text-sm font-medium text-blue-900">{event.eligibility}</p>
                     </div>
                   )}
@@ -412,20 +426,20 @@ export default async function VerifyBookingPage({ searchParams }: VerificationPa
                   <div className="w-12 h-12 rounded-xl bg-indigo-100 flex items-center justify-center">
                     <User className="w-6 h-6 text-indigo-600" />
                   </div>
-                  <h2 className="text-xl sm:text-2xl font-bold text-gray-900">Participant Details</h2>
+                  <h2 className="text-xl sm:text-2xl font-bold text-gray-900">{t('participantDetails')}</h2>
                 </div>
                 <div className="space-y-4">
                   <div className="bg-white rounded-xl p-4 border border-gray-200">
                     <div className="flex items-center gap-2 mb-1.5">
                       <User className="w-4 h-4 text-gray-500" />
-                      <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Name</p>
+                      <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">{t('name')}</p>
                     </div>
                     <p className="text-base sm:text-lg font-bold text-gray-900">{booking.name}</p>
                   </div>
                   <div className="bg-white rounded-xl p-4 border border-gray-200">
                     <div className="flex items-center gap-2 mb-1.5">
                       <School className="w-4 h-4 text-gray-500" />
-                      <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">School</p>
+                      <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">{t('school')}</p>
                     </div>
                     <p className="text-base font-semibold text-gray-900">{booking.school}</p>
                   </div>
@@ -433,9 +447,9 @@ export default async function VerifyBookingPage({ searchParams }: VerificationPa
                     <div className="flex items-center justify-between mb-1.5">
                       <div className="flex items-center gap-2">
                         <Mail className="w-4 h-4 text-gray-500" />
-                        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Email</p>
+                        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">{t('email')}</p>
                       </div>
-                      <CopyButton text={booking.email} label="Email" />
+                      <CopyButton text={booking.email} label={t("email")} />
                     </div>
                     <p className="text-base font-semibold text-gray-900 break-all">{booking.email}</p>
                   </div>
@@ -443,26 +457,26 @@ export default async function VerifyBookingPage({ searchParams }: VerificationPa
                     <div className="flex items-center justify-between mb-1.5">
                       <div className="flex items-center gap-2">
                         <Phone className="w-4 h-4 text-gray-500" />
-                        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Phone</p>
+                        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">{t('phone')}</p>
                       </div>
-                      <CopyButton text={booking.phone || ''} label="Phone" />
+                      <CopyButton text={booking.phone || ''} label={t("phone")} />
                     </div>
-                    <p className="text-base font-semibold text-gray-900">{booking.phone || 'N/A'}</p>
+                    <p className="text-base font-semibold text-gray-900">{booking.phone || t('na')}</p>
                   </div>
                   {booking.bkashNumber && (
                     <div className="bg-white rounded-xl p-4 border border-gray-200">
                       <div className="flex items-center justify-between mb-1.5">
                         <div className="flex items-center gap-2">
                           <Phone className="w-4 h-4 text-gray-500" />
-                          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">bKash Number</p>
+                          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">{t('bkash')}</p>
                         </div>
-                        <CopyButton text={booking.bkashNumber} label="bKash Number" />
+                        <CopyButton text={booking.bkashNumber} label={t('bkash')} />
                       </div>
                       <p className="text-base font-semibold text-gray-900">{booking.bkashNumber}</p>
                     </div>
                   )}
                   <div className="bg-indigo-50 rounded-xl p-4 border border-indigo-200">
-                    <p className="text-xs font-semibold text-indigo-700 uppercase tracking-wider mb-1.5">Registered On</p>
+                    <p className="text-xs font-semibold text-indigo-700 uppercase tracking-wider mb-1.5">{t('registeredOn')}</p>
                     <p className="text-sm font-bold text-indigo-900">
                       {format(bookingDate, 'MMMM d, yyyy')}
                     </p>
@@ -471,14 +485,14 @@ export default async function VerifyBookingPage({ searchParams }: VerificationPa
               </div>
             </div>
 
-            {/* Additional Information */}
+            {/* {t('additionalInfo')} */}
             {booking.information && (
               <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-6 sm:p-8 border-2 border-blue-200 shadow-md mb-6 sm:mb-8">
                 <div className="flex items-center gap-3 mb-4">
                   <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center">
                     <User className="w-5 h-5 text-blue-600" />
                   </div>
-                  <h3 className="text-lg sm:text-xl font-bold text-gray-900">Additional Information</h3>
+                  <h3 className="text-lg sm:text-xl font-bold text-gray-900">{t('additionalInfo')}</h3>
                 </div>
                 <div className="bg-white rounded-xl p-4 sm:p-5 border border-blue-200">
                   <p className="text-gray-700 whitespace-pre-wrap leading-relaxed">{booking.information}</p>
@@ -492,18 +506,18 @@ export default async function VerifyBookingPage({ searchParams }: VerificationPa
                 <div className="flex items-center gap-2 text-gray-600">
                   <QrCode className="w-5 h-5 text-indigo-600" />
                   <p className="text-sm font-medium">
-                    This page can be accessed by scanning the QR code on your confirmation PDF
+                    {t('footerQrNote')}
                   </p>
                 </div>
                 <div className="flex gap-3">
                   <Button asChild variant="ghost" className="text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50">
                     <Link href="/events" prefetch={false}>
-                      View Events
+                      {t('viewEvents')}
                     </Link>
                   </Button>
                   <Button asChild variant="ghost" className="text-gray-600 hover:text-gray-700 hover:bg-gray-100">
                     <Link href="/" prefetch={false}>
-                      Back to Home
+                      {t('backHome')}
                     </Link>
                   </Button>
                 </div>
@@ -516,7 +530,7 @@ export default async function VerifyBookingPage({ searchParams }: VerificationPa
         <div className="text-center">
           <Badge variant="outline" className="inline-flex items-center gap-2 px-4 py-2 bg-white/80 backdrop-blur-sm shadow-md text-xs font-semibold text-gray-700">
             <ShieldCheck className="w-4 h-4 text-green-600" />
-            Securely verified by {SITE_CONFIG.name}
+            {t('trustBadge', { name: SITE_CONFIG.name })}
           </Badge>
         </div>
       </div>

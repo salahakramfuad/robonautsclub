@@ -1,6 +1,8 @@
 import React from 'react'
 import { Metadata } from 'next'
+import { getTranslations, setRequestLocale } from 'next-intl/server'
 import { SITE_CONFIG } from '@/lib/site-config'
+import { pickLocalized } from '@/lib/i18n-localized'
 import { getEventsItemListSchema } from '@/lib/seo'
 import { PAGE_SEO, buildPageMetadata } from '@/lib/seo-metadata'
 import JsonLdScript from '@/components/JsonLdScript'
@@ -17,44 +19,56 @@ import { isEventUpcoming } from '@/lib/dateUtils'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 
-export const metadata: Metadata = buildPageMetadata({
-  title: PAGE_SEO.events.title,
-  description: PAGE_SEO.events.description,
-  path: '/events',
-  absoluteTitle: true,
-  ogImage: {
-    url: '/robotics-event.gif',
-    width: 1200,
-    height: 630,
-    alt: `${SITE_CONFIG.name} Events`,
-  },
-  keywords: [
-    'robotics events Bangladesh',
-    'STEM workshops',
-    'robotics competitions',
-    'Robofest',
-    'robotics bootcamp',
-    'STEM training events',
-    'robotics workshop Dhaka',
-  ],
-})
+type Props = { params: Promise<{ locale: string }> }
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { locale } = await params
+  return buildPageMetadata({
+    title: PAGE_SEO.events.title,
+    description: PAGE_SEO.events.description,
+    path: '/events',
+    absoluteTitle: true,
+    locale,
+    ogImage: {
+      url: '/robotics-event.gif',
+      width: 1200,
+      height: 630,
+      alt: `${SITE_CONFIG.name} Events`,
+    },
+    keywords: [
+      'robotics events Bangladesh',
+      'STEM workshops',
+      'robotics competitions',
+      'Robofest',
+      'robotics bootcamp',
+      'STEM training events',
+      'robotics workshop Dhaka',
+    ],
+  })
+}
 
 // Always read latest events from D1 (admin creates must show up immediately)
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
 
-// --- Main Page ---
-export default async function EventsPage() {
-  // Fetch initial events from Firestore for SSR
+export default async function EventsPage({ params }: Props) {
+  const { locale } = await params
+  setRequestLocale(locale)
+  const t = await getTranslations('events.list')
+
   const initialEvents = await getPublicEvents()
 
-  // Calculate initial stats for hero section
   const initialUpcoming = initialEvents.filter((event) => {
     return isEventUpcoming(event.date)
   })
 
   const itemListSchema = getEventsItemListSchema(
-    initialUpcoming.map((e) => ({ id: e.id, slug: e.slug, href: e.href, title: e.title })),
+    initialUpcoming.map((e) => ({
+      id: e.id,
+      slug: e.slug,
+      href: e.href,
+      title: pickLocalized(locale, e.title, e.titleBn),
+    })),
     20,
   )
 
@@ -69,19 +83,17 @@ export default async function EventsPage() {
             <div className="inline-flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-white/10 backdrop-blur-sm mb-4 sm:mb-6">
               <Sparkles className="w-3 h-3 sm:w-4 sm:h-4" />
               <span className="text-xs sm:text-sm font-medium">
-                {initialUpcoming.length} Upcoming Events
+                {t('heroBadge', { count: initialUpcoming.length })}
               </span>
             </div>
             <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold mb-4 sm:mb-6 tracking-tight px-2">
-              Events &amp; Competitions
+              {t('heroTitle')}
             </h1>
             <p className="text-base sm:text-lg md:text-xl text-blue-100 max-w-3xl mx-auto leading-relaxed px-2">
-              Discover robotics competitions, workshops, and club events—build
-              skills, compete, and connect with the Robonauts community.
+              {t('heroSubtitle')}
             </p>
           </div>
 
-          {/* Quick Stats */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 mt-8 sm:mt-12 max-w-4xl mx-auto">
             <Card className="bg-white/10 backdrop-blur-sm border border-white/20 text-white">
               <CardContent className="p-4 sm:p-6">
@@ -89,7 +101,7 @@ export default async function EventsPage() {
                   <Calendar className="w-5 h-5 sm:w-6 sm:h-6 text-blue-200" />
                   <span className="text-2xl sm:text-3xl font-bold">{initialUpcoming.length}</span>
                 </div>
-                <p className="text-blue-100 text-xs sm:text-sm">Upcoming Events</p>
+                <p className="text-blue-100 text-xs sm:text-sm">{t('statUpcoming')}</p>
               </CardContent>
             </Card>
             <Card className="bg-white/10 backdrop-blur-sm border border-white/20 text-white">
@@ -98,7 +110,7 @@ export default async function EventsPage() {
                   <Users className="w-5 h-5 sm:w-6 sm:h-6 text-blue-200" />
                   <span className="text-2xl sm:text-3xl font-bold">{initialEvents.length}</span>
                 </div>
-                <p className="text-blue-100 text-xs sm:text-sm">Total Events</p>
+                <p className="text-blue-100 text-xs sm:text-sm">{t('statTotal')}</p>
               </CardContent>
             </Card>
             <Card className="bg-white/10 backdrop-blur-sm border border-white/20 text-white">
@@ -107,28 +119,24 @@ export default async function EventsPage() {
                   <Sparkles className="w-5 h-5 sm:w-6 sm:h-6 text-blue-200" />
                   <span className="text-2xl sm:text-3xl font-bold">{initialEvents.length - initialUpcoming.length}</span>
                 </div>
-                <p className="text-blue-100 text-xs sm:text-sm">Past Events</p>
+                <p className="text-blue-100 text-xs sm:text-sm">{t('statPast')}</p>
               </CardContent>
             </Card>
           </div>
         </div>
       </ListingHeroSection>
 
-      {/* Main Content */}
       <main className="flex-1 py-12 sm:py-16 px-4 sm:px-6">
         <div className="max-w-7xl mx-auto">
-          {/* Server-rendered events list (no client realtime listeners) */}
           <RealtimeEventsList initialEvents={initialEvents} />
 
-          {/* Call to action */}
           <div className="mt-12 sm:mt-16 md:mt-20 bg-linear-to-br from-indigo-400 to-blue-500 rounded-2xl sm:rounded-3xl p-8 sm:p-12 text-center text-white">
             <Sparkles className="w-8 h-8 sm:w-12 sm:h-12 mx-auto mb-3 sm:mb-4 text-indigo-200" />
             <h3 className="text-2xl sm:text-3xl font-bold mb-3 sm:mb-4 px-2">
-              Want to Organize an Event?
+              {t('ctaTitle')}
             </h3>
             <p className="text-base sm:text-lg text-indigo-100 mb-4 sm:mb-6 max-w-2xl mx-auto px-2">
-              We&apos;re always open to collaborating with schools and
-              communities to bring robotics education to more students.
+              {t('ctaBody')}
             </p>
             <Button
               asChild
@@ -136,7 +144,7 @@ export default async function EventsPage() {
               className="bg-white text-indigo-500 hover:bg-gray-100 shadow-lg text-sm sm:text-base"
             >
               <a href={`mailto:${SITE_CONFIG.email}`}>
-                Contact Robonauts
+                {t('ctaButton')}
                 <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5" />
               </a>
             </Button>

@@ -1,8 +1,10 @@
-import Link from 'next/link'
 import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import Script from 'next/script'
 import { ArrowLeft, Calendar, Images, MapPin } from 'lucide-react'
+import { getTranslations, setRequestLocale } from 'next-intl/server'
+import { Link } from '@/i18n/navigation'
+import { pickLocalized } from '@/lib/i18n-localized'
 import { effectiveGalleryDisplayRaw } from '@/lib/publicContentDates'
 import { getBreadcrumbSchema } from '@/lib/seo'
 import { buildPageMetadata } from '@/lib/seo-metadata'
@@ -12,13 +14,13 @@ import { getPublicGalleryGroupById } from '../../actions'
 
 export const revalidate = 1800
 
-type Props = { params: Promise<{ id: string }> }
+type Props = { params: Promise<{ id: string; locale: string }> }
 
-function formatDisplayDate(iso: string | Date | null) {
+function formatDisplayDate(iso: string | Date | null, locale: string) {
   if (iso == null) return ''
   try {
     const d = iso instanceof Date ? iso : new Date(iso)
-    return new Intl.DateTimeFormat('en-GB', {
+    return new Intl.DateTimeFormat(locale === 'bn' ? 'bn-BD' : 'en-GB', {
       day: 'numeric',
       month: 'long',
       year: 'numeric',
@@ -29,44 +31,51 @@ function formatDisplayDate(iso: string | Date | null) {
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { id } = await params
+  const { id, locale } = await params
   const group = await getPublicGalleryGroupById(id)
   if (!group) {
     return { title: 'Album' }
   }
 
+  const title = pickLocalized(locale, group.title, group.titleBn)
   const path = `/gallery/album/${id}`
   const cover = group.images[0]?.url
 
   return buildPageMetadata({
-    title: `${group.title} | Robonauts Gallery`,
-    description: `Photos from ${group.title} at Robonauts events and activities.`,
+    title: `${title} | Robonauts Gallery`,
+    description: `Photos from ${title} at Robonauts events and activities.`,
     path,
     absoluteTitle: true,
+    locale,
     ogImage: cover
-      ? { url: cover, alt: group.title }
+      ? { url: cover, alt: title }
       : {
           url: '/robofest/robofest.jpg',
           width: 1200,
           height: 630,
-          alt: group.title,
+          alt: title,
         },
   })
 }
 
 export default async function GalleryAlbumPage({ params }: Props) {
-  const { id } = await params
+  const { id, locale } = await params
+  setRequestLocale(locale)
+  const t = await getTranslations('gallery.album')
+  const tList = await getTranslations('gallery.list')
   const group = await getPublicGalleryGroupById(id)
   if (!group) notFound()
 
+  const title = pickLocalized(locale, group.title, group.titleBn)
+  const location = pickLocalized(locale, group.location, group.locationBn)
   const urls = group.images.map((i) => i.url).filter(Boolean)
-  const dateLine = formatDisplayDate(effectiveGalleryDisplayRaw(group))
+  const dateLine = formatDisplayDate(effectiveGalleryDisplayRaw(group), locale)
   const albumPath = `/gallery/album/${id}`
 
   const breadcrumbSchema = getBreadcrumbSchema([
     { name: 'Home', url: '/' },
     { name: 'Gallery', url: '/gallery' },
-    { name: group.title, url: albumPath },
+    { name: title, url: albumPath },
   ])
 
   return (
@@ -83,18 +92,18 @@ export default async function GalleryAlbumPage({ params }: Props) {
           className="inline-flex items-center gap-2 rounded-md text-sm font-medium text-sky-200 transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-300 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950"
         >
           <ArrowLeft className="size-4" aria-hidden />
-          Back to gallery
+          {t('back')}
         </Link>
 
         <div className="mt-6 sm:mt-8">
           <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-cyan-300/25 bg-white/5 px-3 py-1.5 backdrop-blur-sm">
             <Images className="size-3.5 text-cyan-200" aria-hidden />
             <span className="text-[11px] font-semibold uppercase tracking-[0.22em] text-cyan-100 sm:text-xs">
-              Album
+              {t('badge')}
             </span>
           </div>
           <h1 className="max-w-4xl text-2xl font-extrabold tracking-tight sm:text-3xl md:text-4xl">
-            {group.title}
+            {title}
           </h1>
           <div className="mt-3 flex flex-col gap-2 text-sm text-sky-100/90 sm:mt-4 sm:text-base">
             {dateLine ? (
@@ -103,14 +112,14 @@ export default async function GalleryAlbumPage({ params }: Props) {
                 {dateLine}
               </p>
             ) : null}
-            {group.location ? (
+            {location ? (
               <p className="flex items-start gap-2">
                 <MapPin className="mt-0.5 size-4 shrink-0 text-cyan-200" aria-hidden />
-                <span className="whitespace-pre-wrap">{group.location}</span>
+                <span className="whitespace-pre-wrap">{location}</span>
               </p>
             ) : null}
             <p className="text-sky-200/80">
-              {urls.length} photo{urls.length === 1 ? '' : 's'}
+              {tList('photoCount', { count: urls.length })}
             </p>
           </div>
         </div>
@@ -129,7 +138,7 @@ export default async function GalleryAlbumPage({ params }: Props) {
                 <div className="mx-auto mb-4 flex size-14 items-center justify-center rounded-2xl bg-indigo-50 ring-1 ring-indigo-100">
                   <Images className="size-7 text-indigo-400" aria-hidden />
                 </div>
-                <p className="text-base font-medium text-gray-700">No images in this album yet.</p>
+                <p className="text-base font-medium text-gray-700">{t('empty')}</p>
               </div>
             </div>
           ) : (

@@ -2,9 +2,10 @@
 
 import { useState, useEffect } from 'react'
 import dynamic from 'next/dynamic'
-import Link from 'next/link'
 import Image from 'next/image'
+import { useTranslations } from 'next-intl'
 import { ArrowRight, Volume2, VolumeX } from 'lucide-react'
+import { Link } from '@/i18n/navigation'
 import type { Event } from '@/types/event'
 import { Button } from '@/components/ui/button'
 
@@ -19,9 +20,10 @@ const HERO_VIDEO =
 const HERO_VIDEO_POSTER =
   'https://res.cloudinary.com/digkc0xsk/video/upload/f_jpg,q_80,so_0/v1771270419/ROBOFESTnew_lj6ak1.jpg'
 
-const TRACK_TAGS = ['STEM', 'Robotics', 'Olympiad', 'Innovation'] as const
+const TRACK_TAG_KEYS = ['tagStem', 'tagRobotics', 'tagOlympiad', 'tagInnovation'] as const
 
 export default function Hero({ upcomingEvents = [] }: { upcomingEvents?: Event[] }) {
+  const t = useTranslations('home.hero')
   const [muted, setMuted] = useState(true)
   /** Avoid Cloudinary video bytes on small viewports / reduced motion — fewer network requests. */
   const [useVideoBg, setUseVideoBg] = useState(false)
@@ -86,23 +88,22 @@ export default function Hero({ upcomingEvents = [] }: { upcomingEvents?: Event[]
         <div className="flex flex-1 items-center px-4 py-8 sm:px-6 sm:py-10 lg:px-10 xl:px-14">
           <div className="w-full max-w-[28rem] space-y-6 text-left sm:max-w-md md:max-w-lg lg:max-w-xl lg:space-y-7">
             <h1 className="text-sm font-semibold uppercase tracking-[0.2em] text-sky-200/95 sm:text-base md:text-lg">
-              Robonauts – STEM, Robotics &amp; Olympiad Education in Bangladesh
+              {t('h1')}
             </h1>
 
             <p
               className="text-4xl font-bold tracking-tight text-white drop-shadow-[0_2px_12px_rgba(0,0,0,0.55)] sm:text-5xl md:text-6xl lg:text-[4.25rem] lg:leading-[0.95]"
-              aria-label="Build Skills. Break Barriers. Go Global."
+              aria-label={t('headlineAria')}
             >
-              <span className="block">Build Skills.</span>
-              <span className="block">Break Barriers.</span>
+              <span className="block">{t('line1')}</span>
+              <span className="block">{t('line2')}</span>
               <span className="mt-1 block bg-linear-to-r from-sky-200 via-indigo-200 to-sky-100 bg-clip-text text-transparent">
-                Go Global.
+                {t('line3')}
               </span>
             </p>
 
             <p className="max-w-md text-base leading-relaxed text-slate-100/90 sm:text-lg">
-              Hands-on robotics, competition pathways, and international stages for students
-              ready to build what comes next.
+              {t('subtitle')}
             </p>
 
             <div className="flex flex-col gap-3 pt-1 sm:flex-row sm:items-center">
@@ -112,7 +113,7 @@ export default function Hero({ upcomingEvents = [] }: { upcomingEvents?: Event[]
                 className="h-12 rounded-xl bg-indigo-500 px-7 text-base font-semibold text-white shadow-[0_16px_40px_-16px_rgba(99,102,241,0.9)] hover:bg-indigo-600"
               >
                 <Link href="/events" prefetch={false}>
-                  Explore Events
+                  {t('ctaEvents')}
                   <ArrowRight className="size-5" />
                 </Link>
               </Button>
@@ -123,32 +124,32 @@ export default function Hero({ upcomingEvents = [] }: { upcomingEvents?: Event[]
                 className="h-12 rounded-xl border-white/30 bg-transparent px-7 text-base font-medium text-white/90 hover:border-white/50 hover:bg-white/10 hover:text-white"
               >
                 <Link href="/about" prefetch={false}>
-                  About Robonauts
+                  {t('ctaAbout')}
                 </Link>
               </Button>
             </div>
 
             <p className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-slate-200/85">
               <Link href="/news" prefetch={false} className="font-medium underline-offset-4 hover:text-white hover:underline">
-                Robonauts News
+                {t('linkNews')}
               </Link>
               <span aria-hidden="true">·</span>
               <Link href="/gallery" prefetch={false} className="font-medium underline-offset-4 hover:text-white hover:underline">
-                Event Gallery
+                {t('linkGallery')}
               </Link>
               <span aria-hidden="true">·</span>
               <Link href="/robofest" prefetch={false} className="font-medium underline-offset-4 hover:text-white hover:underline">
-                RoboFest
+                {t('linkRobofest')}
               </Link>
             </p>
 
             <ul className="flex flex-wrap gap-2 pt-1">
-              {TRACK_TAGS.map((tag) => (
+              {TRACK_TAG_KEYS.map((key) => (
                 <li
-                  key={tag}
+                  key={key}
                   className="rounded-full border border-white/15 bg-white/5 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-white/80"
                 >
-                  {tag}
+                  {t(key)}
                 </li>
               ))}
             </ul>
@@ -171,7 +172,7 @@ export default function Hero({ upcomingEvents = [] }: { upcomingEvents?: Event[]
           size="icon"
           onClick={() => setMuted((m) => !m)}
           className="absolute right-5 bottom-8 z-30 rounded-full border border-white/20 bg-black/50 text-white hover:bg-black/70 hover:text-white"
-          aria-label={muted ? 'Unmute video' : 'Mute video'}
+          aria-label={muted ? t('unmuteAria') : t('muteAria')}
         >
           {muted ? <VolumeX className="size-5" /> : <Volume2 className="size-5" />}
         </Button>

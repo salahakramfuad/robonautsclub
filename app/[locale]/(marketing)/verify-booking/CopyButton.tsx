@@ -2,6 +2,7 @@
 
 import { Copy, Check } from 'lucide-react'
 import { useState } from 'react'
+import { useTranslations } from 'next-intl'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 
@@ -11,6 +12,7 @@ interface CopyButtonProps {
 }
 
 export default function CopyButton({ text, label }: CopyButtonProps) {
+  const t = useTranslations('common')
   const [copied, setCopied] = useState(false)
 
   const handleCopy = async () => {
@@ -42,8 +44,8 @@ export default function CopyButton({ text, label }: CopyButtonProps) {
       variant="ghost"
       size="icon"
       onClick={handleCopy}
-      title={copied ? 'Copied!' : `Copy ${label}`}
-      aria-label={`Copy ${label}`}
+      title={copied ? t('copied') : t('copyNamed', { name: label })}
+      aria-label={t('copyNamed', { name: label })}
       className={cn(
         'ml-2 size-8 group',
         copied

@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Image from 'next/image'
+import { useTranslations } from 'next-intl'
 import Reveal from '@/components/Reveal'
 
 export type NamedLogo = { name: string; logo?: string }
@@ -16,6 +17,7 @@ function getInitials(name: string) {
 }
 
 function PartnerLogo({ name, logo }: NamedLogo) {
+  const t = useTranslations('home.partners')
   const [failed, setFailed] = useState(false)
   const showImage = Boolean(logo) && !failed
 
@@ -24,7 +26,7 @@ function PartnerLogo({ name, logo }: NamedLogo) {
       {showImage ? (
         <Image
           src={logo!}
-          alt={`${name} logo`}
+          alt={t('logoAlt', { name })}
           fill
           className="object-contain transition-transform duration-300 group-hover:scale-105"
           quality={90}
@@ -43,19 +45,20 @@ function PartnerLogo({ name, logo }: NamedLogo) {
 }
 
 export default function PartnerShowcase({ items }: { items: NamedLogo[] }) {
+  const t = useTranslations('home.partners')
   if (items.length === 0) return null
 
   return (
     <div className="flex flex-col items-center">
       <Reveal className="mb-8 max-w-2xl text-center sm:mb-12">
         <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-indigo-600 sm:text-xs">
-          Partners
+          {t('eyebrow')}
         </p>
         <h3 className="mt-3 text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl md:text-4xl">
-          Our Strategic Partners
+          {t('title')}
         </h3>
         <p className="mt-3 text-sm leading-relaxed text-gray-600 sm:text-base">
-          Trusted by organizations who believe in the future of learning.
+          {t('subtitle')}
         </p>
       </Reveal>
 

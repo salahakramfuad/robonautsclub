@@ -23,8 +23,10 @@ function mapNewsDoc(id: string, data: Record<string, unknown>, lean: boolean): N
   return {
     id,
     title: typeof data.title === 'string' ? data.title : '',
+    titleBn: typeof data.titleBn === 'string' ? data.titleBn : undefined,
     slug: typeof data.slug === 'string' ? data.slug : '',
     body: lean ? '' : typeof data.body === 'string' ? data.body : '',
+    bodyBn: lean ? undefined : typeof data.bodyBn === 'string' ? data.bodyBn : undefined,
     coverImageUrl:
       typeof data.coverImageUrl === 'string' && data.coverImageUrl ? data.coverImageUrl : undefined,
     images: lean

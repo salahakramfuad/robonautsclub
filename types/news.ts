@@ -1,8 +1,12 @@
 export type NewsArticle = {
   id: string
   title: string
+  /** Optional Bengali title for bn locale */
+  titleBn?: string
   slug: string
   body: string
+  /** Optional Bengali body for bn locale */
+  bodyBn?: string
   coverImageUrl?: string
   images?: string[]
   published: boolean

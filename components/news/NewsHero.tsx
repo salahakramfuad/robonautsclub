@@ -1,6 +1,9 @@
 import { Cpu } from 'lucide-react'
+import { getTranslations } from 'next-intl/server'
 
-export default function NewsHero() {
+export default async function NewsHero() {
+  const t = await getTranslations('news.hero')
+
   return (
     <section className="relative overflow-hidden bg-[#050816] text-white">
       <div
@@ -72,15 +75,14 @@ export default function NewsHero() {
         <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-cyan-300/25 bg-white/5 px-3 py-1.5 shadow-[0_0_24px_rgba(34,211,238,0.15)] backdrop-blur-sm sm:mb-5 sm:px-4">
           <Cpu className="size-3.5 text-cyan-200 sm:size-4" aria-hidden />
           <span className="text-[11px] font-semibold uppercase tracking-[0.22em] text-cyan-100 sm:text-xs">
-            Club News
+            {t('badge')}
           </span>
         </div>
         <h1 className="text-3xl font-extrabold tracking-tight sm:text-4xl md:text-5xl">
-          News &amp; Stories
+          {t('title')}
         </h1>
         <p className="mx-auto mt-3 max-w-2xl text-sm leading-relaxed text-sky-100/90 sm:mt-4 sm:text-base md:text-lg">
-          Follow the latest workshops, competitions, achievements, partnerships and stories from
-          the Robonauts community.
+          {t('subtitle')}
         </p>
       </div>
     </section>

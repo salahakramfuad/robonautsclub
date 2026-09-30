@@ -1,5 +1,6 @@
 'use client'
 
+import { useTranslations } from 'next-intl'
 import { Button } from '@/components/ui/button'
 
 interface RetryButtonProps {
@@ -7,6 +8,7 @@ interface RetryButtonProps {
 }
 
 export default function RetryButton({ className }: RetryButtonProps) {
+  const t = useTranslations('verify.booking')
   return (
     <Button
       type="button"
@@ -14,7 +16,7 @@ export default function RetryButton({ className }: RetryButtonProps) {
       onClick={() => window.location.reload()}
       className={className}
     >
-      Try Again
+      {t('tryAgain')}
     </Button>
   )
 }

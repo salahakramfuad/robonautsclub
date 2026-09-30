@@ -1,6 +1,9 @@
 import { Newspaper } from 'lucide-react'
+import { getTranslations } from 'next-intl/server'
 
-export default function NewsEmptyState() {
+export default async function NewsEmptyState() {
+  const t = await getTranslations('news.empty')
+
   return (
     <div className="relative overflow-hidden rounded-3xl border border-slate-200/80 bg-white px-6 py-16 text-center sm:px-10 sm:py-20">
       <div className="bg-tech-grid-ink pointer-events-none absolute inset-0 opacity-60" aria-hidden />
@@ -18,10 +21,10 @@ export default function NewsEmptyState() {
           <Newspaper className="size-8 text-indigo-600 sm:size-9" aria-hidden />
         </div>
         <h2 className="mt-6 text-xl font-bold tracking-tight text-gray-900 sm:text-2xl">
-          No published stories yet
+          {t('title')}
         </h2>
         <p className="mt-3 text-sm leading-relaxed text-gray-600 sm:text-base">
-          News, workshops, competitions and community updates will appear here soon.
+          {t('body')}
         </p>
       </div>
     </div>

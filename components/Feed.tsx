@@ -1,4 +1,5 @@
 import dynamic from 'next/dynamic'
+import { getTranslations } from 'next-intl/server'
 import { SITE_CONFIG } from '@/lib/site-config'
 import { resolveCourseHref } from '@/lib/course-ui'
 import Hero from './Hero'
@@ -32,44 +33,32 @@ interface FeedProps {
   initialWorkshopSchools?: HomepageOrg[]
 }
 
-export default function Feed({
+export default async function Feed({
   initialCourses = [],
   initialUpcomingEvents = [],
   initialPartners = [],
   initialWorkshopSchools = [],
 }: FeedProps) {
+  const tFaq = await getTranslations('home.faq')
+
   const courses = initialCourses
     .filter((course) => !course.isArchived)
     .map((course) => ({
       id: course.id,
       title: course.title,
+      titleBn: course.titleBn,
       level: course.level,
+      levelBn: course.levelBn,
       blurb: course.blurb,
+      blurbBn: course.blurbBn,
       href: resolveCourseHref(course.href),
       img: course.image,
     }))
 
-  const faqItems = [
-    {
-      question: `Who is eligible to join ${SITE_CONFIG.name}?`,
-      answer: `${SITE_CONFIG.name} welcomes students from grades 3-12 who have an interest in robotics, STEM, and innovation. No prior experience is required for beginner courses.`,
-    },
-    {
-      question: 'What age groups do you serve?',
-      answer:
-        'We serve students aged 8-18 years old, with courses tailored to different age groups and skill levels. Our programs are designed to grow with students from elementary through high school.',
-    },
-    {
-      question: 'Do I need any background knowledge?',
-      answer:
-        'No background knowledge is required for our beginner courses. We start from the basics and guide you through every step. For intermediate and advanced courses, we recommend completing prerequisite courses first.',
-    },
-    {
-      question: 'Do you provide certificates?',
-      answer:
-        'Yes! Students who complete our courses receive certificates of completion. We also provide certificates for participation in competitions and special workshops.',
-    },
-  ]
+  const faqItems = [0, 1, 2, 3].map((i) => ({
+    question: tFaq(`items.${i}.q`, { name: SITE_CONFIG.name }),
+    answer: tFaq(`items.${i}.a`, { name: SITE_CONFIG.name }),
+  }))
 
   return (
     <div className="w-full min-w-full">

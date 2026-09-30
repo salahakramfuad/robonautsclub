@@ -46,10 +46,13 @@ export default function CustomFormBuilder({ fields, onChange, disabled = false }
       {
         id: createFieldId(),
         label: '',
+        labelBn: '',
         type: 'shortText',
         required: false,
         placeholder: '',
+        placeholderBn: '',
         options: [],
+        optionsBn: [],
       },
     ])
   }
@@ -73,7 +76,10 @@ export default function CustomFormBuilder({ fields, onChange, disabled = false }
   const addOption = (fieldIndex: number) => {
     const target = fields[fieldIndex]
     if (!target) return
-    updateField(fieldIndex, { options: [...(target.options ?? []), ''] })
+    updateField(fieldIndex, {
+      options: [...(target.options ?? []), ''],
+      optionsBn: [...(target.optionsBn ?? []), ''],
+    })
   }
 
   const updateOption = (fieldIndex: number, optionIndex: number, value: string) => {
@@ -84,11 +90,21 @@ export default function CustomFormBuilder({ fields, onChange, disabled = false }
     updateField(fieldIndex, { options })
   }
 
+  const updateOptionBn = (fieldIndex: number, optionIndex: number, value: string) => {
+    const target = fields[fieldIndex]
+    if (!target) return
+    const optionsBn = [...(target.optionsBn ?? [])]
+    while (optionsBn.length < (target.options ?? []).length) optionsBn.push('')
+    optionsBn[optionIndex] = value
+    updateField(fieldIndex, { optionsBn })
+  }
+
   const removeOption = (fieldIndex: number, optionIndex: number) => {
     const target = fields[fieldIndex]
     if (!target) return
     const options = (target.options ?? []).filter((_, i) => i !== optionIndex)
-    updateField(fieldIndex, { options })
+    const optionsBn = (target.optionsBn ?? []).filter((_, i) => i !== optionIndex)
+    updateField(fieldIndex, { options, optionsBn })
   }
 
   return (
@@ -130,6 +146,14 @@ export default function CustomFormBuilder({ fields, onChange, disabled = false }
                     disabled={disabled}
                     className="text-sm"
                   />
+                  <Input
+                    type="text"
+                    value={field.labelBn ?? ''}
+                    onChange={(e) => updateField(fieldIndex, { labelBn: e.target.value })}
+                    placeholder="Bengali label (optional)"
+                    disabled={disabled}
+                    className="text-sm border-amber-200"
+                  />
                 </div>
                 <div className="space-y-1">
                   <Label className="text-xs font-semibold text-gray-600">Input type</Label>
@@ -163,6 +187,14 @@ export default function CustomFormBuilder({ fields, onChange, disabled = false }
                     disabled={disabled}
                     className="text-sm"
                   />
+                  <Input
+                    type="text"
+                    value={field.placeholderBn ?? ''}
+                    onChange={(e) => updateField(fieldIndex, { placeholderBn: e.target.value })}
+                    placeholder="Bengali placeholder (optional)"
+                    disabled={disabled}
+                    className="text-sm border-amber-200"
+                  />
                 </div>
                 <div className="flex items-center gap-2 pb-2">
                   <Checkbox
@@ -181,7 +213,7 @@ export default function CustomFormBuilder({ fields, onChange, disabled = false }
                 <div className="space-y-2">
                   <Label className="text-xs font-semibold text-gray-600">Options</Label>
                   {(field.options ?? []).map((option, optionIndex) => (
-                    <div key={`${field.id}-option-${optionIndex}`} className="flex items-center gap-2">
+                    <div key={`${field.id}-option-${optionIndex}`} className="flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-2">
                       <Input
                         type="text"
                         value={option}
@@ -189,6 +221,14 @@ export default function CustomFormBuilder({ fields, onChange, disabled = false }
                         placeholder={`Option ${optionIndex + 1}`}
                         disabled={disabled}
                         className="flex-1 text-sm"
+                      />
+                      <Input
+                        type="text"
+                        value={field.optionsBn?.[optionIndex] ?? ''}
+                        onChange={(e) => updateOptionBn(fieldIndex, optionIndex, e.target.value)}
+                        placeholder="Bengali (optional)"
+                        disabled={disabled}
+                        className="flex-1 text-sm border-amber-200"
                       />
                       <Button
                         type="button"

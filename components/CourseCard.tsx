@@ -1,6 +1,7 @@
-import Link from 'next/link'
 import Image from 'next/image'
 import { ArrowRight } from 'lucide-react'
+import { getTranslations } from 'next-intl/server'
+import { Link } from '@/i18n/navigation'
 import { resolveCourseHref, COURSE_FALLBACK_HREF } from '@/lib/course-ui'
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
@@ -28,7 +29,7 @@ function getLevelColor(levelText: string) {
   return 'bg-slate-50 text-slate-700 border-slate-200/80'
 }
 
-export default function CourseCard({
+export default async function CourseCard({
   title,
   level,
   blurb,
@@ -36,12 +37,13 @@ export default function CourseCard({
   img,
   variant = 'default',
 }: CourseCardProps) {
+  const t = await getTranslations('home.courseCard')
   const featured = variant === 'featured'
   const shortBlurb = !blurb || blurb.trim().length < 80
   const targetHref = resolveCourseHref(href)
   const isContactFallback = targetHref === COURSE_FALLBACK_HREF
-  const featuredCta = isContactFallback ? 'Contact about this program' : 'Explore this program'
-  const defaultCta = isContactFallback ? 'Contact about this program' : 'Learn more'
+  const featuredCta = isContactFallback ? t('contact') : t('explore')
+  const defaultCta = isContactFallback ? t('contact') : t('learnMore')
 
   if (featured) {
     return (
@@ -75,7 +77,7 @@ export default function CourseCard({
 
           <div className="flex flex-col justify-center p-5 sm:p-7 lg:p-8">
             <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-indigo-600">
-              Featured program
+              {t('featuredLabel')}
             </p>
             <h3 className="mt-2 text-2xl font-semibold leading-snug text-gray-900 transition-colors duration-300 group-hover:text-indigo-700 sm:text-3xl">
               {title}

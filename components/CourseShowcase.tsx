@@ -1,13 +1,17 @@
-import Link from 'next/link'
 import { ArrowRight, BookOpen } from 'lucide-react'
+import { getLocale, getTranslations } from 'next-intl/server'
 import CourseCard from '@/components/CourseCard'
 import Reveal from '@/components/Reveal'
+import { pickLocalized } from '@/lib/i18n-localized'
 
 type ShowcaseCourse = {
   id: string
   title: string
+  titleBn?: string
   level: string
+  levelBn?: string
   blurb: string
+  blurbBn?: string
   href: string
   img?: string
 }
@@ -38,16 +42,17 @@ function pickFeaturedIndex(courses: ShowcaseCourse[]) {
   return 0
 }
 
-export default function CourseShowcase({ courses }: { courses: ShowcaseCourse[] }) {
+export default async function CourseShowcase({ courses }: { courses: ShowcaseCourse[] }) {
+  const locale = await getLocale()
+  const t = await getTranslations('home.programs')
+
   if (courses.length === 0) {
     return (
       <div id="programs">
-        <SectionHeader />
+        <SectionHeader eyebrow={t('eyebrow')} title={t('title')} subtitle={t('subtitle')} />
         <div className="py-12 text-center">
           <BookOpen className="mx-auto mb-3 size-12 text-slate-300" />
-          <p className="hidden text-gray-600 sm:block">
-            No courses available at the moment. Check back soon!
-          </p>
+          <p className="hidden text-gray-600 sm:block">{t('empty')}</p>
         </div>
       </div>
     )
@@ -59,13 +64,19 @@ export default function CourseShowcase({ courses }: { courses: ShowcaseCourse[] 
 
   return (
     <div id="programs">
-      <SectionHeader showExplore={others.length > 2} />
+      <SectionHeader
+        eyebrow={t('eyebrow')}
+        title={t('title')}
+        subtitle={t('subtitle')}
+        exploreAll={t('exploreAll')}
+        showExplore={others.length > 2}
+      />
 
       <Reveal>
         <CourseCard
-          title={featured.title}
-          level={featured.level}
-          blurb={featured.blurb}
+          title={pickLocalized(locale, featured.title, featured.titleBn)}
+          level={pickLocalized(locale, featured.level, featured.levelBn)}
+          blurb={pickLocalized(locale, featured.blurb, featured.blurbBn)}
           href={featured.href}
           img={featured.img}
           variant="featured"
@@ -80,9 +91,9 @@ export default function CourseShowcase({ courses }: { courses: ShowcaseCourse[] 
           {others.map((course, index) => (
             <Reveal key={course.id} delayMs={index * 70}>
               <CourseCard
-                title={course.title}
-                level={course.level}
-                blurb={course.blurb}
+                title={pickLocalized(locale, course.title, course.titleBn)}
+                level={pickLocalized(locale, course.level, course.levelBn)}
+                blurb={pickLocalized(locale, course.blurb, course.blurbBn)}
                 href={course.href}
                 img={course.img}
               />
@@ -94,28 +105,40 @@ export default function CourseShowcase({ courses }: { courses: ShowcaseCourse[] 
   )
 }
 
-function SectionHeader({ showExplore = false }: { showExplore?: boolean }) {
+function SectionHeader({
+  eyebrow,
+  title,
+  subtitle,
+  exploreAll,
+  showExplore = false,
+}: {
+  eyebrow: string
+  title: string
+  subtitle: string
+  exploreAll?: string
+  showExplore?: boolean
+}) {
   return (
     <div className="mb-8 flex flex-col gap-4 sm:mb-10 md:mb-12 md:flex-row md:items-end md:justify-between">
       <Reveal className="max-w-2xl">
         <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-indigo-600 sm:text-xs">
-          Programs
+          {eyebrow}
         </p>
         <h2 className="mt-3 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl md:text-5xl">
-          Learn with Robonauts
+          {title}
         </h2>
         <p className="mt-3 max-w-xl text-sm leading-relaxed text-gray-600 sm:text-base">
-          Discover pathways designed for every stage — from first build to competition-ready.
+          {subtitle}
         </p>
       </Reveal>
-      {showExplore ? (
-        <Link
+      {showExplore && exploreAll ? (
+        <a
           href="#course-grid"
           className="group inline-flex items-center gap-1.5 text-sm font-semibold text-indigo-600 transition-colors hover:text-indigo-800"
         >
-          Explore all
+          {exploreAll}
           <ArrowRight className="size-4 transition-transform duration-300 group-hover:translate-x-0.5" />
-        </Link>
+        </a>
       ) : null}
     </div>
   )

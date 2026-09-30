@@ -40,7 +40,9 @@ function mapGalleryDoc(id: string, data: Record<string, unknown>, lean: boolean)
   return {
     id,
     title: typeof data.title === 'string' ? data.title : '',
+    titleBn: typeof data.titleBn === 'string' ? data.titleBn : undefined,
     location: typeof data.location === 'string' ? data.location : '',
+    locationBn: typeof data.locationBn === 'string' ? data.locationBn : undefined,
     images,
     imageCount: allImages.length,
     sortOrder,

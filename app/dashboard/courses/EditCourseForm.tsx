@@ -50,8 +50,11 @@ export default function EditCourseForm({ course, onClose }: EditCourseFormProps)
     resolver: standardSchemaResolver(courseFormSchema),
     defaultValues: {
       title: course.title || '',
+      titleBn: course.titleBn || '',
       level: course.level || '',
+      levelBn: course.levelBn || '',
       blurb: course.blurb || '',
+      blurbBn: course.blurbBn || '',
       href: course.href || '',
       image: course.image || '',
     },
@@ -260,6 +263,75 @@ export default function EditCourseForm({ course, onClose }: EditCourseFormProps)
                   </FormItem>
                 )}
               />
+
+              <details className="rounded-xl border border-amber-200/80 bg-amber-50/40 p-4">
+                <summary className="cursor-pointer text-sm font-semibold text-amber-900">
+                  Bengali (optional)
+                </summary>
+                <p className="mt-1 text-xs text-amber-800/80">
+                  Shown on the public site when the visitor selects Bangla. Leave blank to fall back to English.
+                </p>
+                <div className="mt-4 space-y-4">
+                  <FormField
+                    control={form.control}
+                    name="titleBn"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-sm font-semibold text-gray-700">Course Title (Bengali)</FormLabel>
+                        <FormControl>
+                          <Input
+                            id="edit-titleBn"
+                            placeholder="বাংলা কোর্স শিরোনাম"
+                            disabled={loading}
+                            className="border-2 border-gray-200 rounded-xl py-3 h-auto"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="levelBn"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-sm font-semibold text-gray-700">Level (Bengali)</FormLabel>
+                        <FormControl>
+                          <Input
+                            id="edit-levelBn"
+                            placeholder="যেমন: প্রাথমিক"
+                            disabled={loading}
+                            className="border-2 border-gray-200 rounded-xl py-3 h-auto"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="blurbBn"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-sm font-semibold text-gray-700">Description (Bengali)</FormLabel>
+                        <FormControl>
+                          <Textarea
+                            id="edit-blurbBn"
+                            rows={3}
+                            placeholder="বাংলা বিবরণ"
+                            disabled={loading}
+                            className="min-h-[80px] resize-none border-2 border-gray-200 rounded-xl py-3 md:text-base"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </details>
 
               <FormField
                 control={form.control}

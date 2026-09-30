@@ -1,6 +1,7 @@
 import { Metadata } from "next";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 import Feed from "@/components/Feed";
-import { PAGE_SEO, buildPageMetadata } from "@/lib/seo-metadata";
+import { buildPageMetadata } from "@/lib/seo-metadata";
 import {
   getPublicCourses,
   getPublicEventsForHome,
@@ -9,23 +10,34 @@ import {
 import { isEventUpcoming } from "@/lib/dateUtils";
 import { SITE_CONFIG } from "@/lib/site-config";
 
-export const metadata: Metadata = buildPageMetadata({
-  title: PAGE_SEO.home.title,
-  description: PAGE_SEO.home.description,
-  path: "/",
-  absoluteTitle: true,
-  ogImage: {
-    url: SITE_CONFIG.metadata.defaultImage,
-    width: 407,
-    height: 407,
-    alt: SITE_CONFIG.metadata.defaultImageAlt,
-  },
-});
+type Props = { params: Promise<{ locale: string }> };
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { locale } = await params;
+  setRequestLocale(locale);
+  const t = await getTranslations({ locale, namespace: "seo.pages.home" });
+  return buildPageMetadata({
+    title: t("title"),
+    description: t("description"),
+    path: "/",
+    absoluteTitle: true,
+    locale,
+    ogImage: {
+      url: SITE_CONFIG.metadata.defaultImage,
+      width: 407,
+      height: 407,
+      alt: SITE_CONFIG.metadata.defaultImageAlt,
+    },
+  });
+}
 
 // ISR: longer window minimizes edge recompute frequency for mostly static content
 export const revalidate = 1800;
 
-export default async function Home() {
+export default async function Home({ params }: Props) {
+  const { locale } = await params;
+  setRequestLocale(locale);
+
   const [courses, events, homepageOrgs] = await Promise.all([
     getPublicCourses(),
     getPublicEventsForHome(),

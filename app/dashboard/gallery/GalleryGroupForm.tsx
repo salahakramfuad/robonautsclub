@@ -55,7 +55,9 @@ export default function GalleryGroupForm({ group }: Props) {
     resolver: standardSchemaResolver(galleryGroupFormSchema),
     defaultValues: {
       title: group?.title ?? '',
+      titleBn: group?.titleBn ?? '',
       location: group?.location ?? '',
+      locationBn: group?.locationBn ?? '',
       sortOrder: group?.sortOrder ?? 0,
       displayDateInput:
         group ? isoOrDateToYmd(group.displayDate ?? group.createdAt) || todayLocalYmd() : todayLocalYmd(),
@@ -126,7 +128,9 @@ export default function GalleryGroupForm({ group }: Props) {
       if (isEdit && group) {
         await updateGalleryGroup(group.id, {
           title: values.title,
+          titleBn: values.titleBn,
           location: values.location,
+          locationBn: values.locationBn,
           sortOrder: values.sortOrder,
           images,
           displayDate: values.displayDateInput,
@@ -134,7 +138,9 @@ export default function GalleryGroupForm({ group }: Props) {
       } else {
         await createGalleryGroup({
           title: values.title,
+          titleBn: values.titleBn,
           location: values.location,
+          locationBn: values.locationBn,
           sortOrder: values.sortOrder,
           images,
           displayDate: values.displayDateInput,
@@ -215,6 +221,43 @@ export default function GalleryGroupForm({ group }: Props) {
             </FormItem>
           )}
         />
+
+        <details className="rounded-xl border border-amber-200/80 bg-amber-50/40 p-4">
+          <summary className="cursor-pointer text-sm font-semibold text-amber-900">
+            Bengali (optional)
+          </summary>
+          <p className="mt-1 text-xs text-amber-800/80">
+            Shown on the public site when the visitor selects Bangla. Leave blank to fall back to English.
+          </p>
+          <div className="mt-4 space-y-4">
+            <FormField
+              control={form.control}
+              name="titleBn"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Album title (Bengali)</FormLabel>
+                  <FormControl>
+                    <Input {...field} placeholder="বাংলা অ্যালবাম শিরোনাম" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="locationBn"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Location (Bengali)</FormLabel>
+                  <FormControl>
+                    <Textarea rows={3} placeholder="বাংলা অবস্থান" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+        </details>
 
         <FormField
           control={form.control}

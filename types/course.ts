@@ -2,8 +2,14 @@
 export type Course = {
   id: string // Firestore document ID
   title: string
+  /** Optional Bengali title for bn locale */
+  titleBn?: string
   level: string // e.g., "Beginner-Intermediate", "For All", "All Levels"
+  /** Optional Bengali level for bn locale */
+  levelBn?: string
   blurb: string // Short description
+  /** Optional Bengali blurb for bn locale */
+  blurbBn?: string
   href: string // Course detail page URL
   image: string // Cloudinary URL
   isArchived: boolean // Default: false

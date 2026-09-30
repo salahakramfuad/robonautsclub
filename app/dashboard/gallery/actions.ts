@@ -48,7 +48,9 @@ function mapGalleryDoc(id: string, data: Record<string, unknown>): GalleryGroup 
   return {
     id,
     title: String(data.title ?? ''),
+    titleBn: typeof data.titleBn === 'string' ? data.titleBn : undefined,
     location: String(data.location ?? ''),
+    locationBn: typeof data.locationBn === 'string' ? data.locationBn : undefined,
     images: mapImages(data.images),
     sortOrder,
     displayDate: displayIso || null,
@@ -86,7 +88,9 @@ export async function getGalleryGroupForDashboard(id: string): Promise<GalleryGr
 
 export async function createGalleryGroup(input: {
   title: string
+  titleBn?: string
   location: string
+  locationBn?: string
   sortOrder: number
   images: GalleryImage[]
   displayDate?: string
@@ -99,6 +103,8 @@ export async function createGalleryGroup(input: {
   const title = sanitizeGalleryTitle(input.title)
   const location = sanitizeGalleryLocation(input.location)
   if (!title) throw new Error('Title is required.')
+  const titleBn = sanitizeGalleryTitle(input.titleBn ?? '')
+  const locationBn = sanitizeGalleryLocation(input.locationBn ?? '')
 
   const sortOrder = Number.isFinite(input.sortOrder) ? Math.floor(input.sortOrder) : 0
   const images = input.images.filter((i) => i.url?.trim())
@@ -107,7 +113,9 @@ export async function createGalleryGroup(input: {
 
   await collectionAdd('galleryGroups', {
     title,
+    titleBn,
     location,
+    locationBn,
     sortOrder,
     images,
     displayDate,
@@ -125,7 +133,9 @@ export async function updateGalleryGroup(
   id: string,
   input: {
     title: string
+    titleBn?: string
     location: string
+    locationBn?: string
     sortOrder: number
     images: GalleryImage[]
     displayDate?: string
@@ -144,6 +154,8 @@ export async function updateGalleryGroup(
   const title = sanitizeGalleryTitle(input.title)
   const location = sanitizeGalleryLocation(input.location)
   if (!title) throw new Error('Title is required.')
+  const titleBn = sanitizeGalleryTitle(input.titleBn ?? '')
+  const locationBn = sanitizeGalleryLocation(input.locationBn ?? '')
 
   const sortOrder = Number.isFinite(input.sortOrder) ? Math.floor(input.sortOrder) : 0
   const images = input.images.filter((i) => i.url?.trim())
@@ -154,7 +166,9 @@ export async function updateGalleryGroup(
     id,
     {
       title,
+      titleBn,
       location,
+      locationBn,
       sortOrder,
       images,
       displayDate,

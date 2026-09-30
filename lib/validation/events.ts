@@ -6,10 +6,13 @@ const customFieldTypeSchema = z.enum(CUSTOM_FORM_FIELD_TYPES)
 const eventCustomFormFieldSchema = z.object({
   id: z.string(),
   label: z.string(),
+  labelBn: z.string().optional(),
   type: customFieldTypeSchema,
   required: z.boolean(),
   placeholder: z.string().optional(),
+  placeholderBn: z.string().optional(),
   options: z.array(z.string()).optional(),
+  optionsBn: z.array(z.string()).optional(),
 })
 
 const registrationToggleSchema = z.object({
@@ -28,6 +31,7 @@ const defaultRegistrationFieldsSchema = z.object({
 
 const categoryDraftSchema = z.object({
   name: z.string(),
+  nameBn: z.string().optional(),
   amount: z.union([z.string(), z.number()]),
 })
 
@@ -35,16 +39,25 @@ const categoryDraftSchema = z.object({
 export const dashboardEventFormSchema = z
   .object({
     title: z.string(),
+    titleBn: z.string().default(''),
     dates: z.array(z.string()),
     description: z.string(),
+    descriptionBn: z.string().default(''),
     time: z.string(),
+    timeBn: z.string().default(''),
     location: z.string(),
+    locationBn: z.string().default(''),
     venue: z.string(),
+    venueBn: z.string().default(''),
     fullDescription: z.string(),
+    fullDescriptionBn: z.string().default(''),
     eligibility: z.string(),
+    eligibilityBn: z.string().default(''),
     agenda: z.string(),
+    agendaBn: z.string().default(''),
     image: z.string(),
     tags: z.array(z.string()),
+    tagsBn: z.array(z.string()).default([]),
     isPaid: z.boolean(),
     amount: z.union([z.string(), z.number()]),
     paymentBkashNumber: z.string(),
@@ -52,7 +65,9 @@ export const dashboardEventFormSchema = z
     registrationClosingDate: z.string(),
     registrationDisabled: z.boolean().optional(),
     contactPersonName: z.string(),
+    contactPersonNameBn: z.string().default(''),
     contactPersonDesignation: z.string(),
+    contactPersonDesignationBn: z.string().default(''),
     contactPersonMobileOrEmail: z.string(),
     customFormFields: z.array(eventCustomFormFieldSchema),
     defaultRegistrationFields: defaultRegistrationFieldsSchema,

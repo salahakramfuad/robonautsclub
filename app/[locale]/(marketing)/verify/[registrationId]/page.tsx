@@ -7,12 +7,13 @@ import type { Event } from '@/types/event'
 import { format } from 'date-fns'
 import Image from 'next/image'
 import { Metadata } from 'next'
+import { getTranslations, setRequestLocale } from 'next-intl/server'
 import { absoluteSiteUrl } from '@/lib/seo'
 
 export const dynamic = 'force-dynamic'
 
 interface VerificationPageProps {
-  params: Promise<{ registrationId: string }>
+  params: Promise<{ locale: string; registrationId: string }>
 }
 
 function parseTimestamp(value: unknown): unknown {
@@ -62,9 +63,11 @@ async function getBookingByRegistrationId(registrationId: string): Promise<{
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ registrationId: string }>
+  params: Promise<{ locale: string; registrationId: string }>
 }): Promise<Metadata> {
-  const { registrationId } = await params
+  const { registrationId, locale } = await params
+  setRequestLocale(locale)
+  const tMeta = await getTranslations('verify.meta')
   const { booking, event } = await getBookingByRegistrationId(registrationId)
 
   const noindex = {
@@ -77,9 +80,8 @@ export async function generateMetadata({
 
   if (!booking || !event) {
     return {
-      title: 'Registration Not Found | Robonauts Club',
-      description:
-        'The registration ID you provided could not be found. Please verify your registration number and try again.',
+      title: tMeta('notFoundTitle'),
+      description: tMeta('notFoundDescription'),
       alternates: {
         canonical: `/verify/${registrationId}`,
       },
@@ -87,7 +89,7 @@ export async function generateMetadata({
     }
   }
 
-  const title = `Registration Verified - ${event.title} | Robonauts Club`
+  const title = `{t('verifiedTitle')} - ${event.title} | Robonauts Club`
   const description = `Your registration for ${event.title} is verified. Event date: ${formatEventDates(parseEventDates(event.date), 'long')}.`
 
   const ogImage =
@@ -133,7 +135,9 @@ export async function generateMetadata({
 }
 
 export default async function VerificationPage({ params }: VerificationPageProps) {
-  const { registrationId } = await params
+  const { registrationId, locale } = await params
+  setRequestLocale(locale)
+  const t = await getTranslations('verify.booking')
   const { booking, event } = await getBookingByRegistrationId(registrationId)
 
   const isValid = booking !== null && event !== null
@@ -150,12 +154,12 @@ export default async function VerificationPage({ params }: VerificationPageProps
           <div className="w-20 h-20 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-6">
             <XCircle className="w-12 h-12 text-red-500" />
           </div>
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">Invalid Registration</h1>
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">{t('invalidTitle')}</h1>
           <p className="text-gray-600 mb-4">
-            The registration ID <code className="bg-gray-100 px-2 py-1 rounded font-mono text-sm">{registrationId}</code> could not be found.
+            {t('invalidBody', { name: registrationId })}
           </p>
           <p className="text-sm text-gray-500">
-            Please check the registration ID and try again.
+            {t('invalidHint')}
           </p>
         </div>
       </div>
@@ -163,7 +167,7 @@ export default async function VerificationPage({ params }: VerificationPageProps
   }
 
   const eventDates = parseEventDates(event!.date)
-  const formattedDate = eventDates.length > 0 ? formatEventDates(eventDates, 'long') : 'TBA'
+  const formattedDate = eventDates.length > 0 ? formatEventDates(eventDates, 'long') : t('tba')
   const bookingDate = booking!.createdAt instanceof Date 
     ? booking!.createdAt 
     : new Date(booking!.createdAt)
@@ -177,55 +181,55 @@ export default async function VerificationPage({ params }: VerificationPageProps
             <div className="w-20 h-20 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center mx-auto mb-4">
               <CheckCircle className="w-12 h-12 text-white" />
             </div>
-            <h1 className="text-3xl font-bold text-white mb-2">Registration Verified</h1>
-            <p className="text-green-50">This registration is valid and confirmed</p>
+            <h1 className="text-3xl font-bold text-white mb-2">{t('verifiedTitle')}</h1>
+            <p className="text-green-50">{t('verifiedSubtitle')}</p>
           </div>
 
           <div className="p-8">
-            {/* Registration ID */}
+            {/* {t('idLabel')} */}
             <div className="bg-indigo-50 border-2 border-indigo-200 rounded-xl p-6 mb-6">
               <div className="flex items-center justify-between flex-wrap gap-4">
                 <div>
-                  <p className="text-sm font-medium text-indigo-600 mb-1">Registration ID</p>
+                  <p className="text-sm font-medium text-indigo-600 mb-1">{t('idLabel')}</p>
                   <p className="text-2xl font-bold text-indigo-900 font-mono">{booking!.registrationId}</p>
                 </div>
                 {qrCodeDataURL && (
                   <div className="flex-shrink-0">
                     <Image
                       src={qrCodeDataURL}
-                      alt="QR Code"
+                      alt={t("qrAltShort")}
                       width={128}
                       height={128}
                       className="w-32 h-32 border-2 border-indigo-200 rounded-lg"
                       unoptimized
                     />
-                    <p className="text-xs text-center text-gray-500 mt-2">Scan to verify</p>
+                    <p className="text-xs text-center text-gray-500 mt-2">{t('scanVerify')}</p>
                   </div>
                 )}
               </div>
             </div>
 
             <div className="grid md:grid-cols-2 gap-6">
-              {/* Event Details */}
+              {/* {t('eventDetails')} */}
               <div className="bg-gray-50 rounded-xl p-6 border border-gray-200">
                 <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
                   <Calendar className="w-5 h-5 text-indigo-600" />
-                  Event Details
+                  {t('eventDetails')}
                 </h2>
                 <div className="space-y-3">
                   <div>
-                    <p className="text-sm font-medium text-gray-600 mb-1">Event Name</p>
+                    <p className="text-sm font-medium text-gray-600 mb-1">{t('eventName')}</p>
                     <p className="text-base font-semibold text-gray-900">{event!.title}</p>
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-gray-600 mb-1">Date</p>
+                    <p className="text-sm font-medium text-gray-600 mb-1">{t('date')}</p>
                     <p className="text-base text-gray-900">{formattedDate}</p>
                   </div>
                   {event!.time && (
                     <div>
                       <p className="text-sm font-medium text-gray-600 mb-1 flex items-center gap-1">
                         <Clock className="w-4 h-4" />
-                        Time
+                        {t('time')}
                       </p>
                       <p className="text-base text-gray-900">{event!.time}</p>
                     </div>
@@ -234,7 +238,7 @@ export default async function VerificationPage({ params }: VerificationPageProps
                     <div>
                       <p className="text-sm font-medium text-gray-600 mb-1 flex items-center gap-1">
                         <MapPin className="w-4 h-4" />
-                        Venue
+                        {t('venue')}
                       </p>
                       <p className="text-base text-gray-900">{event!.venue || event!.location}</p>
                     </div>
@@ -242,52 +246,52 @@ export default async function VerificationPage({ params }: VerificationPageProps
                 </div>
               </div>
 
-              {/* Registration Details */}
+              {/* {t('registrationDetails')} */}
               <div className="bg-gray-50 rounded-xl p-6 border border-gray-200">
                 <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
                   <User className="w-5 h-5 text-indigo-600" />
-                  Registration Details
+                  {t('registrationDetails')}
                 </h2>
                 <div className="space-y-3">
                   <div>
                     <p className="text-sm font-medium text-gray-600 mb-1 flex items-center gap-1">
                       <User className="w-4 h-4" />
-                      Name
+                      {t('name')}
                     </p>
                     <p className="text-base font-semibold text-gray-900">{booking!.name}</p>
                   </div>
                   <div>
                     <p className="text-sm font-medium text-gray-600 mb-1 flex items-center gap-1">
                       <School className="w-4 h-4" />
-                      School
+                      {t('school')}
                     </p>
                     <p className="text-base text-gray-900">{booking!.school}</p>
                   </div>
                   <div>
                     <p className="text-sm font-medium text-gray-600 mb-1 flex items-center gap-1">
                       <Mail className="w-4 h-4" />
-                      Email
+                      {t('email')}
                     </p>
                     <p className="text-base text-gray-900 break-all">{booking!.email}</p>
                   </div>
                   <div>
                     <p className="text-sm font-medium text-gray-600 mb-1 flex items-center gap-1">
                       <Phone className="w-4 h-4" />
-                      Phone
+                      {t('phone')}
                     </p>
-                    <p className="text-base text-gray-900">{booking!.phone || 'N/A'}</p>
+                    <p className="text-base text-gray-900">{booking!.phone || t('na')}</p>
                   </div>
                   {booking!.bkashNumber && (
                     <div>
                       <p className="text-sm font-medium text-gray-600 mb-1 flex items-center gap-1">
                         <Phone className="w-4 h-4" />
-                        bKash Number
+                        {t('bkash')}
                       </p>
                       <p className="text-base text-gray-900">{booking!.bkashNumber}</p>
                     </div>
                   )}
                   <div>
-                    <p className="text-sm font-medium text-gray-600 mb-1">Registered On</p>
+                    <p className="text-sm font-medium text-gray-600 mb-1">{t('registeredOn')}</p>
                     <p className="text-base text-gray-900">
                       {format(bookingDate, 'MMMM d, yyyy HH:mm')}
                     </p>
@@ -298,7 +302,7 @@ export default async function VerificationPage({ params }: VerificationPageProps
 
             {booking!.information && (
               <div className="mt-6 bg-blue-50 rounded-xl p-6 border border-blue-200">
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">Additional Information</h3>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">{t('additionalInfo')}</h3>
                 <p className="text-gray-700 whitespace-pre-wrap">{booking!.information}</p>
               </div>
             )}
@@ -307,7 +311,7 @@ export default async function VerificationPage({ params }: VerificationPageProps
 
         {/* Footer Note */}
         <div className="text-center text-sm text-gray-500">
-          <p>This page can be accessed by scanning the QR code on the confirmation PDF</p>
+          <p>{t('footerNote')}</p>
         </div>
       </div>
     </div>

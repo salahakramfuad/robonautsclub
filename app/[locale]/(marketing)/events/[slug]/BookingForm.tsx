@@ -4,7 +4,9 @@ import { useMemo, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { standardSchemaResolver } from '@hookform/resolvers/standard-schema'
 import { CheckCircle, Banknote } from 'lucide-react'
+import { useLocale, useTranslations } from 'next-intl'
 import { Event } from '@/types/event'
+import { pickLocalized } from '@/lib/i18n-localized'
 import { getEventRegistrationFields } from '@/lib/registrationFields'
 import { PRIVATE_CANDIDATE_OPTION, SCHOOL_NOT_FOUND_OPTION } from '@/lib/schoolDirectory'
 import {
@@ -27,6 +29,8 @@ import {
 import { cn } from '@/lib/utils'
 
 export default function BookingForm({ event, schools }: { event: Event; schools: string[] }) {
+  const locale = useLocale()
+  const t = useTranslations('events.booking')
   const [isSubmitted, setIsSubmitted] = useState(false)
   const [submissionWarning, setSubmissionWarning] = useState<string | null>(null)
   const [submitError, setSubmitError] = useState('')
@@ -96,7 +100,7 @@ export default function BookingForm({ event, schools }: { event: Event; schools:
           window.location.assign(result.checkoutUrl)
           return
         }
-        setSubmitError(result.error || 'Failed to submit registration. Please try again.')
+        setSubmitError(result.error || t('errorSubmitFailed'))
         return
       }
 
@@ -119,11 +123,11 @@ export default function BookingForm({ event, schools }: { event: Event; schools:
           setSubmissionWarning(null)
         }, result.warning ? 15000 : 5000)
       } else {
-        setSubmitError(result.error || 'Failed to submit registration. Please try again.')
+        setSubmitError(result.error || t('errorSubmitFailed'))
       }
     } catch (error) {
       console.error('Registration error:', error)
-      setSubmitError('An unexpected error occurred. Please try again.')
+      setSubmitError(t('errorUnexpected'))
     }
   }
 
@@ -136,23 +140,22 @@ export default function BookingForm({ event, schools }: { event: Event; schools:
           <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-green-50 flex items-center justify-center mx-auto mb-3 sm:mb-4">
             <CheckCircle className="w-10 h-10 sm:w-12 sm:h-12 text-green-500" />
           </div>
-          <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2 sm:mb-3">Registration Successful!</h3>
+          <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2 sm:mb-3">{t('successTitle')}</h3>
           <p className="text-sm sm:text-base text-gray-600 mb-2">
-            Your registration for <strong className="text-indigo-600">{event.title}</strong> has been confirmed!
+            {t('successConfirmed', { title: event.title })}
           </p>
           {submissionWarning ? (
             <Alert className="mt-4 border-amber-200 bg-amber-50 text-left">
-              <AlertTitle className="text-amber-900">Heads up — confirmation email not delivered</AlertTitle>
+              <AlertTitle className="text-amber-900">{t('emailWarningTitle')}</AlertTitle>
               <AlertDescription className="text-amber-800">{submissionWarning}</AlertDescription>
             </Alert>
           ) : (
             <>
               <p className="text-xs sm:text-sm text-gray-500">
-                A confirmation email with event details has been sent to your email address. Please check your inbox
-                (and spam folder).
+                {t('successEmailSent')}
               </p>
               <p className="text-xs sm:text-sm text-gray-500 mt-1">
-                If you don&apos;t see it in a few minutes, check your spam or junk folder.
+                {t('successCheckSpam')}
               </p>
             </>
           )}
@@ -170,20 +173,22 @@ export default function BookingForm({ event, schools }: { event: Event; schools:
   return (
     <Card className="border-2 border-gray-200 shadow-lg hover:shadow-xl transition-shadow duration-300">
       <CardHeader className="p-5 sm:p-7 pb-0">
-        <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-1 sm:mb-2">Registration Form</h3>
+        <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-1 sm:mb-2">{t('title')}</h3>
         <p className="text-xs sm:text-sm text-gray-500">{event.title}</p>
       </CardHeader>
       <CardContent className="p-5 sm:p-7 pt-4 sm:pt-6">
         {event.isPaid && (
           <Alert className="mb-5 border-2 border-amber-300 bg-amber-50 shadow-sm">
             <Banknote className="h-5 w-5 text-amber-600" />
-            <AlertTitle className="text-amber-800 uppercase tracking-wide">Registration Fee</AlertTitle>
+            <AlertTitle className="text-amber-800 uppercase tracking-wide">{t('feeTitle')}</AlertTitle>
             <AlertDescription>
               <p className="text-2xl sm:text-3xl font-bold text-amber-700">
-                {payableAmount != null ? `BDT ${payableAmount}` : 'Select a category to see the fee'}
+                {payableAmount != null
+                  ? t('feeBdt', { amount: payableAmount })
+                  : t('feeSelectCategory')}
               </p>
               <p className="text-xs text-gray-600 mt-2">
-                You will be redirected to bKash secure checkout after submitting this form.
+                {t('feeBkashNote')}
               </p>
             </AlertDescription>
           </Alert>
@@ -203,7 +208,7 @@ export default function BookingForm({ event, schools }: { event: Event; schools:
               render={({ field, fieldState }) => (
                 <FormItem>
                   <FormLabel>
-                    Name <span className="text-red-500">*</span>
+                    {t('labelName')} <span className="text-red-500">*</span>
                   </FormLabel>
                   <FormControl>
                     <Input
@@ -225,7 +230,7 @@ export default function BookingForm({ event, schools }: { event: Event; schools:
                 render={({ field, fieldState }) => (
                   <FormItem>
                     <FormLabel htmlFor="category">
-                      Category{' '}
+                      {t('labelCategory')}{' '}
                       {defaultRegistrationFields.category.required && <span className="text-red-500">*</span>}
                     </FormLabel>
                     <FormControl>
@@ -238,14 +243,20 @@ export default function BookingForm({ event, schools }: { event: Event; schools:
                         )}
                         {...field}
                       >
-                        <option value="">Select category</option>
-                        {event.categories?.map((category) => (
+                        <option value="">{t('selectCategory')}</option>
+                        {event.categories?.map((category) => {
+                          const categoryName = pickLocalized(locale, category.name, category.nameBn)
+                          return (
                           <option key={category.name} value={category.name}>
                             {event.isPaid && category.amount != null
-                              ? `${category.name} - BDT ${category.amount}`
-                              : category.name}
+                              ? t('categoryWithFee', {
+                                  name: categoryName,
+                                  amount: category.amount,
+                                })
+                              : categoryName}
                           </option>
-                        ))}
+                          )
+                        })}
                       </select>
                     </FormControl>
                     <FormMessage />
@@ -262,7 +273,7 @@ export default function BookingForm({ event, schools }: { event: Event; schools:
                   render={({ field, fieldState }) => (
                     <FormItem>
                       <FormLabel htmlFor="school">
-                        School (If you are private candidate, write private candidate)
+                        {t('labelSchool')}
                         {defaultRegistrationFields.school.required && <span className="text-red-500">*</span>}
                       </FormLabel>
                       <FormControl>
@@ -275,14 +286,14 @@ export default function BookingForm({ event, schools }: { event: Event; schools:
                           )}
                           {...field}
                         >
-                          <option value="">Select school</option>
-                          <option value={PRIVATE_CANDIDATE_OPTION}>{PRIVATE_CANDIDATE_OPTION}</option>
+                          <option value="">{t('selectSchool')}</option>
+                          <option value={PRIVATE_CANDIDATE_OPTION}>{t('optionPrivateCandidate')}</option>
                           {schools.map((school) => (
                             <option key={school} value={school}>
                               {school}
                             </option>
                           ))}
-                          <option value={SCHOOL_NOT_FOUND_OPTION}>School not found (type manually)</option>
+                          <option value={SCHOOL_NOT_FOUND_OPTION}>{t('optionSchoolNotFound')}</option>
                         </select>
                       </FormControl>
                       <FormMessage />
@@ -298,7 +309,7 @@ export default function BookingForm({ event, schools }: { event: Event; schools:
                         <FormControl>
                           <Input
                             type="text"
-                            placeholder="Type your school name"
+                            placeholder={t('placeholderCustomSchool')}
                             disabled={isLoading}
                             className={inputClass(false)}
                             {...field}
@@ -318,14 +329,14 @@ export default function BookingForm({ event, schools }: { event: Event; schools:
               render={({ field, fieldState }) => (
                 <FormItem>
                   <FormLabel htmlFor="email">
-                    Email Address (We will use this to send you the confirmation email){' '}
+                    {t('labelEmail')}{' '}
                     <span className="text-red-500">*</span>
                   </FormLabel>
                   <FormControl>
                     <Input
                       id="email"
                       type="email"
-                      placeholder="Enter your email"
+                      placeholder={t('placeholderEmail')}
                       disabled={isLoading}
                       className={inputClass(!!fieldState.error)}
                       {...field}
@@ -342,13 +353,13 @@ export default function BookingForm({ event, schools }: { event: Event; schools:
               render={({ field, fieldState }) => (
                 <FormItem>
                   <FormLabel htmlFor="phone">
-                    Phone Number <span className="text-red-500">*</span>
+                    {t('labelPhone')} <span className="text-red-500">*</span>
                   </FormLabel>
                   <FormControl>
                     <Input
                       id="phone"
                       type="tel"
-                      placeholder="01XXXXXXXXX (11 digits starting with 01)"
+                      placeholder={t('placeholderPhone')}
                       disabled={isLoading}
                       className={inputClass(!!fieldState.error)}
                       {...field}
@@ -366,7 +377,7 @@ export default function BookingForm({ event, schools }: { event: Event; schools:
                 render={({ field, fieldState }) => (
                   <FormItem>
                     <FormLabel htmlFor="information">
-                      Other Information
+                      {t('labelOtherInfo')}
                       {defaultRegistrationFields.information.required && (
                         <span className="text-red-500">*</span>
                       )}
@@ -376,7 +387,7 @@ export default function BookingForm({ event, schools }: { event: Event; schools:
                         id="information"
                         rows={4}
                         disabled={isLoading}
-                        placeholder="Any additional information you'd like to share (optional)..."
+                        placeholder={t('placeholderOtherInfo')}
                         className={cn(
                           'min-h-[100px] resize-none border-2 rounded-lg py-3 md:text-base',
                           fieldState.error ? 'border-red-400 bg-red-50' : 'border-gray-200 hover:border-gray-300',
@@ -392,7 +403,7 @@ export default function BookingForm({ event, schools }: { event: Event; schools:
 
             {customFormFields.length > 0 && (
               <div className="space-y-4 border-t border-gray-200 pt-4">
-                <p className="text-sm font-semibold text-gray-800">Additional Information</p>
+                <p className="text-sm font-semibold text-gray-800">{t('additionalInfo')}</p>
                 {customFormFields.map((field) => (
                   <FormField
                     key={field.id}
@@ -401,11 +412,17 @@ export default function BookingForm({ event, schools }: { event: Event; schools:
                     render={({ field: f, fieldState }) => {
                       const strVal = typeof f.value === 'string' ? f.value : ''
                       const arrVal = Array.isArray(f.value) ? f.value : []
+                      const fieldLabel = pickLocalized(locale, field.label, field.labelBn)
+                      const fieldPlaceholder = pickLocalized(
+                        locale,
+                        field.placeholder,
+                        field.placeholderBn,
+                      )
 
                       return (
                         <FormItem>
                           <FormLabel htmlFor={`custom-${field.id}`}>
-                            {field.label} {field.required && <span className="text-red-500">*</span>}
+                            {fieldLabel} {field.required && <span className="text-red-500">*</span>}
                           </FormLabel>
                           <FormControl>
                             {field.type === 'longText' ? (
@@ -413,7 +430,7 @@ export default function BookingForm({ event, schools }: { event: Event; schools:
                                 id={`custom-${field.id}`}
                                 rows={3}
                                 disabled={isLoading}
-                                placeholder={field.placeholder || 'Enter your answer'}
+                                placeholder={fieldPlaceholder || t('placeholderCustomAnswer')}
                                 className={cn(
                                   'min-h-[80px] resize-none border-2 rounded-lg py-3 md:text-base',
                                   fieldState.error
@@ -442,16 +459,16 @@ export default function BookingForm({ event, schools }: { event: Event; schools:
                                 name={f.name}
                                 ref={f.ref}
                               >
-                                <option value="">Select an option</option>
-                                {(field.options ?? []).map((option) => (
+                                <option value="">{t('selectOption')}</option>
+                                {(field.options ?? []).map((option, optionIndex) => (
                                   <option key={`${field.id}-${option}`} value={option}>
-                                    {option}
+                                    {pickLocalized(locale, option, field.optionsBn?.[optionIndex])}
                                   </option>
                                 ))}
                               </select>
                             ) : field.type === 'radio' ? (
                               <div className="space-y-2">
-                                {(field.options ?? []).map((option) => (
+                                {(field.options ?? []).map((option, optionIndex) => (
                                   <label
                                     key={`${field.id}-${option}`}
                                     className="flex items-center gap-2 text-sm text-gray-700"
@@ -465,13 +482,13 @@ export default function BookingForm({ event, schools }: { event: Event; schools:
                                       onBlur={f.onBlur}
                                       disabled={isLoading}
                                     />
-                                    {option}
+                                    {pickLocalized(locale, option, field.optionsBn?.[optionIndex])}
                                   </label>
                                 ))}
                               </div>
                             ) : field.type === 'checkbox' ? (
                               <div className="space-y-2">
-                                {(field.options ?? []).map((option) => {
+                                {(field.options ?? []).map((option, optionIndex) => {
                                   const normalized = option.trim()
                                   const checked = arrVal.includes(normalized)
                                   return (
@@ -495,7 +512,7 @@ export default function BookingForm({ event, schools }: { event: Event; schools:
                                         }}
                                         disabled={isLoading}
                                       />
-                                      {option}
+                                      {pickLocalized(locale, option, field.optionsBn?.[optionIndex])}
                                     </label>
                                   )
                                 })}
@@ -513,7 +530,7 @@ export default function BookingForm({ event, schools }: { event: Event; schools:
                                         : 'text'
                                 }
                                 disabled={isLoading}
-                                placeholder={field.placeholder || 'Enter your answer'}
+                                placeholder={fieldPlaceholder || t('placeholderCustomAnswer')}
                                 className={inputClass(!!fieldState.error)}
                                 value={strVal}
                                 onChange={(e) => f.onChange(e.target.value)}
@@ -537,7 +554,7 @@ export default function BookingForm({ event, schools }: { event: Event; schools:
               disabled={isLoading || (event.isPaid && !hasSelectedCategory)}
               className="w-full bg-indigo-500 hover:bg-indigo-600 text-white shadow-md hover:shadow-lg py-6 text-sm sm:text-base"
             >
-              {isLoading ? 'Submitting...' : event.isPaid ? 'Proceed to bKash' : 'Submit'}
+              {isLoading ? t('submitting') : event.isPaid ? t('proceedBkash') : t('submit')}
             </Button>
           </form>
         </Form>

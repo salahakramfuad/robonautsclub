@@ -1,11 +1,13 @@
-import Link from 'next/link'
 import { Metadata } from 'next'
 import Script from 'next/script'
 import dynamic from 'next/dynamic'
 import { Calendar, Clock, MapPin, ArrowLeft, Users, Monitor, Building2, Banknote } from 'lucide-react'
+import { getTranslations, setRequestLocale } from 'next-intl/server'
+import { Link } from '@/i18n/navigation'
 import { getPublicEnglishMediumSchools, getPublicEvent } from '../public-data'
 import { Event } from '@/types/event'
 import { notFound, permanentRedirect } from 'next/navigation'
+import { pickLocalized, pickLocalizedList } from '@/lib/i18n-localized'
 import { eventPublicHref } from '@/lib/event-ui'
 import EventImage from './EventImage'
 import { getEventSchema, getBreadcrumbSchema, absoluteSiteUrl } from '@/lib/seo'
@@ -68,8 +70,8 @@ const getEventTags = (event: Event) => {
   return tags.slice(0, 4) // Limit to 4 tags
 }
 
-// Event Passed Component
-const EventPassedMessage = () => {
+async function EventPassedMessage() {
+  const t = await getTranslations('events.detail')
   return (
     <Card className="shadow-sm">
       <CardContent className="p-6 sm:p-8 text-center">
@@ -77,15 +79,14 @@ const EventPassedMessage = () => {
           <Calendar className="w-6 h-6 sm:w-8 sm:h-8 text-gray-400" />
         </div>
         <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-2">
-          Event Has Passed
+          {t('passedTitle')}
         </h3>
         <p className="text-sm sm:text-base text-gray-600 mb-4">
-          This event has already taken place. Check out our upcoming events for
-          new opportunities!
+          {t('passedBody')}
         </p>
         <Button asChild className="bg-indigo-500 hover:bg-indigo-600 text-white">
           <Link href="/events" prefetch={false}>
-            View Upcoming Events
+            {t('passedCta')}
           </Link>
         </Button>
       </CardContent>
@@ -93,8 +94,8 @@ const EventPassedMessage = () => {
   )
 }
 
-// Registration Closed Component
-const RegistrationClosedMessage = () => {
+async function RegistrationClosedMessage() {
+  const t = await getTranslations('events.detail')
   return (
     <Card className="shadow-sm">
       <CardContent className="p-6 sm:p-8 text-center">
@@ -102,15 +103,14 @@ const RegistrationClosedMessage = () => {
           <Users className="w-6 h-6 sm:w-8 sm:h-8 text-amber-600" />
         </div>
         <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-2">
-          Registration Closed
+          {t('registrationClosedTitle')}
         </h3>
         <p className="text-sm sm:text-base text-gray-600 mb-4">
-          Registration for this event is closed. Check out our other events for
-          new opportunities!
+          {t('registrationClosedBody')}
         </p>
         <Button asChild className="bg-indigo-500 hover:bg-indigo-600 text-white">
           <Link href="/events" prefetch={false}>
-            View Other Events
+            {t('registrationClosedCta')}
           </Link>
         </Button>
       </CardContent>
@@ -121,9 +121,10 @@ const RegistrationClosedMessage = () => {
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ slug: string }>
+  params: Promise<{ locale: string; slug: string }>
 }): Promise<Metadata> {
-  const { slug } = await params
+  const { slug, locale } = await params
+  setRequestLocale(locale)
   const event = await getPublicEvent(slug)
 
   if (!event) {
@@ -149,13 +150,21 @@ export async function generateMetadata({
     return Number.isNaN(d.getTime()) ? undefined : d.toISOString()
   })()
 
+  const title = pickLocalized(locale, event.title, event.titleBn)
+  const description =
+    pickLocalized(locale, event.fullDescription, event.fullDescriptionBn) ||
+    pickLocalized(locale, event.description, event.descriptionBn)
+  const shortDescription = pickLocalized(locale, event.description, event.descriptionBn)
+
   return {
-    title: event.title,
-    description: event.fullDescription || event.description,
-    keywords: event.tags || ['robotics', 'STEM', 'workshop', 'competition'],
+    title,
+    description,
+    keywords: pickLocalizedList(locale, event.tags, event.tagsBn).length
+      ? pickLocalizedList(locale, event.tags, event.tagsBn)
+      : ['robotics', 'STEM', 'workshop', 'competition'],
     openGraph: {
-      title: event.title,
-      description: event.fullDescription || event.description,
+      title,
+      description,
       url: eventPageUrl,
       type: 'article',
       ...(publishedTime ? { publishedTime } : {}),
@@ -165,14 +174,14 @@ export async function generateMetadata({
           url: ogImageUrl,
           width: 1200,
           height: 630,
-          alt: event.title,
+          alt: title,
         },
       ],
     },
     twitter: {
       card: 'summary_large_image',
-      title: event.title,
-      description: event.description,
+      title,
+      description: shortDescription,
       images: [ogImageUrl],
     },
     alternates: {
@@ -187,9 +196,12 @@ export const revalidate = 1800
 export default async function EventDetailPage({
   params,
 }: {
-  params: Promise<{ slug: string }>
+  params: Promise<{ locale: string; slug: string }>
 }) {
-  const { slug } = await params
+  const { slug, locale } = await params
+  setRequestLocale(locale)
+  const t = await getTranslations('events.detail')
+  const tBreadcrumb = await getTranslations('breadcrumbs')
   const [event, schools] = await Promise.all([
     getPublicEvent(slug),
     getPublicEnglishMediumSchools(),
@@ -206,8 +218,22 @@ export default async function EventDetailPage({
   const eventDates = parseEventDates(event.date)
   const hasPassed = hasEventPassed(event.date)
   const registrationOpen = isRegistrationOpen(event)
-  const tags = getEventTags(event)
-  const isOnline = event.location.toLowerCase().includes('online') || event.venue?.toLowerCase().includes('online')
+  const title = pickLocalized(locale, event.title, event.titleBn)
+  const description = pickLocalized(locale, event.description, event.descriptionBn)
+  const fullDescription = pickLocalized(locale, event.fullDescription, event.fullDescriptionBn) || description
+  const time = pickLocalized(locale, event.time, event.timeBn)
+  const location = pickLocalized(locale, event.location, event.locationBn)
+  const venue = pickLocalized(locale, event.venue, event.venueBn)
+  const eligibility = pickLocalized(locale, event.eligibility, event.eligibilityBn)
+  const agenda = pickLocalized(locale, event.agenda, event.agendaBn)
+  const contactPersonName = pickLocalized(locale, event.contactPersonName, event.contactPersonNameBn)
+  const contactPersonDesignation = pickLocalized(
+    locale,
+    event.contactPersonDesignation,
+    event.contactPersonDesignationBn,
+  )
+  const tags = pickLocalizedList(locale, getEventTags(event), event.tagsBn)
+  const isOnline = location.toLowerCase().includes('online') || venue.toLowerCase().includes('online')
   const categoryFees =
     Array.isArray(event.categories) && event.categories.length > 0
       ? event.categories
@@ -216,7 +242,7 @@ export default async function EventDetailPage({
       : []
   const minCategoryFee = categoryFees.length > 0 ? Math.min(...categoryFees) : null
   const hasContactDetails = Boolean(
-    event.contactPersonName || event.contactPersonDesignation || event.contactPersonMobileOrEmail
+    contactPersonName || contactPersonDesignation || event.contactPersonMobileOrEmail
   )
 
   // Generate structured data
@@ -230,20 +256,20 @@ export default async function EventDetailPage({
 
   const eventSchema = getEventSchema({
     id: event.id,
-    title: event.title,
-    description: event.fullDescription || event.description,
+    title,
+    description: fullDescription,
     date: schemaDate,
-    time: event.time,
-    location: event.location,
-    venue: event.venue,
+    time,
+    location,
+    venue,
     image: getEventImageUrl(event.image),
     url: eventUrl,
   })
 
   const breadcrumbSchema = getBreadcrumbSchema([
-    { name: 'Home', url: '/' },
-    { name: 'Events', url: '/events' },
-    { name: event.title, url: eventPublicHref(event) },
+    { name: tBreadcrumb('home'), url: '/' },
+    { name: tBreadcrumb('events'), url: '/events' },
+    { name: title, url: eventPublicHref(event) },
   ])
 
   return (
@@ -273,15 +299,15 @@ export default async function EventDetailPage({
             className="inline-flex items-center gap-2 text-gray-700 hover:text-indigo-600 mb-3 sm:mb-4 transition-colors group text-sm sm:text-base"
           >
             <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5 group-hover:-translate-x-1 transition-transform" />
-            <span className="font-medium">Back to Events</span>
+            <span className="font-medium">{t('back')}</span>
           </Link>
           
           <div className="max-w-4xl">
             <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-extrabold text-gray-900 mb-2 sm:mb-3 leading-tight">
-              {event.title}
+              {title}
             </h1>
             <p className="text-sm sm:text-base md:text-lg lg:text-xl text-gray-600 leading-relaxed">
-              {event.description}
+              {description}
             </p>
           </div>
         </div>
@@ -296,7 +322,7 @@ export default async function EventDetailPage({
             <Card className="overflow-hidden border-2 border-gray-200 shadow-lg p-0">
               <EventImage
                 src={getEventImageUrl(event.image)}
-                alt={event.title}
+                alt={title}
                 priority
               />
             </Card>
@@ -304,9 +330,9 @@ export default async function EventDetailPage({
             {/* Overview Section */}
             <Card className="border-2 border-gray-200 shadow-lg">
               <CardContent className="p-4 sm:p-6 md:p-8">
-                <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-3 sm:mb-4">Overview</h3>
+                <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-3 sm:mb-4">{t('overview')}</h3>
                 <p className="text-gray-700 leading-relaxed text-sm sm:text-base md:text-lg">
-                  {event.fullDescription || event.description}
+                  {fullDescription}
                 </p>
               </CardContent>
             </Card>
@@ -314,25 +340,27 @@ export default async function EventDetailPage({
             {/* Event Details Section */}
             <Card className="border-2 border-gray-200 shadow-lg">
               <CardContent className="p-4 sm:p-6 md:p-8">
-                <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">Event Details</h3>
+                <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">{t('details')}</h3>
                 <div className="space-y-3 sm:space-y-4">
                 <div className="flex items-start gap-2 sm:gap-3 p-3 sm:p-4 rounded-lg sm:rounded-xl bg-indigo-50/50 border border-indigo-100">
                   <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-indigo-100 flex items-center justify-center shrink-0">
                     <Calendar className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-500" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-xs sm:text-sm font-medium text-gray-500 mb-1">Date{eventDates.length > 1 ? 's' : ''}</p>
+                    <p className="text-xs sm:text-sm font-medium text-gray-500 mb-1">
+                      {eventDates.length > 1 ? t('datesLabel') : t('dateLabel')}
+                    </p>
                     <p className="text-sm sm:text-base font-semibold text-gray-900">{formatEventDates(eventDates, 'long')}</p>
                   </div>
                 </div>
-                {event.time && (
+                {time && (
                   <div className="flex items-start gap-2 sm:gap-3 p-3 sm:p-4 rounded-lg sm:rounded-xl bg-blue-50/50 border border-blue-100">
                     <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-blue-100 flex items-center justify-center shrink-0">
                       <Clock className="w-4 h-4 sm:w-5 sm:h-5 text-blue-500" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-xs sm:text-sm font-medium text-gray-500 mb-1">Time</p>
-                      <p className="text-sm sm:text-base font-semibold text-gray-900">{event.time}</p>
+                      <p className="text-xs sm:text-sm font-medium text-gray-500 mb-1">{t('timeLabel')}</p>
+                      <p className="text-sm sm:text-base font-semibold text-gray-900">{time}</p>
                     </div>
                   </div>
                 )}
@@ -341,8 +369,8 @@ export default async function EventDetailPage({
                     <MapPin className="w-4 h-4 sm:w-5 sm:h-5 text-purple-500" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-xs sm:text-sm font-medium text-gray-500 mb-1">Venue</p>
-                    <p className="text-sm sm:text-base font-semibold text-gray-900 wrap-break-word">{event.venue || event.location}</p>
+                    <p className="text-xs sm:text-sm font-medium text-gray-500 mb-1">{t('venueLabel')}</p>
+                    <p className="text-sm sm:text-base font-semibold text-gray-900 wrap-break-word">{venue || location}</p>
                   </div>
                 </div>
                 {isOnline ? (
@@ -351,8 +379,8 @@ export default async function EventDetailPage({
                       <Monitor className="w-4 h-4 sm:w-5 sm:h-5 text-cyan-500" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-xs sm:text-sm font-medium text-gray-500 mb-1">Mode</p>
-                      <p className="text-sm sm:text-base font-semibold text-gray-900">Online Streaming</p>
+                      <p className="text-xs sm:text-sm font-medium text-gray-500 mb-1">{t('modeLabel')}</p>
+                      <p className="text-sm sm:text-base font-semibold text-gray-900">{t('modeOnline')}</p>
                     </div>
                   </div>
                 ) : (
@@ -361,19 +389,19 @@ export default async function EventDetailPage({
                       <Building2 className="w-4 h-4 sm:w-5 sm:h-5 text-purple-500" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-xs sm:text-sm font-medium text-gray-500 mb-1">Mode</p>
-                      <p className="text-sm sm:text-base font-semibold text-gray-900">In-person</p>
+                      <p className="text-xs sm:text-sm font-medium text-gray-500 mb-1">{t('modeLabel')}</p>
+                      <p className="text-sm sm:text-base font-semibold text-gray-900">{t('modeInPerson')}</p>
                     </div>
                   </div>
                 )}
-                {event.eligibility && (
+                {eligibility && (
                   <div className="flex items-start gap-2 sm:gap-3 p-3 sm:p-4 rounded-lg sm:rounded-xl bg-green-50/50 border border-green-100">
                     <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-green-100 flex items-center justify-center shrink-0">
                       <Users className="w-4 h-4 sm:w-5 sm:h-5 text-green-500" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-xs sm:text-sm font-medium text-gray-500 mb-1">Audience</p>
-                      <p className="text-sm sm:text-base font-semibold text-gray-900 wrap-break-word">{event.eligibility}</p>
+                      <p className="text-xs sm:text-sm font-medium text-gray-500 mb-1">{t('audienceLabel')}</p>
+                      <p className="text-sm sm:text-base font-semibold text-gray-900 wrap-break-word">{eligibility}</p>
                     </div>
                   </div>
                 )}
@@ -383,9 +411,11 @@ export default async function EventDetailPage({
                       <Banknote className="w-4 h-4 sm:w-5 sm:h-5 text-amber-600" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-xs sm:text-sm font-medium text-gray-500 mb-1">Fee</p>
+                      <p className="text-xs sm:text-sm font-medium text-gray-500 mb-1">{t('feeLabel')}</p>
                       <p className="text-sm sm:text-base font-semibold text-gray-900">
-                        {minCategoryFee != null ? `Starts from BDT ${minCategoryFee}` : `BDT ${event.amount}`}
+                        {minCategoryFee != null
+                          ? t('feeStartsFrom', { amount: minCategoryFee })
+                          : t('feeAmount', { amount: event.amount })}
                       </p>
                     </div>
                   </div>
@@ -398,21 +428,21 @@ export default async function EventDetailPage({
             {hasContactDetails && (
               <Card className="border-2 border-gray-200 shadow-lg">
                 <CardContent className="p-4 sm:p-6 md:p-8">
-                  <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">Contact Person</h3>
+                  <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">{t('contactPerson')}</h3>
                   <div className="space-y-3">
-                    {event.contactPersonName && (
+                    {contactPersonName && (
                       <p className="text-sm sm:text-base text-gray-800">
-                        <span className="font-semibold">Name:</span> {event.contactPersonName}
+                        <span className="font-semibold">{t('contactName')}</span> {contactPersonName}
                       </p>
                     )}
-                    {event.contactPersonDesignation && (
+                    {contactPersonDesignation && (
                       <p className="text-sm sm:text-base text-gray-800">
-                        <span className="font-semibold">Designation:</span> {event.contactPersonDesignation}
+                        <span className="font-semibold">{t('contactDesignation')}</span> {contactPersonDesignation}
                       </p>
                     )}
                     {event.contactPersonMobileOrEmail && (
                       <p className="text-sm sm:text-base text-gray-800">
-                        <span className="font-semibold">Mobile/Email:</span> {event.contactPersonMobileOrEmail}
+                        <span className="font-semibold">{t('contactMobileEmail')}</span> {event.contactPersonMobileOrEmail}
                       </p>
                     )}
                   </div>
@@ -421,12 +451,12 @@ export default async function EventDetailPage({
             )}
 
             {/* Agenda Section */}
-            {event.agenda && (
+            {agenda && (
               <Card className="border-2 border-gray-200 shadow-lg">
                 <CardContent className="p-4 sm:p-6 md:p-8">
-                  <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">Agenda</h3>
+                  <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">{t('agenda')}</h3>
                   <div className="text-gray-700 leading-relaxed text-sm sm:text-base md:text-lg whitespace-pre-line">
-                    {event.agenda}
+                    {agenda}
                   </div>
                 </CardContent>
               </Card>
@@ -435,14 +465,10 @@ export default async function EventDetailPage({
             {/* About the Organizer Section */}
             <Card className="border-2 border-gray-200 shadow-lg">
               <CardContent className="p-4 sm:p-6 md:p-8">
-                <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-3 sm:mb-4">About the Organizer</h3>
+                <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-3 sm:mb-4">{t('organizerTitle')}</h3>
                 <div className="space-y-3 sm:space-y-4 text-gray-700 leading-relaxed text-sm sm:text-base md:text-lg">
-                  <p>
-                    Robonauts Club is Bangladesh&apos;s first youth robotics club, dedicated to preparing students for RoboFest and global STEM challenges. We empower the next generation of robotics innovators through hands-on learning, expert mentorship, and competitive opportunities.
-                  </p>
-                  <p>
-                    Our events bring together passionate students, experienced mentors, and industry leaders to share knowledge, tools, and inspiration that shape the future of robotics and technology in Bangladesh.
-                  </p>
+                  <p>{t('organizerP1')}</p>
+                  <p>{t('organizerP2')}</p>
                 </div>
               </CardContent>
             </Card>
@@ -469,9 +495,9 @@ export default async function EventDetailPage({
           <div className="lg:col-span-1">
             <div className="sticky top-4 sm:top-6">
               {hasPassed ? (
-                <EventPassedMessage />
+                await EventPassedMessage()
               ) : !registrationOpen ? (
-                <RegistrationClosedMessage />
+                await RegistrationClosedMessage()
               ) : (
                 <BookingForm event={event} schools={schools} />
               )}

@@ -2,8 +2,10 @@ import { z } from 'zod'
 
 export const newsArticleFormSchema = z.object({
   title: z.string().trim().min(1, 'Title is required'),
+  titleBn: z.string().default(''),
   slugOverride: z.string(),
   body: z.string().trim().min(1, 'Article body is required'),
+  bodyBn: z.string().default(''),
   coverImageUrl: z.string(),
   displayDateInput: z.string().min(1, 'Display date is required'),
   published: z.boolean(),

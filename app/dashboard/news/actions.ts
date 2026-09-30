@@ -34,8 +34,10 @@ function mapNewsDoc(id: string, data: Record<string, unknown>): NewsArticle {
   return {
     id,
     title: String(data.title ?? ''),
+    titleBn: typeof data.titleBn === 'string' ? data.titleBn : undefined,
     slug: String(data.slug ?? ''),
     body: String(data.body ?? ''),
+    bodyBn: typeof data.bodyBn === 'string' ? data.bodyBn : undefined,
     coverImageUrl: data.coverImageUrl ? String(data.coverImageUrl) : undefined,
     images: Array.isArray(data.images) ? data.images.filter((u): u is string => typeof u === 'string') : undefined,
     published: Boolean(data.published),
@@ -91,8 +93,10 @@ export async function getNewsArticleForDashboard(id: string): Promise<NewsArticl
 
 export async function createNewsArticle(input: {
   title: string
+  titleBn?: string
   slug?: string
   body: string
+  bodyBn?: string
   coverImageUrl?: string
   images?: string[]
   published: boolean
@@ -107,6 +111,8 @@ export async function createNewsArticle(input: {
   const body = sanitizeNewsBody(input.body)
   if (!title) throw new Error('Title is required.')
   if (!body) throw new Error('Body is required.')
+  const titleBn = sanitizeNewsTitle(input.titleBn ?? '')
+  const bodyBn = sanitizeNewsBody(input.bodyBn ?? '')
 
   const baseSlug = slugifyForUrl((input.slug?.trim() || title).trim())
   const slug = await ensureUniqueSlug(baseSlug)
@@ -120,8 +126,10 @@ export async function createNewsArticle(input: {
 
   await collectionAdd('news', {
     title,
+    titleBn,
     slug,
     body,
+    bodyBn,
     coverImageUrl: input.coverImageUrl?.trim() || '',
     images,
     published,
@@ -140,8 +148,10 @@ export async function updateNewsArticle(
   id: string,
   input: {
     title: string
+    titleBn?: string
     slug?: string
     body: string
+    bodyBn?: string
     coverImageUrl?: string
     images?: string[]
     published: boolean
@@ -162,6 +172,8 @@ export async function updateNewsArticle(
   const body = sanitizeNewsBody(input.body)
   if (!title) throw new Error('Title is required.')
   if (!body) throw new Error('Body is required.')
+  const titleBn = sanitizeNewsTitle(input.titleBn ?? '')
+  const bodyBn = sanitizeNewsBody(input.bodyBn ?? '')
 
   const slugInput = (input.slug?.trim() || title).trim()
   const baseSlug = slugifyForUrl(slugInput)
@@ -178,8 +190,10 @@ export async function updateNewsArticle(
 
   const update: Record<string, unknown> = {
     title,
+    titleBn,
     slug,
     body,
+    bodyBn,
     coverImageUrl: input.coverImageUrl?.trim() || '',
     images,
     published,
