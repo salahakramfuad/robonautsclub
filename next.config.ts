@@ -1,10 +1,12 @@
 import type { NextConfig } from 'next'
 import { createRequire } from 'node:module'
+import createNextIntlPlugin from 'next-intl/plugin'
 
 const require = createRequire(import.meta.url)
 const withBundleAnalyzer = require('@next/bundle-analyzer')({
   enabled: process.env.ANALYZE === 'true',
 })
+const withNextIntl = createNextIntlPlugin('./i18n/request.ts')
 
 /** @type {import('next').NextConfig} */
 const nextConfig: NextConfig = {
@@ -96,7 +98,7 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default withBundleAnalyzer(nextConfig);
+export default withBundleAnalyzer(withNextIntl(nextConfig));
 
 // Bindings from wrangler.jsonc (D1 DB, R2 cache, etc.) available in `next dev`.
 // Do not start the local Workers runtime during `next build`; a stale local

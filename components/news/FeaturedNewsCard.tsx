@@ -1,7 +1,9 @@
-import Link from 'next/link'
 import Image from 'next/image'
 import { ArrowRight } from 'lucide-react'
+import { getLocale, getTranslations } from 'next-intl/server'
+import { Link } from '@/i18n/navigation'
 import type { NewsArticle } from '@/types/news'
+import { pickLocalized } from '@/lib/i18n-localized'
 import { effectiveNewsDisplayRaw } from '@/lib/publicContentDates'
 import { excerptBody, formatNewsDate, newsArticleHref, newsDateTimeAttr } from '@/lib/news-ui'
 import NewsCoverFallback from '@/components/news/NewsCoverFallback'
@@ -10,10 +12,14 @@ type Props = {
   article: NewsArticle
 }
 
-export default function FeaturedNewsCard({ article }: Props) {
+export default async function FeaturedNewsCard({ article }: Props) {
+  const locale = await getLocale()
+  const tCard = await getTranslations('news.card')
+  const tList = await getTranslations('news.list')
   const href = newsArticleHref(article)
   const dateLabel = formatNewsDate(effectiveNewsDisplayRaw(article))
-  const excerpt = excerptBody(article.body, 180)
+  const title = pickLocalized(locale, article.title, article.titleBn)
+  const excerpt = excerptBody(pickLocalized(locale, article.body, article.bodyBn), 180)
 
   return (
     <Link
@@ -26,7 +32,7 @@ export default function FeaturedNewsCard({ article }: Props) {
           {article.coverImageUrl ? (
             <Image
               src={article.coverImageUrl}
-              alt={article.title}
+              alt={title}
               fill
               priority
               className="object-cover transition-transform duration-500 ease-out motion-reduce:transition-none group-hover:scale-[1.03]"
@@ -43,7 +49,7 @@ export default function FeaturedNewsCard({ article }: Props) {
 
         <div className="flex flex-col justify-center p-5 sm:p-7 lg:p-9 xl:p-10">
           <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-indigo-600">
-            Featured story
+            {tList('featuredLabel')}
           </p>
           {dateLabel ? (
             <time
@@ -54,7 +60,7 @@ export default function FeaturedNewsCard({ article }: Props) {
             </time>
           ) : null}
           <h2 className="mt-2 text-2xl font-bold leading-snug tracking-tight text-gray-900 transition-colors duration-300 group-hover:text-indigo-700 sm:text-3xl lg:text-[2rem] lg:leading-tight">
-            {article.title}
+            {title}
           </h2>
           {excerpt ? (
             <p className="mt-3 line-clamp-3 text-sm leading-relaxed text-gray-600 sm:text-base">
@@ -62,7 +68,7 @@ export default function FeaturedNewsCard({ article }: Props) {
             </p>
           ) : null}
           <span className="mt-6 inline-flex items-center gap-1.5 text-sm font-semibold text-indigo-600">
-            Read story
+            {tCard('readStory')}
             <ArrowRight
               className="size-4 transition-transform duration-300 motion-reduce:transition-none group-hover:translate-x-1"
               aria-hidden

@@ -1,6 +1,8 @@
-import Link from 'next/link'
 import Image from 'next/image'
 import { Calendar, Images, MapPin } from 'lucide-react'
+import { getLocale, getTranslations } from 'next-intl/server'
+import { Link } from '@/i18n/navigation'
+import { pickLocalized } from '@/lib/i18n-localized'
 import { cn } from '@/lib/utils'
 import type { GalleryGroup } from '@/types/gallery'
 
@@ -10,7 +12,11 @@ type Props = {
   featured?: boolean
 }
 
-export default function GalleryAlbumCard({ group, dateLine = '', featured = false }: Props) {
+export default async function GalleryAlbumCard({ group, dateLine = '', featured = false }: Props) {
+  const locale = await getLocale()
+  const t = await getTranslations('gallery.card')
+  const title = pickLocalized(locale, group.title, group.titleBn)
+  const location = pickLocalized(locale, group.location, group.locationBn)
   const cover = group.images[0]?.url
   const stack = group.images.slice(1, 4).map((img) => img.url)
   const photoCount = group.imageCount ?? group.images.length
@@ -76,7 +82,7 @@ export default function GalleryAlbumCard({ group, dateLine = '', featured = fals
 
         <div className="absolute bottom-3 left-3 inline-flex items-center gap-1.5 rounded-full border border-cyan-300/30 bg-slate-950/55 px-2.5 py-1 text-[11px] font-semibold text-cyan-50 backdrop-blur-sm sm:bottom-4 sm:left-4 sm:text-xs">
           <Images className="size-3.5 shrink-0 text-cyan-200" aria-hidden />
-          {photoCount} photo{photoCount === 1 ? '' : 's'}
+          {t('photoBadge', { count: photoCount })}
         </div>
       </div>
 
@@ -87,7 +93,7 @@ export default function GalleryAlbumCard({ group, dateLine = '', featured = fals
             featured ? 'text-xl sm:text-2xl line-clamp-2' : 'text-lg sm:text-xl line-clamp-2',
           )}
         >
-          {group.title}
+          {title}
         </h2>
         {dateLine ? (
           <p className="flex items-center gap-1.5 text-xs text-gray-500 sm:text-sm">
@@ -95,10 +101,10 @@ export default function GalleryAlbumCard({ group, dateLine = '', featured = fals
             <span className="truncate">{dateLine}</span>
           </p>
         ) : null}
-        {group.location ? (
+        {location ? (
           <p className="flex items-start gap-1.5 text-xs text-gray-500 sm:text-sm">
             <MapPin className="mt-0.5 size-3.5 shrink-0 text-indigo-500" aria-hidden />
-            <span className="line-clamp-2 whitespace-pre-wrap">{group.location}</span>
+            <span className="line-clamp-2 whitespace-pre-wrap">{location}</span>
           </p>
         ) : null}
       </div>

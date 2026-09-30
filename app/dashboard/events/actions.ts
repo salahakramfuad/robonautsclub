@@ -86,23 +86,34 @@ export async function getEvent(id: string): Promise<Event | null> {
  */
 export async function createEvent(formData: {
   title: string
+  titleBn?: string
   date: string | string[] // Accept both string and array
   description: string
+  descriptionBn?: string
   time?: string
+  timeBn?: string
   location?: string
+  locationBn?: string
   venue?: string
+  venueBn?: string
   fullDescription?: string
+  fullDescriptionBn?: string
   eligibility?: string
+  eligibilityBn?: string
   agenda?: string
+  agendaBn?: string
   image?: string
   tags?: string[]
+  tagsBn?: string[]
   isPaid?: boolean
   amount?: number
   paymentBkashNumber?: string
-  categories?: Array<{ name: string; amount?: number }>
+  categories?: Array<{ name: string; nameBn?: string; amount?: number }>
   registrationClosingDate?: string
   contactPersonName?: string
+  contactPersonNameBn?: string
   contactPersonDesignation?: string
+  contactPersonDesignationBn?: string
   contactPersonMobileOrEmail?: string
   customFormFields?: Event['customFormFields']
   defaultRegistrationFields?: Event['defaultRegistrationFields']
@@ -157,26 +168,40 @@ export async function createEvent(formData: {
       hasCategories: categories.length > 0,
     })
     const slug = await ensureUniqueEventSlug(slugifyEventTitle(sanitized.title))
+    const tagsBn = Array.isArray(formData.tagsBn)
+      ? formData.tagsBn.map((tag) => String(tag).trim()).filter((tag) => tag.length > 0)
+      : []
     const eventId = await collectionAdd('events', {
       title: sanitized.title,
+      titleBn: formData.titleBn?.trim() ?? '',
       slug,
       date: normalizedDate,
       description: sanitized.description,
+      descriptionBn: formData.descriptionBn?.trim() ?? '',
       time: sanitized.time || defaultTime,
+      timeBn: formData.timeBn?.trim() ?? '',
       location: sanitized.location,
+      locationBn: formData.locationBn?.trim() ?? '',
       venue: sanitized.venue || sanitized.location,
+      venueBn: formData.venueBn?.trim() ?? '',
       fullDescription: sanitized.fullDescription || sanitized.description,
+      fullDescriptionBn: formData.fullDescriptionBn?.trim() ?? '',
       eligibility: sanitized.eligibility,
+      eligibilityBn: formData.eligibilityBn?.trim() ?? '',
       agenda: sanitized.agenda,
+      agendaBn: formData.agendaBn?.trim() ?? '',
       image: formData.image || '/robotics-event.gif',
       tags: sanitized.tags,
+      tagsBn,
       isPaid,
       ...(isPaid && { amount: formData.amount ?? 0 }),
       ...(categories.length > 0 && { categories }),
       ...(isPaid && formData.paymentBkashNumber?.trim() && { paymentBkashNumber: formData.paymentBkashNumber.trim() }),
       ...(formData.registrationClosingDate?.trim() && { registrationClosingDate: formData.registrationClosingDate.trim() }),
       contactPersonName: formData.contactPersonName?.trim() ?? '',
+      contactPersonNameBn: formData.contactPersonNameBn?.trim() ?? '',
       contactPersonDesignation: formData.contactPersonDesignation?.trim() ?? '',
+      contactPersonDesignationBn: formData.contactPersonDesignationBn?.trim() ?? '',
       contactPersonMobileOrEmail: formData.contactPersonMobileOrEmail?.trim() ?? '',
       customFormFields,
       defaultRegistrationFields,
@@ -222,24 +247,35 @@ export async function updateEvent(
   eventId: string,
   formData: {
     title: string
+    titleBn?: string
     date: string | string[] // Accept both string and array
     description: string
+    descriptionBn?: string
     time?: string
+    timeBn?: string
     location?: string
+    locationBn?: string
     venue?: string
+    venueBn?: string
     fullDescription?: string
+    fullDescriptionBn?: string
     eligibility?: string
+    eligibilityBn?: string
     agenda?: string
+    agendaBn?: string
     image?: string
     tags?: string[]
+    tagsBn?: string[]
     isPaid?: boolean
     amount?: number
     paymentBkashNumber?: string
-    categories?: Array<{ name: string; amount?: number }>
+    categories?: Array<{ name: string; nameBn?: string; amount?: number }>
     registrationClosingDate?: string
     registrationDisabled?: boolean
     contactPersonName?: string
+    contactPersonNameBn?: string
     contactPersonDesignation?: string
+    contactPersonDesignationBn?: string
     contactPersonMobileOrEmail?: string
     customFormFields?: Event['customFormFields']
     defaultRegistrationFields?: Event['defaultRegistrationFields']
@@ -302,28 +338,65 @@ export async function updateEvent(
       : formData.date
     
     // Use sanitized values for all text fields
-    const isPaid = formData.isPaid ?? false
-    const categories = normalizeEventCategories(formData.categories, isPaid)
-    const customFormFields = normalizeCustomFormFields(formData.customFormFields)
-    const defaultRegistrationFields = normalizeDefaultRegistrationFields(formData.defaultRegistrationFields, {
-      hasCategories: categories.length > 0,
-    })
+    const isPaid = formData.isPaid ?? (Boolean(eventData.isPaid) || false)
+    const categories = normalizeEventCategories(
+      formData.categories ??
+        (Array.isArray(eventData.categories)
+          ? (eventData.categories as Array<{ name: string; nameBn?: string; amount?: number }>)
+          : undefined),
+      isPaid,
+    )
+    const customFormFields = normalizeCustomFormFields(
+      formData.customFormFields ??
+        (Array.isArray(eventData.customFormFields)
+          ? (eventData.customFormFields as Event['customFormFields'])
+          : undefined),
+    )
+    const defaultRegistrationFields = normalizeDefaultRegistrationFields(
+      formData.defaultRegistrationFields ??
+        (eventData.defaultRegistrationFields as Event['defaultRegistrationFields'] | undefined),
+      {
+        hasCategories: categories.length > 0,
+      },
+    )
     const previousSlug =
       typeof eventData.slug === 'string' && eventData.slug.trim() ? eventData.slug.trim() : ''
     const slug = await ensureUniqueEventSlug(slugifyEventTitle(sanitized.title), eventId)
+    const tagsBn = Array.isArray(formData.tagsBn)
+      ? formData.tagsBn.map((tag) => String(tag).trim()).filter((tag) => tag.length > 0)
+      : Array.isArray(eventData.tagsBn)
+        ? (eventData.tagsBn as unknown[]).map((tag) => String(tag).trim()).filter((tag) => tag.length > 0)
+        : []
     await collectionSet('events', eventId, {
       title: sanitized.title,
+      titleBn: formData.titleBn?.trim() ?? (typeof eventData.titleBn === 'string' ? eventData.titleBn : ''),
       slug,
       date: normalizedDate,
       description: sanitized.description,
+      descriptionBn:
+        formData.descriptionBn?.trim() ??
+        (typeof eventData.descriptionBn === 'string' ? eventData.descriptionBn : ''),
       time: sanitized.time || defaultTime,
+      timeBn: formData.timeBn?.trim() ?? (typeof eventData.timeBn === 'string' ? eventData.timeBn : ''),
       location: sanitized.location,
+      locationBn:
+        formData.locationBn?.trim() ??
+        (typeof eventData.locationBn === 'string' ? eventData.locationBn : ''),
       venue: sanitized.venue || sanitized.location,
+      venueBn: formData.venueBn?.trim() ?? (typeof eventData.venueBn === 'string' ? eventData.venueBn : ''),
       fullDescription: sanitized.fullDescription || sanitized.description,
+      fullDescriptionBn:
+        formData.fullDescriptionBn?.trim() ??
+        (typeof eventData.fullDescriptionBn === 'string' ? eventData.fullDescriptionBn : ''),
       eligibility: sanitized.eligibility,
+      eligibilityBn:
+        formData.eligibilityBn?.trim() ??
+        (typeof eventData.eligibilityBn === 'string' ? eventData.eligibilityBn : ''),
       agenda: sanitized.agenda,
+      agendaBn: formData.agendaBn?.trim() ?? (typeof eventData.agendaBn === 'string' ? eventData.agendaBn : ''),
       image: formData.image || '/robotics-event.gif',
       tags: sanitized.tags,
+      tagsBn,
       isPaid,
       amount: isPaid ? (formData.amount ?? 0) : 0,
       categories,
@@ -331,7 +404,15 @@ export async function updateEvent(
       registrationClosingDate: formData.registrationClosingDate?.trim() ?? '',
       registrationDisabled: formData.registrationDisabled ?? false,
       contactPersonName: formData.contactPersonName?.trim() ?? '',
+      contactPersonNameBn:
+        formData.contactPersonNameBn?.trim() ??
+        (typeof eventData.contactPersonNameBn === 'string' ? eventData.contactPersonNameBn : ''),
       contactPersonDesignation: formData.contactPersonDesignation?.trim() ?? '',
+      contactPersonDesignationBn:
+        formData.contactPersonDesignationBn?.trim() ??
+        (typeof eventData.contactPersonDesignationBn === 'string'
+          ? eventData.contactPersonDesignationBn
+          : ''),
       contactPersonMobileOrEmail: formData.contactPersonMobileOrEmail?.trim() ?? '',
       customFormFields,
       defaultRegistrationFields,

@@ -1,9 +1,8 @@
 'use client'
 
-import Link from 'next/link'
-import { usePathname } from 'next/navigation'
 import { ChevronDown } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { Link, usePathname } from '@/i18n/navigation'
 import {
   Popover,
   PopoverContent,

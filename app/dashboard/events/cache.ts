@@ -38,23 +38,25 @@ function parseCreatedAt(value: unknown): Date | string {
 }
 
 export function normalizeEventCategories(
-  categories: Array<{ name: string; amount?: number }> | undefined,
+  categories: Array<{ name: string; nameBn?: string; amount?: number }> | undefined,
   isPaid: boolean,
-): Array<{ name: string; amount?: number }> {
+): Array<{ name: string; nameBn?: string; amount?: number }> {
   if (!Array.isArray(categories)) return []
 
   const normalized = categories
     .map((category) => {
       const name = category.name?.trim() || ''
+      const nameBn = typeof category.nameBn === 'string' ? category.nameBn.trim() : ''
       const numeric = Number(category.amount)
       const includeAmount =
         isPaid && category.amount != null && Number.isFinite(numeric) && numeric > 0
 
-      return includeAmount ? { name, amount: numeric } : { name }
+      const base = nameBn ? { name, nameBn } : { name }
+      return includeAmount ? { ...base, amount: numeric } : base
     })
     .filter((category) => category.name.length > 0)
 
-  const uniqueByName = new Map<string, { name: string; amount?: number }>()
+  const uniqueByName = new Map<string, { name: string; nameBn?: string; amount?: number }>()
   for (const category of normalized) {
     if (!uniqueByName.has(category.name.toLowerCase())) {
       uniqueByName.set(category.name.toLowerCase(), category)

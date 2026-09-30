@@ -1,0 +1,511 @@
+import { Metadata } from 'next'
+import Script from 'next/script'
+import dynamic from 'next/dynamic'
+import { Calendar, Clock, MapPin, ArrowLeft, Users, Monitor, Building2, Banknote } from 'lucide-react'
+import { getTranslations, setRequestLocale } from 'next-intl/server'
+import { Link } from '@/i18n/navigation'
+import { getPublicEnglishMediumSchools, getPublicEvent } from '../public-data'
+import { Event } from '@/types/event'
+import { notFound, permanentRedirect } from 'next/navigation'
+import { pickLocalized, pickLocalizedList } from '@/lib/i18n-localized'
+import { eventPublicHref } from '@/lib/event-ui'
+import EventImage from './EventImage'
+import { getEventSchema, getBreadcrumbSchema, absoluteSiteUrl } from '@/lib/seo'
+import { parseEventDates, formatEventDates, hasEventPassed, isRegistrationOpen } from '@/lib/dateUtils'
+import { Card, CardContent } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+
+const BookingForm = dynamic(() => import('./BookingForm'))
+
+
+// Helper function to validate and get image URL
+const getEventImageUrl = (imageUrl?: string): string => {
+  if (!imageUrl || imageUrl.trim() === '') {
+    return '/roboclass.jpg'
+  }
+
+  const trimmed = imageUrl.trim()
+  
+  // Check if it's a valid relative path (starts with /)
+  if (trimmed.startsWith('/')) {
+    return trimmed
+  }
+  
+  // Check if it's a valid absolute URL
+  if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
+    return trimmed
+  }
+  
+  // Invalid URL, use default
+  return '/robologo.png'
+}
+
+// Helper function to get tags from event
+const getEventTags = (event: Event) => {
+  // Use stored tags if available, otherwise fall back to extracted tags
+  if (event.tags && event.tags.length > 0) {
+    return event.tags
+  }
+
+  // Fallback: Extract tags from content if no tags are stored
+  const tags: string[] = []
+  const titleLower = event.title.toLowerCase()
+  const descLower = (event.fullDescription || event.description).toLowerCase()
+
+  if (titleLower.includes('workshop') || descLower.includes('workshop')) tags.push('Workshop')
+  if (titleLower.includes('competition') || titleLower.includes('olympiad') || titleLower.includes('robfest')) tags.push('Competition')
+  if (titleLower.includes('bootcamp') || descLower.includes('bootcamp')) tags.push('Bootcamp')
+  if (titleLower.includes('coding') || descLower.includes('programming') || descLower.includes('python')) tags.push('Programming')
+  if (descLower.includes('robotics') || titleLower.includes('robot')) tags.push('Robotics')
+  if (descLower.includes('stem') || descLower.includes('science')) tags.push('STEM')
+  if (descLower.includes('ai') || descLower.includes('artificial intelligence')) tags.push('AI')
+  if (descLower.includes('arduino') || descLower.includes('electronics')) tags.push('Electronics')
+
+  // Default tags if none found
+  if (tags.length === 0) {
+    tags.push('Robotics', 'STEM', 'Education')
+  }
+
+  return tags.slice(0, 4) // Limit to 4 tags
+}
+
+async function EventPassedMessage() {
+  const t = await getTranslations('events.detail')
+  return (
+    <Card className="shadow-sm">
+      <CardContent className="p-6 sm:p-8 text-center">
+        <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-3 sm:mb-4">
+          <Calendar className="w-6 h-6 sm:w-8 sm:h-8 text-gray-400" />
+        </div>
+        <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-2">
+          {t('passedTitle')}
+        </h3>
+        <p className="text-sm sm:text-base text-gray-600 mb-4">
+          {t('passedBody')}
+        </p>
+        <Button asChild className="bg-indigo-500 hover:bg-indigo-600 text-white">
+          <Link href="/events" prefetch={false}>
+            {t('passedCta')}
+          </Link>
+        </Button>
+      </CardContent>
+    </Card>
+  )
+}
+
+async function RegistrationClosedMessage() {
+  const t = await getTranslations('events.detail')
+  return (
+    <Card className="shadow-sm">
+      <CardContent className="p-6 sm:p-8 text-center">
+        <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-amber-100 flex items-center justify-center mx-auto mb-3 sm:mb-4">
+          <Users className="w-6 h-6 sm:w-8 sm:h-8 text-amber-600" />
+        </div>
+        <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-2">
+          {t('registrationClosedTitle')}
+        </h3>
+        <p className="text-sm sm:text-base text-gray-600 mb-4">
+          {t('registrationClosedBody')}
+        </p>
+        <Button asChild className="bg-indigo-500 hover:bg-indigo-600 text-white">
+          <Link href="/events" prefetch={false}>
+            {t('registrationClosedCta')}
+          </Link>
+        </Button>
+      </CardContent>
+    </Card>
+  )
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string; slug: string }>
+}): Promise<Metadata> {
+  const { slug, locale } = await params
+  setRequestLocale(locale)
+  const event = await getPublicEvent(slug)
+
+  if (!event) {
+    return {
+      title: 'Event Not Found',
+    }
+  }
+
+  const eventPageUrl = absoluteSiteUrl(eventPublicHref(event))
+  const eventImage = getEventImageUrl(event.image)
+  const ogImageUrl = eventImage.startsWith('http')
+    ? eventImage
+    : absoluteSiteUrl(eventImage)
+
+  const publishedTime = (() => {
+    const d =
+      event.createdAt instanceof Date ? event.createdAt : new Date(event.createdAt as string)
+    return Number.isNaN(d.getTime()) ? undefined : d.toISOString()
+  })()
+  const modifiedTime = (() => {
+    const d =
+      event.updatedAt instanceof Date ? event.updatedAt : new Date(event.updatedAt as string)
+    return Number.isNaN(d.getTime()) ? undefined : d.toISOString()
+  })()
+
+  const title = pickLocalized(locale, event.title, event.titleBn)
+  const description =
+    pickLocalized(locale, event.fullDescription, event.fullDescriptionBn) ||
+    pickLocalized(locale, event.description, event.descriptionBn)
+  const shortDescription = pickLocalized(locale, event.description, event.descriptionBn)
+
+  return {
+    title,
+    description,
+    keywords: pickLocalizedList(locale, event.tags, event.tagsBn).length
+      ? pickLocalizedList(locale, event.tags, event.tagsBn)
+      : ['robotics', 'STEM', 'workshop', 'competition'],
+    openGraph: {
+      title,
+      description,
+      url: eventPageUrl,
+      type: 'article',
+      ...(publishedTime ? { publishedTime } : {}),
+      ...(modifiedTime ? { modifiedTime } : {}),
+      images: [
+        {
+          url: ogImageUrl,
+          width: 1200,
+          height: 630,
+          alt: title,
+        },
+      ],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description: shortDescription,
+      images: [ogImageUrl],
+    },
+    alternates: {
+      canonical: eventPublicHref(event),
+    },
+  }
+}
+
+// ISR: longer window lowers edge recomputation while admin updates still invalidate on-demand
+export const revalidate = 1800
+
+export default async function EventDetailPage({
+  params,
+}: {
+  params: Promise<{ locale: string; slug: string }>
+}) {
+  const { slug, locale } = await params
+  setRequestLocale(locale)
+  const t = await getTranslations('events.detail')
+  const tBreadcrumb = await getTranslations('breadcrumbs')
+  const [event, schools] = await Promise.all([
+    getPublicEvent(slug),
+    getPublicEnglishMediumSchools(),
+  ])
+
+  if (!event) {
+    notFound()
+  }
+
+  if (event.slug && event.slug !== slug) {
+    permanentRedirect(eventPublicHref(event))
+  }
+
+  const eventDates = parseEventDates(event.date)
+  const hasPassed = hasEventPassed(event.date)
+  const registrationOpen = isRegistrationOpen(event)
+  const title = pickLocalized(locale, event.title, event.titleBn)
+  const description = pickLocalized(locale, event.description, event.descriptionBn)
+  const fullDescription = pickLocalized(locale, event.fullDescription, event.fullDescriptionBn) || description
+  const time = pickLocalized(locale, event.time, event.timeBn)
+  const location = pickLocalized(locale, event.location, event.locationBn)
+  const venue = pickLocalized(locale, event.venue, event.venueBn)
+  const eligibility = pickLocalized(locale, event.eligibility, event.eligibilityBn)
+  const agenda = pickLocalized(locale, event.agenda, event.agendaBn)
+  const contactPersonName = pickLocalized(locale, event.contactPersonName, event.contactPersonNameBn)
+  const contactPersonDesignation = pickLocalized(
+    locale,
+    event.contactPersonDesignation,
+    event.contactPersonDesignationBn,
+  )
+  const tags = pickLocalizedList(locale, getEventTags(event), event.tagsBn)
+  const isOnline = location.toLowerCase().includes('online') || venue.toLowerCase().includes('online')
+  const categoryFees =
+    Array.isArray(event.categories) && event.categories.length > 0
+      ? event.categories
+          .map((category) => category.amount)
+          .filter((amount): amount is number => amount != null && amount > 0)
+      : []
+  const minCategoryFee = categoryFees.length > 0 ? Math.min(...categoryFees) : null
+  const hasContactDetails = Boolean(
+    contactPersonName || contactPersonDesignation || event.contactPersonMobileOrEmail
+  )
+
+  // Generate structured data
+  const eventUrl = absoluteSiteUrl(eventPublicHref(event))
+  // For structured data, use first date or comma-separated string
+  const schemaDate = Array.isArray(event.date) 
+    ? event.date.length > 0 ? event.date[0] : ''
+    : typeof event.date === 'string' && event.date.includes(',')
+    ? event.date.split(',')[0].trim()
+    : event.date || ''
+
+  const eventSchema = getEventSchema({
+    id: event.id,
+    title,
+    description: fullDescription,
+    date: schemaDate,
+    time,
+    location,
+    venue,
+    image: getEventImageUrl(event.image),
+    url: eventUrl,
+  })
+
+  const breadcrumbSchema = getBreadcrumbSchema([
+    { name: tBreadcrumb('home'), url: '/' },
+    { name: tBreadcrumb('events'), url: '/events' },
+    { name: title, url: eventPublicHref(event) },
+  ])
+
+  return (
+    <div className="min-h-screen bg-linear-to-br from-sky-50 via-blue-50 to-indigo-50">
+      <Script
+        id="event-schema"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(eventSchema) }}
+      />
+      <Script
+        id="breadcrumb-schema"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
+      {/* Compact Header Section */}
+      <section className="relative overflow-hidden">
+        {/* Background decoration */}
+        <div className="absolute inset-0 opacity-30">
+          <div className="absolute top-0 right-0 h-96 bg-blue-200 rounded-full blur-3xl transform translate-x-1/2 -translate-y-1/2" />
+          <div className="absolute bottom-0 left-0 h-96 bg-indigo-200 rounded-full blur-3xl transform -translate-x-1/2 translate-y-1/2" />
+        </div>
+
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 pt-4 sm:pt-6 md:pt-8 pb-4 sm:pb-6">
+          <Link
+            href="/events"
+            prefetch={false}
+            className="inline-flex items-center gap-2 text-gray-700 hover:text-indigo-600 mb-3 sm:mb-4 transition-colors group text-sm sm:text-base"
+          >
+            <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5 group-hover:-translate-x-1 transition-transform" />
+            <span className="font-medium">{t('back')}</span>
+          </Link>
+          
+          <div className="max-w-4xl">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-extrabold text-gray-900 mb-2 sm:mb-3 leading-tight">
+              {title}
+            </h1>
+            <p className="text-sm sm:text-base md:text-lg lg:text-xl text-gray-600 leading-relaxed">
+              {description}
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Main Content */}
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 pb-8 sm:pb-12">
+        <div className="grid lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
+          {/* Left Column - Image and Content Sections */}
+          <div className="lg:col-span-2 space-y-4 sm:space-y-5">
+            {/* Main Event Image */}
+            <Card className="overflow-hidden border-2 border-gray-200 shadow-lg p-0">
+              <EventImage
+                src={getEventImageUrl(event.image)}
+                alt={title}
+                priority
+              />
+            </Card>
+
+            {/* Overview Section */}
+            <Card className="border-2 border-gray-200 shadow-lg">
+              <CardContent className="p-4 sm:p-6 md:p-8">
+                <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-3 sm:mb-4">{t('overview')}</h3>
+                <p className="text-gray-700 leading-relaxed text-sm sm:text-base md:text-lg">
+                  {fullDescription}
+                </p>
+              </CardContent>
+            </Card>
+
+            {/* Event Details Section */}
+            <Card className="border-2 border-gray-200 shadow-lg">
+              <CardContent className="p-4 sm:p-6 md:p-8">
+                <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">{t('details')}</h3>
+                <div className="space-y-3 sm:space-y-4">
+                <div className="flex items-start gap-2 sm:gap-3 p-3 sm:p-4 rounded-lg sm:rounded-xl bg-indigo-50/50 border border-indigo-100">
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-indigo-100 flex items-center justify-center shrink-0">
+                    <Calendar className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-500" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs sm:text-sm font-medium text-gray-500 mb-1">
+                      {eventDates.length > 1 ? t('datesLabel') : t('dateLabel')}
+                    </p>
+                    <p className="text-sm sm:text-base font-semibold text-gray-900">{formatEventDates(eventDates, 'long')}</p>
+                  </div>
+                </div>
+                {time && (
+                  <div className="flex items-start gap-2 sm:gap-3 p-3 sm:p-4 rounded-lg sm:rounded-xl bg-blue-50/50 border border-blue-100">
+                    <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-blue-100 flex items-center justify-center shrink-0">
+                      <Clock className="w-4 h-4 sm:w-5 sm:h-5 text-blue-500" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs sm:text-sm font-medium text-gray-500 mb-1">{t('timeLabel')}</p>
+                      <p className="text-sm sm:text-base font-semibold text-gray-900">{time}</p>
+                    </div>
+                  </div>
+                )}
+                <div className="flex items-start gap-2 sm:gap-3 p-3 sm:p-4 rounded-lg sm:rounded-xl bg-purple-50/50 border border-purple-100">
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-purple-100 flex items-center justify-center shrink-0">
+                    <MapPin className="w-4 h-4 sm:w-5 sm:h-5 text-purple-500" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs sm:text-sm font-medium text-gray-500 mb-1">{t('venueLabel')}</p>
+                    <p className="text-sm sm:text-base font-semibold text-gray-900 wrap-break-word">{venue || location}</p>
+                  </div>
+                </div>
+                {isOnline ? (
+                  <div className="flex items-start gap-2 sm:gap-3 p-3 sm:p-4 rounded-lg sm:rounded-xl bg-cyan-50/50 border border-cyan-100">
+                    <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-cyan-100 flex items-center justify-center shrink-0">
+                      <Monitor className="w-4 h-4 sm:w-5 sm:h-5 text-cyan-500" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs sm:text-sm font-medium text-gray-500 mb-1">{t('modeLabel')}</p>
+                      <p className="text-sm sm:text-base font-semibold text-gray-900">{t('modeOnline')}</p>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex items-start gap-2 sm:gap-3 p-3 sm:p-4 rounded-lg sm:rounded-xl bg-purple-50/50 border border-purple-100">
+                    <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-purple-100 flex items-center justify-center shrink-0">
+                      <Building2 className="w-4 h-4 sm:w-5 sm:h-5 text-purple-500" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs sm:text-sm font-medium text-gray-500 mb-1">{t('modeLabel')}</p>
+                      <p className="text-sm sm:text-base font-semibold text-gray-900">{t('modeInPerson')}</p>
+                    </div>
+                  </div>
+                )}
+                {eligibility && (
+                  <div className="flex items-start gap-2 sm:gap-3 p-3 sm:p-4 rounded-lg sm:rounded-xl bg-green-50/50 border border-green-100">
+                    <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-green-100 flex items-center justify-center shrink-0">
+                      <Users className="w-4 h-4 sm:w-5 sm:h-5 text-green-500" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs sm:text-sm font-medium text-gray-500 mb-1">{t('audienceLabel')}</p>
+                      <p className="text-sm sm:text-base font-semibold text-gray-900 wrap-break-word">{eligibility}</p>
+                    </div>
+                  </div>
+                )}
+                {event.isPaid && event.amount != null && (
+                  <div className="flex items-start gap-2 sm:gap-3 p-3 sm:p-4 rounded-lg sm:rounded-xl bg-amber-50/50 border border-amber-100">
+                    <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-amber-100 flex items-center justify-center shrink-0">
+                      <Banknote className="w-4 h-4 sm:w-5 sm:h-5 text-amber-600" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs sm:text-sm font-medium text-gray-500 mb-1">{t('feeLabel')}</p>
+                      <p className="text-sm sm:text-base font-semibold text-gray-900">
+                        {minCategoryFee != null
+                          ? t('feeStartsFrom', { amount: minCategoryFee })
+                          : t('feeAmount', { amount: event.amount })}
+                      </p>
+                    </div>
+                  </div>
+                )}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Contact person */}
+            {hasContactDetails && (
+              <Card className="border-2 border-gray-200 shadow-lg">
+                <CardContent className="p-4 sm:p-6 md:p-8">
+                  <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">{t('contactPerson')}</h3>
+                  <div className="space-y-3">
+                    {contactPersonName && (
+                      <p className="text-sm sm:text-base text-gray-800">
+                        <span className="font-semibold">{t('contactName')}</span> {contactPersonName}
+                      </p>
+                    )}
+                    {contactPersonDesignation && (
+                      <p className="text-sm sm:text-base text-gray-800">
+                        <span className="font-semibold">{t('contactDesignation')}</span> {contactPersonDesignation}
+                      </p>
+                    )}
+                    {event.contactPersonMobileOrEmail && (
+                      <p className="text-sm sm:text-base text-gray-800">
+                        <span className="font-semibold">{t('contactMobileEmail')}</span> {event.contactPersonMobileOrEmail}
+                      </p>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Agenda Section */}
+            {agenda && (
+              <Card className="border-2 border-gray-200 shadow-lg">
+                <CardContent className="p-4 sm:p-6 md:p-8">
+                  <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">{t('agenda')}</h3>
+                  <div className="text-gray-700 leading-relaxed text-sm sm:text-base md:text-lg whitespace-pre-line">
+                    {agenda}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* About the Organizer Section */}
+            <Card className="border-2 border-gray-200 shadow-lg">
+              <CardContent className="p-4 sm:p-6 md:p-8">
+                <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-3 sm:mb-4">{t('organizerTitle')}</h3>
+                <div className="space-y-3 sm:space-y-4 text-gray-700 leading-relaxed text-sm sm:text-base md:text-lg">
+                  <p>{t('organizerP1')}</p>
+                  <p>{t('organizerP2')}</p>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Tags Section */}
+            <Card className="border-2 border-gray-200 shadow-lg">
+              <CardContent className="p-4 sm:p-6 md:p-8">
+                <div className="flex flex-wrap gap-2 sm:gap-3">
+                  {tags.map((tag, index) => (
+                    <Badge
+                      key={index}
+                      variant="secondary"
+                      className="px-3 sm:px-4 py-1.5 sm:py-2 bg-indigo-50 text-indigo-700 border border-indigo-200 hover:bg-indigo-100 text-xs sm:text-sm font-medium"
+                    >
+                      {tag}
+                    </Badge>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Right Column - Booking Form */}
+          <div className="lg:col-span-1">
+            <div className="sticky top-4 sm:top-6">
+              {hasPassed ? (
+                await EventPassedMessage()
+              ) : !registrationOpen ? (
+                await RegistrationClosedMessage()
+              ) : (
+                <BookingForm event={event} schools={schools} />
+              )}
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  )
+}
+

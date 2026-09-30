@@ -7,25 +7,59 @@ import {
   FaWhatsapp,
 } from "react-icons/fa";
 import Image from "next/image";
-import Link from "next/link";
+import { getTranslations } from "next-intl/server";
+import { Link } from "@/i18n/navigation";
 import { SITE_CONFIG } from "@/lib/site-config";
 
-const SOCIAL_LINKS = [
-  { icon: FaFacebookF, href: SITE_CONFIG.social.facebook, label: "Facebook" },
-  { icon: FaInstagram, href: SITE_CONFIG.social.instagram, label: "Instagram" },
-  { icon: FaLinkedinIn, href: SITE_CONFIG.social.linkedin, label: "LinkedIn" },
-  { icon: FaYoutube, href: SITE_CONFIG.social.youtube, label: "YouTube" },
-  { icon: FaWhatsapp, href: SITE_CONFIG.social.whatsapp, label: "WhatsApp" },
+const NAV_HREF_KEYS = [
+  { href: "/", key: "Home" as const },
+  { href: "/events", key: "Events" as const },
+  { href: "/news", key: "News" as const },
+  { href: "/robofest", key: "Robofest" as const },
+  { href: "/gallery", key: "Gallery" as const },
+  { href: "/about", key: "AboutUs" as const },
 ];
 
-const SERVICE_LINKS = [
-  { title: "Robotics Workshops", href: "/#programs" },
-  { title: "Hands-on Training", href: "/#programs" },
-  { title: "Robo Fair", href: "/robofest" },
-  { title: "Competitions and Simulations", href: "/events" },
+const SERVICE_HREFS = [
+  { href: "/#programs", key: "workshops" as const },
+  { href: "/#programs", key: "handsOn" as const },
+  { href: "/robofest", key: "roboFair" as const },
+  { href: "/events", key: "competitions" as const },
 ] as const;
 
-export default function Footer() {
+export default async function Footer() {
+  const t = await getTranslations("footer");
+  const tSite = await getTranslations("site");
+  const tNav = await getTranslations("nav");
+
+  const socialLinks = [
+    {
+      icon: FaFacebookF,
+      href: SITE_CONFIG.social.facebook,
+      label: t("social.facebook"),
+    },
+    {
+      icon: FaInstagram,
+      href: SITE_CONFIG.social.instagram,
+      label: t("social.instagram"),
+    },
+    {
+      icon: FaLinkedinIn,
+      href: SITE_CONFIG.social.linkedin,
+      label: t("social.linkedin"),
+    },
+    {
+      icon: FaYoutube,
+      href: SITE_CONFIG.social.youtube,
+      label: t("social.youtube"),
+    },
+    {
+      icon: FaWhatsapp,
+      href: SITE_CONFIG.social.whatsapp,
+      label: t("social.whatsapp"),
+    },
+  ];
+
   return (
     <footer className="bg-brand-light text-brand-dar bg-sky-100">
       {/* Top accent strip */}
@@ -49,14 +83,14 @@ export default function Footer() {
                 {SITE_CONFIG.name}
               </h2>
               <p className="mt-1 max-w-sm text-xs sm:text-sm text-brand-dark/70">
-                {SITE_CONFIG.tagline}
+                {tSite("tagline")}
               </p>
             </div>
           </div>
 
           {/* Social Links */}
           <div className="flex gap-2 sm:gap-3 flex-wrap">
-            {SOCIAL_LINKS.map(({ icon: Icon, href, label }) => (
+            {socialLinks.map(({ icon: Icon, href, label }) => (
               <a
                 key={label}
                 href={href}
@@ -92,17 +126,17 @@ export default function Footer() {
           {/* Navigation */}
           <nav aria-label="Footer">
             <h3 className="mb-3 sm:mb-4 text-xs sm:text-sm font-semibold uppercase tracking-wide text-brand-blue">
-              Quick Links
+              {t("quickLinks")}
             </h3>
             <ul className="space-y-2 sm:space-y-3 text-xs sm:text-sm">
-              {SITE_CONFIG.navLinks.map((link) => (
+              {NAV_HREF_KEYS.map((link) => (
                 <li key={link.href}>
                   <Link
                     href={link.href}
                     prefetch={false}
                     className="transition hover:text-brand-blue"
                   >
-                    {link.title}
+                    {tNav(link.key)}
                   </Link>
                 </li>
               ))}
@@ -112,7 +146,7 @@ export default function Footer() {
                   prefetch={false}
                   className="transition hover:text-brand-blue"
                 >
-                  Contact
+                  {tNav("Contact")}
                 </Link>
               </li>
             </ul>
@@ -121,17 +155,17 @@ export default function Footer() {
           {/* Services */}
           <div>
             <h3 className="mb-3 sm:mb-4 text-xs sm:text-sm font-semibold uppercase tracking-wide text-brand-blue">
-              Our Services
+              {t("ourServices")}
             </h3>
             <ul className="space-y-2 sm:space-y-3 text-xs sm:text-sm">
-              {SERVICE_LINKS.map((service) => (
-                <li key={service.title}>
+              {SERVICE_HREFS.map((service) => (
+                <li key={service.key}>
                   <Link
                     href={service.href}
                     prefetch={false}
                     className="transition hover:text-brand-blue"
                   >
-                    {service.title}
+                    {tSite(`services.${service.key}`)}
                   </Link>
                 </li>
               ))}
@@ -141,7 +175,7 @@ export default function Footer() {
           {/* Contact */}
           <div>
             <h3 className="mb-3 sm:mb-4 text-xs sm:text-sm font-semibold uppercase tracking-wide text-brand-blue">
-              Contact
+              {t("contact")}
             </h3>
             <div className="space-y-2 sm:space-y-3 text-xs sm:text-sm">
               <a
@@ -167,7 +201,7 @@ export default function Footer() {
           {/* Payment */}
           <div>
             <h3 className="mb-3 sm:mb-4 text-xs sm:text-sm font-semibold uppercase tracking-wide text-brand-blue">
-              Payment method
+              {t("paymentMethod")}
             </h3>
             <div
               className="inline-flex items-center gap-2.5 rounded-xl border border-[#E2136E]/20 bg-white px-3 py-2.5 shadow-sm"
@@ -183,7 +217,7 @@ export default function Footer() {
               <div className="leading-tight">
                 <p className="text-sm font-semibold text-[#E2136E]">bKash</p>
                 <p className="text-[11px] text-brand-dark/60">
-                  Secure online payments
+                  {t("securePayments")}
                 </p>
               </div>
             </div>
@@ -204,7 +238,10 @@ export default function Footer() {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 py-3 sm:py-4">
         <div className="flex flex-col gap-2 text-xs sm:text-sm text-brand-dark/80 md:flex-row md:items-center md:justify-between text-center md:text-left">
           <span>
-            © {new Date().getFullYear()} {SITE_CONFIG.name}. All rights reserved.
+            {t("allRightsReserved", {
+              year: new Date().getFullYear(),
+              name: SITE_CONFIG.name,
+            })}
           </span>
 
           <a
@@ -213,7 +250,7 @@ export default function Footer() {
             rel="noopener noreferrer"
             className="transition hover:text-brand-blue"
           >
-            Developed by{" "}
+            {t("developedBy")}{" "}
             <span className="font-semibold">{SITE_CONFIG.developer.name}</span>
           </a>
         </div>

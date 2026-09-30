@@ -1,7 +1,7 @@
 import { MetadataRoute } from 'next'
-import { getPublicEvents } from './(marketing)/events/public-data'
-import { getPublishedNews } from './(marketing)/news/actions'
-import { getGalleryGroups } from './(marketing)/gallery/actions'
+import { getPublicEvents } from './[locale]/(marketing)/events/public-data'
+import { getPublishedNews } from './[locale]/(marketing)/news/actions'
+import { getGalleryGroups } from './[locale]/(marketing)/gallery/actions'
 import { eventPublicHref } from '@/lib/event-ui'
 import { newsArticleHref } from '@/lib/news-ui'
 import {
@@ -16,44 +16,34 @@ export const revalidate = 3600
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = getSiteOrigin()
 
-  const staticPages: MetadataRoute.Sitemap = [
-    {
-      url: `${baseUrl}/`,
-      lastModified: new Date(),
-      changeFrequency: 'daily',
-      priority: 1,
-    },
-    {
-      url: `${baseUrl}/events`,
-      lastModified: new Date(),
-      changeFrequency: 'daily',
-      priority: 0.9,
-    },
-    {
-      url: `${baseUrl}/robofest`,
-      lastModified: new Date(),
-      changeFrequency: 'weekly',
-      priority: 0.9,
-    },
-    {
-      url: `${baseUrl}/news`,
-      lastModified: new Date(),
-      changeFrequency: 'weekly',
-      priority: 0.85,
-    },
-    {
-      url: `${baseUrl}/gallery`,
-      lastModified: new Date(),
-      changeFrequency: 'weekly',
-      priority: 0.85,
-    },
-    {
-      url: `${baseUrl}/about`,
-      lastModified: new Date(),
-      changeFrequency: 'monthly',
-      priority: 0.8,
-    },
+  const staticPageDefs = [
+    { path: '/', changeFrequency: 'daily' as const, priority: 1 },
+    { path: '/events', changeFrequency: 'daily' as const, priority: 0.9 },
+    { path: '/robofest', changeFrequency: 'weekly' as const, priority: 0.9 },
+    { path: '/news', changeFrequency: 'weekly' as const, priority: 0.85 },
+    { path: '/gallery', changeFrequency: 'weekly' as const, priority: 0.85 },
+    { path: '/about', changeFrequency: 'monthly' as const, priority: 0.8 },
   ]
+
+  const staticPages: MetadataRoute.Sitemap = staticPageDefs.flatMap((page) => {
+    const lastModified = new Date()
+    const enUrl = page.path === '/' ? `${baseUrl}/` : `${baseUrl}${page.path}`
+    const bnUrl = page.path === '/' ? `${baseUrl}/bn` : `${baseUrl}/bn${page.path}`
+    return [
+      {
+        url: enUrl,
+        lastModified,
+        changeFrequency: page.changeFrequency,
+        priority: page.priority,
+      },
+      {
+        url: bnUrl,
+        lastModified,
+        changeFrequency: page.changeFrequency,
+        priority: page.priority,
+      },
+    ]
+  })
 
   let robofestPages: MetadataRoute.Sitemap = []
   try {

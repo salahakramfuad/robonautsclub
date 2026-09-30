@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState, type ChangeEvent, type FormEvent } from "react";
+import { useTranslations } from "next-intl";
 import { computeRobofestRegistrationTotal } from "@/lib/robofest-fee";
 import type { RobofestRoundContent } from "@/lib/robofest-content";
 import {
@@ -10,7 +11,6 @@ import {
 import {
   formatCampusAmbassadorLabel,
   ROBOFEST_CAMPUS_AMBASSADOR_NOT_APPLICABLE,
-  ROBOFEST_CAMPUS_AMBASSADOR_NOT_APPLICABLE_LABEL,
   type RobofestCampusAmbassador,
 } from "@/lib/robofest-campus-ambassadors";
 import {
@@ -26,7 +26,7 @@ import {
 import {
   initiateRobofestPaidCheckout,
   submitRobofestRegistration,
-} from "@/app/(marketing)/robofest/actions";
+} from "@/app/[locale]/(marketing)/robofest/actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -82,6 +82,28 @@ function resizeTeamMembers(
 const selectClassName =
   "flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50";
 
+const GRADE_KEYS: Record<string, "grade05" | "grade06" | "grade07" | "grade08" | "grade09" | "grade10" | "grade11" | "grade12"> = {
+  "Grade - 05": "grade05",
+  "Grade - 06": "grade06",
+  "Grade - 07": "grade07",
+  "Grade - 08": "grade08",
+  "Grade - 09": "grade09",
+  "Grade - 10": "grade10",
+  "Grade - 11": "grade11",
+  "Grade - 12": "grade12",
+};
+
+function divisionTranslationKey(
+  value: string,
+): "divisionDhaka" | "divisionChittagong" | null {
+  const normalized = value.trim().toLowerCase();
+  if (normalized.startsWith("dha")) return "divisionDhaka";
+  if (normalized.startsWith("chit") || normalized.includes("ctg")) {
+    return "divisionChittagong";
+  }
+  return null;
+}
+
 export default function RobofestCategoryRegistrationForm({
   category,
   rounds,
@@ -102,6 +124,9 @@ export default function RobofestCategoryRegistrationForm({
   /** Legacy global deadline fallback for unsaved CMS docs. */
   globalRegistrationClosingDate?: string | null;
 }) {
+  const t = useTranslations("robofest.form");
+  const tErrors = useTranslations("robofest.errors");
+
   const deadlineContent = useMemo(
     () => ({
       rounds,
@@ -110,20 +135,36 @@ export default function RobofestCategoryRegistrationForm({
     [rounds, globalRegistrationClosingDate],
   );
 
+  const divisionLabel = (value: string, closed: boolean) => {
+    const key = divisionTranslationKey(value);
+    const base = key
+      ? t(key)
+      : ROBOFEST_DIVISIONS.find((d) => d.value === value)?.label ||
+        `${value} Division`;
+    return closed ? `${base} ${t("divisionClosedSuffix")}` : base;
+  };
+
+  const ageCategoryLabel = (value: RobofestAgeCategory) =>
+    value === "explorer" ? t("ageExplorer") : t("ageInnovators");
+
+  const gradeLabel = (grade: string) => {
+    const key = GRADE_KEYS[grade];
+    return key ? t(key) : grade;
+  };
+
   const divisionOptions = useMemo(() => {
     const fromRounds = rounds
       .map((round) => {
         const match = ROBOFEST_DIVISIONS.find((d) => d.value === round.city);
-        const base =
-          match ?? { value: round.city, label: `${round.city} Division` };
+        const value = match?.value ?? round.city;
         const closed = isRobofestDivisionRegistrationClosed(
           deadlineContent,
           round.city,
         );
         return {
-          ...base,
+          value,
           closed,
-          label: closed ? `${base.label} (closed)` : base.label,
+          label: divisionLabel(value, closed),
         };
       })
       .filter((d, i, arr) => arr.findIndex((x) => x.value === d.value) === i);
@@ -134,12 +175,13 @@ export default function RobofestCategoryRegistrationForm({
         d.value,
       );
       return {
-        ...d,
+        value: d.value,
         closed,
-        label: closed ? `${d.label} (closed)` : d.label,
+        label: divisionLabel(d.value, closed),
       };
     });
-  }, [rounds, deadlineContent]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- labels depend on locale via t()
+  }, [rounds, deadlineContent, t]);
 
   const allDivisionsClosed = useMemo(
     () => areAllRobofestDivisionsClosed(deadlineContent),
@@ -223,23 +265,19 @@ export default function RobofestCategoryRegistrationForm({
     ) {
       setError(
         form.division
-          ? `Registration for the ${form.division} division is closed.`
-          : "Please select a division.",
+          ? tErrors("divisionClosed", { name: form.division })
+          : tErrors("selectDivision"),
       );
       return;
     }
 
     if (!rulesUnderstood) {
-      setError(
-        "Please confirm that you have read and understood the category rulebook.",
-      );
+      setError(tErrors("rules"));
       return;
     }
 
     if (isPaid && amount > 0 && !understood) {
-      setError(
-        "Please confirm that you understand the fee and payment instructions.",
-      );
+      setError(tErrors("fee"));
       return;
     }
 
@@ -267,7 +305,7 @@ export default function RobofestCategoryRegistrationForm({
       if (isPaid && amount > 0) {
         const result = await initiateRobofestPaidCheckout(payload);
         if (!result.success || !result.checkoutUrl) {
-          setError(result.error || "Failed to start payment.");
+          setError(result.error || tErrors("payment"));
           return;
         }
         window.location.href = result.checkoutUrl;
@@ -276,7 +314,7 @@ export default function RobofestCategoryRegistrationForm({
 
       const result = await submitRobofestRegistration(payload);
       if (!result.success) {
-        setError(result.error || "Failed to submit registration.");
+        setError(result.error || tErrors("submit"));
         return;
       }
 
@@ -286,7 +324,7 @@ export default function RobofestCategoryRegistrationForm({
       setIsSubmitted(true);
       setForm(emptyForm(firstOpenDivision));
     } catch {
-      setError("Failed to submit registration. Please try again.");
+      setError(tErrors("retry"));
     } finally {
       setIsSubmitting(false);
     }
@@ -295,11 +333,8 @@ export default function RobofestCategoryRegistrationForm({
   if (allDivisionsClosed) {
     return (
       <Alert variant="destructive">
-        <AlertTitle>Registration closed</AlertTitle>
-        <AlertDescription>
-          The registration deadline has passed for all divisions. New team
-          registrations are no longer accepted online.
-        </AlertDescription>
+        <AlertTitle>{t("allClosedTitle")}</AlertTitle>
+        <AlertDescription>{t("allClosedBody")}</AlertDescription>
       </Alert>
     );
   }
@@ -307,20 +342,21 @@ export default function RobofestCategoryRegistrationForm({
   if (isSubmitted) {
     return (
       <Alert className="border-green-200 bg-green-50 text-green-900">
-        <AlertTitle>Registration confirmed</AlertTitle>
+        <AlertTitle>{t("successTitle")}</AlertTitle>
         <AlertDescription className="space-y-2">
           <p>
-            Thanks for registering for {category}. A confirmation email
-            {isPaid ? "" : " with PDF"} has been sent.
+            {isPaid
+              ? t("successBodyNoPdf", { name: category })
+              : t("successBody", { name: category })}
           </p>
           {registrationId ? (
             <p className="font-mono text-sm font-semibold">
-              ID: {registrationId}
+              {t("successId", { count: registrationId })}
             </p>
           ) : null}
           {teamNumber ? (
             <p className="font-mono text-sm font-semibold text-cyan-800">
-              Team number: {teamNumber}
+              {t("successTeamNumber", { name: teamNumber })}
             </p>
           ) : null}
           {warning ? <p className="text-amber-800 text-sm">{warning}</p> : null}
@@ -337,7 +373,7 @@ export default function RobofestCategoryRegistrationForm({
             setTeamNumber(null);
           }}
         >
-          Register another team
+          {t("registerAnother")}
         </Button>
       </Alert>
     );
@@ -350,7 +386,7 @@ export default function RobofestCategoryRegistrationForm({
           htmlFor={fieldId("competition")}
           className="text-sm font-medium text-gray-700"
         >
-          Competition
+          {t("labelCompetition")}
         </label>
         <Input
           id={fieldId("competition")}
@@ -361,8 +397,7 @@ export default function RobofestCategoryRegistrationForm({
       </div>
 
       <p className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-600 leading-relaxed">
-        Team number is assigned automatically after registration (e.g. BS#001)
-        and is used as your Team Number.
+        {t("teamNumberHint")}
       </p>
 
       <div className="space-y-1.5">
@@ -370,7 +405,7 @@ export default function RobofestCategoryRegistrationForm({
           htmlFor={fieldId("division")}
           className="text-sm font-medium text-gray-700"
         >
-          Select Division <span className="text-red-500">*</span>
+          {t("labelDivision")} <span className="text-red-500">*</span>
         </label>
         <select
           id={fieldId("division")}
@@ -381,7 +416,7 @@ export default function RobofestCategoryRegistrationForm({
           required
           className={selectClassName}
         >
-          <option value="">Select division</option>
+          <option value="">{t("selectDivision")}</option>
           {divisionOptions.map((d) => (
             <option key={d.value} value={d.value} disabled={d.closed}>
               {d.label}
@@ -392,10 +427,9 @@ export default function RobofestCategoryRegistrationForm({
 
       {selectedDivisionClosed ? (
         <Alert variant="destructive">
-          <AlertTitle>Division closed</AlertTitle>
+          <AlertTitle>{t("divisionClosedTitle")}</AlertTitle>
           <AlertDescription>
-            Registration for the {form.division} division has closed. Please
-            select another open division, or contact us if you need help.
+            {t("divisionClosedBody", { name: form.division })}
           </AlertDescription>
         </Alert>
       ) : null}
@@ -407,7 +441,7 @@ export default function RobofestCategoryRegistrationForm({
           htmlFor={fieldId("age-category")}
           className="text-sm font-medium text-gray-700"
         >
-          Category <span className="text-red-500">*</span>
+          {t("labelAgeCategory")} <span className="text-red-500">*</span>
         </label>
         <select
           id={fieldId("age-category")}
@@ -416,10 +450,10 @@ export default function RobofestCategoryRegistrationForm({
           required
           className={selectClassName}
         >
-          <option value="">Select category</option>
+          <option value="">{t("selectCategory")}</option>
           {ROBOFEST_AGE_CATEGORIES.map((c) => (
             <option key={c.value} value={c.value}>
-              {c.label}
+              {ageCategoryLabel(c.value)}
             </option>
           ))}
         </select>
@@ -430,7 +464,7 @@ export default function RobofestCategoryRegistrationForm({
           htmlFor={fieldId("team-size")}
           className="text-sm font-medium text-gray-700"
         >
-          Number of Members <span className="text-red-500">*</span>
+          {t("labelTeamSize")} <span className="text-red-500">*</span>
         </label>
         <select
           id={fieldId("team-size")}
@@ -454,7 +488,9 @@ export default function RobofestCategoryRegistrationForm({
             className="space-y-3 rounded-lg border border-gray-200 bg-gray-50/70 p-3"
           >
             <legend className="px-1 text-sm font-semibold text-gray-800">
-              {`Team Member ${String(index + 1).padStart(2, "0")}`}
+              {t("memberLegend", {
+                count: String(index + 1).padStart(2, "0"),
+              })}
             </legend>
 
             <div className="space-y-1.5">
@@ -462,8 +498,7 @@ export default function RobofestCategoryRegistrationForm({
                 htmlFor={fieldId(`member-${index}-name`)}
                 className="text-sm font-medium text-gray-700"
               >
-                Full Name
-                {index === 0 ? " (Team Leader)" : ""}{" "}
+                {index === 0 ? t("memberNameLeader") : t("memberName")}{" "}
                 <span className="text-red-500">*</span>
               </label>
               <Input
@@ -480,7 +515,7 @@ export default function RobofestCategoryRegistrationForm({
                 htmlFor={fieldId(`member-${index}-email`)}
                 className="text-sm font-medium text-gray-700"
               >
-                E-Mail Address <span className="text-red-500">*</span>
+                {t("memberEmail")} <span className="text-red-500">*</span>
               </label>
               <Input
                 id={fieldId(`member-${index}-email`)}
@@ -497,7 +532,7 @@ export default function RobofestCategoryRegistrationForm({
                 htmlFor={fieldId(`member-${index}-phone`)}
                 className="text-sm font-medium text-gray-700"
               >
-                Mobile Number <span className="text-red-500">*</span>
+                {t("memberPhone")} <span className="text-red-500">*</span>
               </label>
               <Input
                 id={fieldId(`member-${index}-phone`)}
@@ -509,7 +544,7 @@ export default function RobofestCategoryRegistrationForm({
                 inputMode="numeric"
                 autoComplete="tel"
               />
-              <p className="text-xs text-gray-500">11 digits starting with 01</p>
+              <p className="text-xs text-gray-500">{t("memberPhoneHint")}</p>
             </div>
 
             <div className="space-y-1.5">
@@ -517,7 +552,7 @@ export default function RobofestCategoryRegistrationForm({
                 htmlFor={fieldId(`member-${index}-school`)}
                 className="text-sm font-medium text-gray-700"
               >
-                Institution Name <span className="text-red-500">*</span>
+                {t("memberInstitution")} <span className="text-red-500">*</span>
               </label>
               <select
                 id={fieldId(`member-${index}-school`)}
@@ -526,9 +561,9 @@ export default function RobofestCategoryRegistrationForm({
                 required
                 className={selectClassName}
               >
-                <option value="">Select institution</option>
+                <option value="">{t("selectInstitution")}</option>
                 <option value={PRIVATE_CANDIDATE_OPTION}>
-                  {PRIVATE_CANDIDATE_OPTION}
+                  {t("optionPrivateCandidate")}
                 </option>
                 {schools.map((school) => (
                   <option key={school} value={school}>
@@ -536,7 +571,7 @@ export default function RobofestCategoryRegistrationForm({
                   </option>
                 ))}
                 <option value={SCHOOL_NOT_FOUND_OPTION}>
-                  School not found (type manually)
+                  {t("optionSchoolNotFound")}
                 </option>
               </select>
             </div>
@@ -547,7 +582,8 @@ export default function RobofestCategoryRegistrationForm({
                   htmlFor={fieldId(`member-${index}-custom-school`)}
                   className="text-sm font-medium text-gray-700"
                 >
-                  Enter institution name <span className="text-red-500">*</span>
+                  {t("memberCustomInstitution")}{" "}
+                  <span className="text-red-500">*</span>
                 </label>
                 <Input
                   id={fieldId(`member-${index}-custom-school`)}
@@ -564,14 +600,16 @@ export default function RobofestCategoryRegistrationForm({
                 htmlFor={fieldId(`member-${index}-branch`)}
                 className="text-sm font-medium text-gray-700"
               >
-                Branch{" "}
-                <span className="text-gray-400 font-normal">(optional)</span>
+                {t("memberBranch")}{" "}
+                <span className="text-gray-400 font-normal">
+                  {t("memberBranchOptional")}
+                </span>
               </label>
               <Input
                 id={fieldId(`member-${index}-branch`)}
                 value={member.branch}
                 onChange={updateMember(index, "branch")}
-                placeholder="Campus / branch"
+                placeholder={t("memberBranchPlaceholder")}
               />
             </div>
 
@@ -580,7 +618,7 @@ export default function RobofestCategoryRegistrationForm({
                 htmlFor={fieldId(`member-${index}-grade`)}
                 className="text-sm font-medium text-gray-700"
               >
-                Grade <span className="text-red-500">*</span>
+                {t("memberGrade")} <span className="text-red-500">*</span>
               </label>
               <select
                 id={fieldId(`member-${index}-grade`)}
@@ -592,12 +630,12 @@ export default function RobofestCategoryRegistrationForm({
               >
                 <option value="">
                   {form.ageCategory
-                    ? "Select grade"
-                    : "Select category first"}
+                    ? t("selectGrade")
+                    : t("selectCategoryFirst")}
                 </option>
                 {gradeOptions.map((grade) => (
                   <option key={grade} value={grade}>
-                    {grade}
+                    {gradeLabel(grade)}
                   </option>
                 ))}
               </select>
@@ -611,7 +649,7 @@ export default function RobofestCategoryRegistrationForm({
           htmlFor={fieldId("ambassador")}
           className="text-sm font-medium text-gray-700"
         >
-          Campus Ambassador <span className="text-red-500">*</span>
+          {t("labelAmbassador")} <span className="text-red-500">*</span>
         </label>
         <select
           id={fieldId("ambassador")}
@@ -625,21 +663,21 @@ export default function RobofestCategoryRegistrationForm({
           required
           className={selectClassName}
         >
-          <option value="">Select campus ambassador</option>
+          <option value="">{t("selectAmbassador")}</option>
           {campusAmbassadors.map((a) => (
             <option key={a.id} value={a.id}>
               {formatCampusAmbassadorLabel(a)}
             </option>
           ))}
           <option value={ROBOFEST_CAMPUS_AMBASSADOR_NOT_APPLICABLE}>
-            {ROBOFEST_CAMPUS_AMBASSADOR_NOT_APPLICABLE_LABEL}
+            {t("optionAmbassadorNA")}
           </option>
         </select>
       </div>
 
       {error ? (
         <Alert variant="destructive">
-          <AlertTitle>Could not submit</AlertTitle>
+          <AlertTitle>{tErrors("couldNotSubmit")}</AlertTitle>
           <AlertDescription>{error}</AlertDescription>
         </Alert>
       ) : null}
@@ -656,25 +694,27 @@ export default function RobofestCategoryRegistrationForm({
             className="mt-0.5"
           />
           <span className="text-sm text-slate-700 leading-snug">
-            Yes, I have read and understood the rules found in the rulebook for{" "}
-            <span className="font-semibold">{category}</span>
-            {rulesPdf ? (
-              <>
-                {" "}
-                (
-                <a
-                  href={rulesPdf}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="font-semibold text-cyan-700 underline underline-offset-2 hover:text-cyan-800"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  open rulebook
-                </a>
-                )
-              </>
-            ) : null}
-            .
+            {(() => {
+              const label = t("rulesCheckbox", { name: category })
+              if (!rulesPdf) return label
+              const match = label.match(/^(.*)\(([^)]+)\)\.?\s*$/)
+              if (!match) return label
+              return (
+                <>
+                  {match[1]}(
+                  <a
+                    href={rulesPdf}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="font-semibold text-cyan-700 underline underline-offset-2 hover:text-cyan-800"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    {match[2]}
+                  </a>
+                  ).
+                </>
+              )
+            })()}
           </span>
         </label>
 
@@ -690,11 +730,11 @@ export default function RobofestCategoryRegistrationForm({
               className="mt-0.5"
             />
             <span className="text-sm text-slate-700 leading-snug">
-              I understand the registration fee is{" "}
-              <span className="font-semibold">BDT {totalAmount}</span> (
-              {form.teamSize} member{form.teamSize === 1 ? "" : "s"} × BDT{" "}
-              {amount}), and after paying on bKash I will not close or leave
-              this browser until I see the registration successful message.
+              {t("feeCheckbox", {
+                count: totalAmount,
+                title: form.teamSize,
+                name: amount,
+              })}
             </span>
           </label>
         ) : null}
@@ -711,11 +751,11 @@ export default function RobofestCategoryRegistrationForm({
       >
         {isSubmitting
           ? isPaid
-            ? "Redirecting to bKash…"
-            : "Submitting…"
+            ? t("submitRedirecting")
+            : t("submitSubmitting")
           : isPaid
-            ? `Pay BDT ${totalAmount} to confirm registration`
-            : "Submit registration"}
+            ? t("submitPaid", { count: totalAmount })
+            : t("submitFree")}
       </Button>
       </>
       ) : null}

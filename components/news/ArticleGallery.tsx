@@ -2,8 +2,9 @@
 
 import { useCallback, useState } from 'react'
 import Image from 'next/image'
-import Link from 'next/link'
 import { ArrowRight } from 'lucide-react'
+import { useTranslations } from 'next-intl'
+import { Link } from '@/i18n/navigation'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { LightboxPortal } from '@/components/ImageLightboxGallery'
@@ -23,6 +24,7 @@ export default function ArticleGallery({
   viewAllHref,
   className,
 }: Props) {
+  const t = useTranslations('news.gallery')
   const [openIndex, setOpenIndex] = useState<number | null>(null)
   const close = useCallback(() => setOpenIndex(null), [])
 
@@ -37,9 +39,9 @@ export default function ArticleGallery({
     <section className={cn('mt-12 sm:mt-16', className)} aria-labelledby="article-gallery-heading">
       <div className="mb-5 sm:mb-6">
         <h2 id="article-gallery-heading" className="text-xl font-bold tracking-tight text-gray-900 sm:text-2xl">
-          Gallery
+          {t('title')}
         </h2>
-        <p className="mt-1 text-sm text-slate-500">Moments from the event</p>
+        <p className="mt-1 text-sm text-slate-500">{t('subtitle')}</p>
       </div>
 
       <div
@@ -70,7 +72,7 @@ export default function ArticleGallery({
                   cellClass,
                   'group/item flex flex-col items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2',
                 )}
-                aria-label={`See all ${totalWithCover} photos`}
+                aria-label={t('seeAllAria', { count: totalWithCover })}
               >
                 <Image
                   src={url}
@@ -89,7 +91,7 @@ export default function ArticleGallery({
                       moreLabel && 'mt-1',
                     )}
                   >
-                    View all photos
+                    {t('viewAllPhotos')}
                     <ArrowRight className="size-3.5" aria-hidden />
                   </span>
                 </span>
@@ -107,7 +109,7 @@ export default function ArticleGallery({
                 cellClass,
                 'h-auto p-0 text-left hover:bg-slate-100 focus-visible:ring-2 focus-visible:ring-indigo-500 group/item',
               )}
-              aria-label={`Open image ${i + 1} of ${gridImages.length}`}
+              aria-label={t('openImageAria', { count: i + 1, title: gridImages.length })}
             >
               <Image
                 src={url}
@@ -132,7 +134,7 @@ export default function ArticleGallery({
             prefetch={false}
             className="inline-flex items-center gap-1.5 rounded-md text-sm font-semibold text-indigo-600 transition-colors hover:text-indigo-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2"
           >
-            See all {totalWithCover} photos
+            {t('seeAllPhotos', { count: totalWithCover })}
             <ArrowRight className="size-4" aria-hidden />
           </Link>
         </div>

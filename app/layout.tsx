@@ -1,20 +1,28 @@
-import type { Metadata } from "next";
-import { Geist } from "next/font/google";
-import "./globals.css";
-import OrganizationSchema from "@/components/OrganizationSchema";
-import ConditionalAnalytics from "@/components/ConditionalAnalytics";
-import { SITE_CONFIG, getSiteOrigin } from "@/lib/site-config";
+import type { Metadata } from 'next'
+import { Geist, Hind_Siliguri } from 'next/font/google'
+import './globals.css'
+import OrganizationSchema from '@/components/OrganizationSchema'
+import ConditionalAnalytics from '@/components/ConditionalAnalytics'
+import { SITE_CONFIG, getSiteOrigin } from '@/lib/site-config'
 
 const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
+  variable: '--font-geist-sans',
+  subsets: ['latin'],
+})
+
+/** Bengali-capable UI font applied when locale is bn. */
+const bengaliSans = Hind_Siliguri({
+  variable: '--font-bengali',
+  subsets: ['bengali', 'latin'],
+  weight: ['400', '500', '600', '700'],
+  display: 'swap',
+})
 
 export const metadata: Metadata = {
   metadataBase: new URL(`${getSiteOrigin()}/`),
   title: {
     default: SITE_CONFIG.metadata.defaultTitle,
-    template: SITE_CONFIG.metadata.titleTemplate
+    template: SITE_CONFIG.metadata.titleTemplate,
   },
   description: SITE_CONFIG.metadata.defaultDescription,
   keywords: [...SITE_CONFIG.metadata.keywords],
@@ -27,10 +35,10 @@ export const metadata: Metadata = {
     telephone: false,
   },
   openGraph: {
-    type: "website",
-    locale: "en_US",
-    alternateLocale: ["bn_BD"],
-    url: "/",
+    type: 'website',
+    locale: 'en_US',
+    alternateLocale: ['bn_BD'],
+    url: '/',
     siteName: SITE_CONFIG.name,
     title: SITE_CONFIG.metadata.defaultTitle,
     description: SITE_CONFIG.metadata.defaultDescription,
@@ -44,7 +52,7 @@ export const metadata: Metadata = {
     ],
   },
   twitter: {
-    card: "summary_large_image",
+    card: 'summary_large_image',
     title: SITE_CONFIG.metadata.defaultTitle,
     description: SITE_CONFIG.metadata.defaultDescription,
     images: [SITE_CONFIG.metadata.defaultImage],
@@ -62,38 +70,38 @@ export const metadata: Metadata = {
     },
   },
   alternates: {
-    canonical: "/",
+    canonical: '/',
   },
   icons: {
-    icon: "/favicon.ico",
+    icon: '/favicon.ico',
   },
-  category: "Education",
-  classification: "Robotics Education, STEM Training, Youth Development",
+  category: 'Education',
+  classification: 'Robotics Education, STEM Training, Youth Development',
   other: {
     'geo.region': 'BD',
     'geo.placename': 'Dhaka',
     'geo.position': '23.8103;90.4125',
-    'ICBM': '23.8103, 90.4125',
+    ICBM: '23.8103, 90.4125',
   },
   ...(process.env.GOOGLE_SITE_VERIFICATION
     ? { verification: { google: process.env.GOOGLE_SITE_VERIFICATION } }
     : {}),
-};
+}
 
 export default function RootLayout({
   children,
 }: Readonly<{
-  children: React.ReactNode;
+  children: React.ReactNode
 }>) {
   return (
-    <html lang="en" dir="ltr">
-      <body className={`${geistSans.variable} ${geistSans.className} antialiased`}>
+    <html lang="en" dir="ltr" suppressHydrationWarning>
+      <body
+        className={`${geistSans.variable} ${bengaliSans.variable} ${geistSans.className} antialiased`}
+      >
         <ConditionalAnalytics />
         <OrganizationSchema />
         {children}
       </body>
     </html>
-  );
+  )
 }
-
-// Bindings from wrangler.jsonc available in `next dev` via next.config side-effect.

@@ -2,7 +2,8 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import Image from 'next/image'
-import Link from 'next/link'
+import { useLocale, useTranslations } from 'next-intl'
+import { Link } from '@/i18n/navigation'
 import {
   Calendar,
   ChevronLeft,
@@ -12,6 +13,7 @@ import {
   ArrowRight,
 } from 'lucide-react'
 import { Event } from '@/types/event'
+import { pickLocalized, pickLocalizedList } from '@/lib/i18n-localized'
 import { eventPublicHref } from '@/lib/event-ui'
 import { parseEventDates, formatEventDates, isRegistrationOpen } from '@/lib/dateUtils'
 import { SITE_CONFIG } from '@/lib/site-config'
@@ -42,16 +44,12 @@ const ACCENT_DOTS = [
   'from-sky-500 to-cyan-400',
 ] as const
 
-function categoryLabel(event: Event): string {
-  if (event.tags && event.tags.length > 0) return event.tags[0]
-  return 'Event'
-}
-
-function highlightsFor(event: Event): string[] {
-  if (event.tags && event.tags.length > 0) {
-    return event.tags.slice(0, 6)
+function highlightsFor(locale: string, event: Event): string[] {
+  const tags = pickLocalizedList(locale, event.tags, event.tagsBn)
+  if (tags.length > 0) {
+    return tags.slice(0, 6)
   }
-  const sentence = event.description?.trim()
+  const sentence = pickLocalized(locale, event.description, event.descriptionBn).trim()
   if (!sentence) return []
   const cut = sentence.length > 120 ? `${sentence.slice(0, 117)}…` : sentence
   return [cut]
@@ -107,12 +105,21 @@ export default function FeaturedUpcomingCarousel({
   wrapperClassName = '',
   variant = 'default',
 }: Props) {
+  const locale = useLocale()
+  const t = useTranslations('events.list')
+  const tCard = useTranslations('events.card')
   const [api, setApi] = useState<CarouselApi | undefined>(undefined)
   const [activeIndex, setActiveIndex] = useState(0)
 
   const safeEvents = useMemo(() => events.filter(Boolean), [events])
   const count = safeEvents.length
   const { getSlide } = useSlideHelpers()
+
+  const categoryLabel = (event: Event): string => {
+    const tags = pickLocalizedList(locale, event.tags, event.tagsBn)
+    if (tags.length > 0) return tags[0]
+    return tCard('categoryFallback')
+  }
 
   const autoplayPlugin = useRef(
     Autoplay({ delay: autoAdvanceMs, stopOnInteraction: false, stopOnMouseEnter: true })
@@ -143,7 +150,7 @@ export default function FeaturedUpcomingCarousel({
       <div className={`${rootMb} ${wrapperClassName}`.trim()}>
         {showIntroText ? (
           <p className="text-[11px] font-semibold uppercase tracking-wider text-indigo-200/90 mb-2 text-center lg:text-left">
-            Next up
+            {t('nextUp')}
           </p>
         ) : null}
         <Carousel
@@ -160,7 +167,7 @@ export default function FeaturedUpcomingCarousel({
                 size="icon"
                 onClick={() => api?.scrollPrev()}
                 className="absolute left-1 top-1/2 -translate-y-1/2 z-20 size-6 rounded-full bg-black/55 text-white hover:bg-black/75 hover:text-white border border-white/10"
-                aria-label="Previous featured event"
+                aria-label={t('prevAria')}
               >
                 <ChevronLeft className="w-3.5 h-3.5" />
               </Button>
@@ -170,7 +177,7 @@ export default function FeaturedUpcomingCarousel({
                 size="icon"
                 onClick={() => api?.scrollNext()}
                 className="absolute right-1 top-1/2 -translate-y-1/2 z-20 size-6 rounded-full bg-black/55 text-white hover:bg-black/75 hover:text-white border border-white/10"
-                aria-label="Next featured event"
+                aria-label={t('nextAria')}
               >
                 <ChevronRight className="w-3.5 h-3.5" />
               </Button>
@@ -185,6 +192,9 @@ export default function FeaturedUpcomingCarousel({
               const slideGradient = `bg-linear-to-r ${ACCENT_GRADIENTS[slideAccent]}`
               const category = categoryLabel(event)
               const registrationOpen = isRegistrationOpen(event)
+              const title = pickLocalized(locale, event.title, event.titleBn)
+              const time = pickLocalized(locale, event.time, event.timeBn)
+              const location = pickLocalized(locale, event.location, event.locationBn)
               return (
                 <CarouselItem key={event.id} className="pl-0">
                   <div className="flex flex-row items-stretch pl-7 pr-7 min-h-0">
@@ -193,14 +203,14 @@ export default function FeaturedUpcomingCarousel({
                         // eslint-disable-next-line @next/next/no-img-element
                         <img
                           src={slide.imageSrc}
-                          alt={event.title}
+                          alt={title}
                           className="absolute inset-0 size-full object-cover"
                           onError={slide.onImageError}
                         />
                       ) : (
                         <Image
                           src={slide.imageSrc}
-                          alt={event.title}
+                          alt={title}
                           fill
                           className="object-cover"
                           sizes="(max-width:640px) 72px, 112px"
@@ -220,7 +230,7 @@ export default function FeaturedUpcomingCarousel({
                             {category}
                           </Badge>
                           <h3 className="text-xs sm:text-sm font-bold text-white truncate sm:whitespace-normal sm:line-clamp-1 leading-tight">
-                            {event.title}
+                            {title}
                           </h3>
                         </div>
                         <div className="flex flex-wrap items-center gap-x-1.5 gap-y-0 mt-0.5 text-[10px] sm:text-[11px] text-gray-300">
@@ -230,25 +240,25 @@ export default function FeaturedUpcomingCarousel({
                               {formatEventDates(eventDates)}
                             </span>
                           </span>
-                          {event.time ? (
+                          {time ? (
                             <>
                               <span className="text-white/35" aria-hidden>
                                 ·
                               </span>
                               <span className="inline-flex items-center gap-0.5 shrink-0">
                                 <Clock className="w-2.5 h-2.5 text-indigo-300" />
-                                <span className="truncate">{event.time}</span>
+                                <span className="truncate">{time}</span>
                               </span>
                             </>
                           ) : null}
-                          {event.location ? (
+                          {location ? (
                             <>
                               <span className="text-white/35" aria-hidden>
                                 ·
                               </span>
                               <span className="inline-flex items-center gap-0.5 min-w-0">
                                 <MapPin className="w-2.5 h-2.5 shrink-0 text-indigo-300" />
-                                <span className="truncate">{event.location}</span>
+                                <span className="truncate">{location}</span>
                               </span>
                             </>
                           ) : null}
@@ -261,7 +271,7 @@ export default function FeaturedUpcomingCarousel({
                           className={`h-auto px-2.5 py-1 rounded-md text-[10px] sm:text-xs font-semibold text-white shadow-sm hover:opacity-90 hover:text-white whitespace-nowrap border-0 ${slideGradient}`}
                         >
                           <Link href={eventPublicHref(event)} prefetch={false}>
-                            {registrationOpen ? 'Register' : 'Details'}
+                            {registrationOpen ? t('register') : t('details')}
                             <ArrowRight className="w-3 h-3 shrink-0" />
                           </Link>
                         </Button>
@@ -287,7 +297,7 @@ export default function FeaturedUpcomingCarousel({
                       ? `w-5 ${dotActiveClass} hover:opacity-90`
                       : 'w-1.5 bg-white/35'
                   }`}
-                  aria-label={`Show ${ev.title}`}
+                  aria-label={t('dotAria', { title: ev.title })}
                   aria-current={index === activeIndex}
                 />
               ))}
@@ -303,14 +313,13 @@ export default function FeaturedUpcomingCarousel({
       {showIntroText && (
         <>
           <p className="text-sm font-semibold uppercase tracking-wider text-indigo-600 mb-1">
-            Ready to compete?
+            {t('readyToCompete')}
           </p>
           <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
-            Upcoming competitions &amp; events
+            {t('carouselTitle')}
           </h2>
           <p className="text-gray-600 text-sm sm:text-base max-w-3xl mb-6 sm:mb-8">
-            Spotlight on what&apos;s next—workshops, competitions, and community events from{' '}
-            {SITE_CONFIG.name}.
+            {t('carouselIntro', { name: SITE_CONFIG.name })}
           </p>
         </>
       )}
@@ -329,7 +338,7 @@ export default function FeaturedUpcomingCarousel({
               size="icon"
               onClick={() => api?.scrollPrev()}
               className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 z-20 size-10 sm:size-12 rounded-full bg-black/40 text-white hover:bg-black/60 hover:text-white backdrop-blur-sm"
-              aria-label="Previous featured event"
+              aria-label={t('prevAria')}
             >
               <ChevronLeft className="w-5 h-5 sm:w-6 sm:h-6" />
             </Button>
@@ -339,7 +348,7 @@ export default function FeaturedUpcomingCarousel({
               size="icon"
               onClick={() => api?.scrollNext()}
               className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 z-20 size-10 sm:size-12 rounded-full bg-black/40 text-white hover:bg-black/60 hover:text-white backdrop-blur-sm"
-              aria-label="Next featured event"
+              aria-label={t('nextAria')}
             >
               <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6" />
             </Button>
@@ -354,8 +363,12 @@ export default function FeaturedUpcomingCarousel({
             const slideGradient = `bg-linear-to-r ${ACCENT_GRADIENTS[slideAccent]}`
             const slideDot = ACCENT_DOTS[slideAccent]
             const category = categoryLabel(event)
-            const highlights = highlightsFor(event)
+            const highlights = highlightsFor(locale, event)
             const registrationOpen = isRegistrationOpen(event)
+            const title = pickLocalized(locale, event.title, event.titleBn)
+            const description = pickLocalized(locale, event.description, event.descriptionBn)
+            const time = pickLocalized(locale, event.time, event.timeBn)
+            const location = pickLocalized(locale, event.location, event.locationBn)
             return (
               <CarouselItem key={event.id} className="pl-0">
                 <div className="grid lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] gap-0">
@@ -364,14 +377,14 @@ export default function FeaturedUpcomingCarousel({
                       // eslint-disable-next-line @next/next/no-img-element -- avoids hostname allowlist gaps for arbitrary event image URLs
                       <img
                         src={slide.imageSrc}
-                        alt={event.title}
+                        alt={title}
                         className="absolute inset-0 size-full object-cover transition-opacity duration-300"
                         onError={slide.onImageError}
                       />
                     ) : (
                       <Image
                         src={slide.imageSrc}
-                        alt={event.title}
+                        alt={title}
                         fill
                         className="object-cover transition-opacity duration-300"
                         sizes="(max-width: 1024px) 100vw, 55vw"
@@ -387,14 +400,14 @@ export default function FeaturedUpcomingCarousel({
                         {category}
                       </Badge>
                       <h3 className="mt-3 text-2xl sm:text-3xl lg:text-4xl font-extrabold text-white drop-shadow-sm line-clamp-2">
-                        {event.title}
+                        {title}
                       </h3>
                     </div>
                   </div>
 
                   <div className="bg-gray-950 text-white p-5 sm:p-7 lg:p-8 flex flex-col border-t lg:border-t-0 lg:border-l border-white/10">
                     <p className="text-gray-300 text-sm sm:text-base leading-relaxed line-clamp-4 sm:line-clamp-5 mb-6">
-                      {event.description}
+                      {description}
                     </p>
 
                     <div className="space-y-3 text-sm sm:text-base mb-6">
@@ -402,16 +415,16 @@ export default function FeaturedUpcomingCarousel({
                         <Calendar className="w-5 h-5 shrink-0 text-indigo-400" />
                         <span className="font-medium">{formatEventDates(eventDates)}</span>
                       </div>
-                      {event.time ? (
+                      {time ? (
                         <div className="flex gap-3 text-gray-200">
                           <Clock className="w-5 h-5 shrink-0 text-indigo-400" />
-                          <span>{event.time}</span>
+                          <span>{time}</span>
                         </div>
                       ) : null}
-                      {event.location ? (
+                      {location ? (
                         <div className="flex gap-3 text-gray-200">
                           <MapPin className="w-5 h-5 shrink-0 text-indigo-400" />
-                          <span className="line-clamp-2">{event.location}</span>
+                          <span className="line-clamp-2">{location}</span>
                         </div>
                       ) : null}
                     </div>
@@ -419,7 +432,7 @@ export default function FeaturedUpcomingCarousel({
                     {highlights.length > 0 && (
                       <div className="mb-8">
                         <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-3">
-                          Highlights
+                          {t('highlights')}
                         </p>
                         <ul className="space-y-2">
                           {highlights.map((h, idx) => (
@@ -445,7 +458,7 @@ export default function FeaturedUpcomingCarousel({
                         className={`h-auto px-5 py-3 rounded-xl font-semibold text-white shadow-lg hover:opacity-90 hover:text-white border-0 ${slideGradient}`}
                       >
                         <Link href={eventPublicHref(event)} prefetch={false}>
-                          {registrationOpen ? 'Register' : 'View details'}
+                          {registrationOpen ? t('register') : t('viewDetails')}
                           <ArrowRight className="w-4 h-4" />
                         </Link>
                       </Button>
@@ -471,7 +484,7 @@ export default function FeaturedUpcomingCarousel({
                     ? `w-10 ${dotActiveClass} hover:opacity-90`
                     : 'w-2.5 bg-gray-600'
                 }`}
-                aria-label={`Show ${ev.title}`}
+                aria-label={t('dotAria', { title: ev.title })}
                 aria-current={index === activeIndex}
               />
             ))}

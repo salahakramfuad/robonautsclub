@@ -5,7 +5,11 @@ export type GalleryImage = {
 export type GalleryGroup = {
   id: string
   title: string
+  /** Optional Bengali title for bn locale */
+  titleBn?: string
   location: string
+  /** Optional Bengali location for bn locale */
+  locationBn?: string
   images: GalleryImage[]
   /** Total images in album; may exceed `images.length` on lean listing payloads. */
   imageCount?: number

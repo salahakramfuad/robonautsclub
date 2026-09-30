@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Image from 'next/image'
+import { useTranslations } from 'next-intl'
 import InfiniteMarquee from '@/components/InfiniteMarquee'
 import Reveal from '@/components/Reveal'
 import type { NamedLogo } from '@/components/PartnerShowcase'
@@ -16,6 +17,7 @@ function getInitials(name: string) {
 }
 
 function SchoolMark({ name, logo }: NamedLogo) {
+  const t = useTranslations('home.schools')
   const [failed, setFailed] = useState(false)
   const showImage = Boolean(logo) && !failed
 
@@ -24,7 +26,7 @@ function SchoolMark({ name, logo }: NamedLogo) {
       {showImage ? (
         <Image
           src={logo!}
-          alt={`${name} logo`}
+          alt={t('logoAlt', { name })}
           fill
           className="object-contain"
           quality={90}
@@ -53,6 +55,7 @@ function SchoolChip({ name, logo }: NamedLogo) {
 }
 
 export default function SchoolReachShowcase({ items }: { items: NamedLogo[] }) {
+  const t = useTranslations('home.schools')
   if (items.length === 0) return null
 
   const rowA = items.filter((_, i) => i % 2 === 0)
@@ -68,14 +71,13 @@ export default function SchoolReachShowcase({ items }: { items: NamedLogo[] }) {
 
       <Reveal className="relative mx-auto mb-8 max-w-2xl text-center sm:mb-12">
         <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-indigo-600 sm:text-xs">
-          Schools
+          {t('eyebrow')}
         </p>
         <h3 className="mt-3 text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl md:text-4xl">
-          Taking Innovation Beyond Our Walls
+          {t('title')}
         </h3>
         <p className="mt-3 text-sm leading-relaxed text-gray-600 sm:text-base">
-          Through seminars, workshops, and hands-on experiences, we bring future-ready learning
-          to schools across our community.
+          {t('subtitle')}
         </p>
       </Reveal>
 

@@ -8,9 +8,11 @@ import {
   getEventDateInBangladesh,
   bdWallTimeToUtcDate,
 } from '@/lib/dateUtils'
-import Link from 'next/link'
 import { Calendar, Clock, MapPin, ArrowRight } from 'lucide-react'
+import { getLocale, getTranslations } from 'next-intl/server'
+import { Link } from '@/i18n/navigation'
 import { Event } from '@/types/event'
+import { pickLocalized, pickLocalizedList } from '@/lib/i18n-localized'
 import { eventPublicHref } from '@/lib/event-ui'
 import { SITE_CONFIG } from '@/lib/site-config'
 import { differenceInDays, differenceInHours } from 'date-fns'
@@ -111,12 +113,19 @@ function isEventGoingOn(event: Event): boolean {
   return true
 }
 
-function getTimeDisplay(event: Event, isUpcoming: boolean): string | null {
+type TimeT = {
+  goingOn: string
+  startingSoon: string
+  tomorrow: string
+  daysAway: (count: number) => string
+}
+
+function getTimeDisplay(event: Event, isUpcoming: boolean, t: TimeT): string | null {
   const firstDate = getFirstEventDate(event.date)
   if (!firstDate || !isUpcoming) return null
 
   if (isEventGoingOn(event)) {
-    return 'Event going on'
+    return t.goingOn
   }
 
   const bstNow = getBangladeshNow()
@@ -133,20 +142,40 @@ function getTimeDisplay(event: Event, isUpcoming: boolean): string | null {
   const daysUntil = differenceInDays(eventDateBST, bstNow)
 
   if (daysUntil === 0) {
-    if (hoursUntil >= 0) return 'Starting soon'
-    return 'Event going on'
+    if (hoursUntil >= 0) return t.startingSoon
+    return t.goingOn
   }
-  if (hoursUntil < 24 && hoursUntil >= 0) return 'Starting soon'
-  if (hoursUntil >= 24 && hoursUntil < 48) return 'Tomorrow'
-  if (daysUntil > 0) return `${daysUntil} days away`
+  if (hoursUntil < 24 && hoursUntil >= 0) return t.startingSoon
+  if (hoursUntil >= 24 && hoursUntil < 48) return t.tomorrow
+  if (daysUntil > 0) return t.daysAway(daysUntil)
   return null
 }
 
-function EventCard({ event, priority = false }: { event: Event; priority?: boolean }) {
+async function EventCard({
+  event,
+  locale,
+  priority = false,
+  statusUpcoming,
+  statusCompleted,
+  viewDetails,
+  timeT,
+}: {
+  event: Event
+  locale: string
+  priority?: boolean
+  statusUpcoming: string
+  statusCompleted: string
+  viewDetails: string
+  timeT: TimeT
+}) {
   const eventDates = parseEventDates(event.date)
   const isUpcoming = isEventUpcoming(event.date)
-  const status = isUpcoming ? 'Upcoming' : 'Completed'
-  const timeDisplay = getTimeDisplay(event, isUpcoming)
+  const status = isUpcoming ? statusUpcoming : statusCompleted
+  const timeDisplay = getTimeDisplay(event, isUpcoming, timeT)
+  const title = pickLocalized(locale, event.title, event.titleBn)
+  const time = pickLocalized(locale, event.time, event.timeBn)
+  const location = pickLocalized(locale, event.location, event.locationBn)
+  const tags = pickLocalizedList(locale, event.tags, event.tagsBn)
 
   return (
     <Link href={eventPublicHref(event)} prefetch={false} className="h-full">
@@ -164,7 +193,7 @@ function EventCard({ event, priority = false }: { event: Event; priority?: boole
         </div>
 
         <div className="relative h-40 sm:h-48 bg-linear-to-br from-indigo-400 via-blue-400 to-purple-400 overflow-hidden">
-          <EventCardImage src={event.image} alt={event.title} priority={priority} />
+          <EventCardImage src={event.image} alt={title} priority={priority} />
           <div className="absolute inset-0 bg-black/10 group-hover:bg-black/20 transition-colors" />
           {isUpcoming && timeDisplay && (
             <Badge className="absolute bottom-4 left-4 bg-white/90 hover:bg-white/90 backdrop-blur-sm text-indigo-700 z-10 border-0 text-sm font-bold">
@@ -175,7 +204,7 @@ function EventCard({ event, priority = false }: { event: Event; priority?: boole
 
         <CardContent className="p-4 sm:p-6 flex flex-col flex-1">
           <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-2 sm:mb-3 group-hover:text-indigo-500 transition-colors line-clamp-2">
-            {event.title}
+            {title}
           </h3>
 
           <div className="space-y-1.5 sm:space-y-2 mb-3 sm:mb-4">
@@ -183,23 +212,23 @@ function EventCard({ event, priority = false }: { event: Event; priority?: boole
               <Calendar className="w-3 h-3 sm:w-4 sm:h-4 text-indigo-500 shrink-0" />
               <span className="font-medium">{formatEventDates(eventDates)}</span>
             </div>
-            {event.time && (
+            {time && (
               <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-600">
                 <Clock className="w-3 h-3 sm:w-4 sm:h-4 text-indigo-500 shrink-0" />
-                <span>{event.time}</span>
+                <span>{time}</span>
               </div>
             )}
-            {event.location && (
+            {location && (
               <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-600">
                 <MapPin className="w-3 h-3 sm:w-4 sm:h-4 text-indigo-500 shrink-0" />
-                <span className="line-clamp-1">{event.location}</span>
+                <span className="line-clamp-1">{location}</span>
               </div>
             )}
           </div>
 
-          {event.tags && event.tags.length > 0 && (
+          {tags.length > 0 && (
             <div className="flex flex-wrap gap-1.5 mb-3 sm:mb-4">
-              {event.tags.slice(0, 3).map((tag, index) => (
+              {tags.slice(0, 3).map((tag, index) => (
                 <Badge
                   key={index}
                   variant="secondary"
@@ -208,9 +237,9 @@ function EventCard({ event, priority = false }: { event: Event; priority?: boole
                   {tag}
                 </Badge>
               ))}
-              {event.tags.length > 3 && (
+              {tags.length > 3 && (
                 <Badge variant="secondary" className="bg-gray-100 hover:bg-gray-100 text-gray-600 text-xs font-medium">
-                  +{event.tags.length - 3}
+                  +{tags.length - 3}
                 </Badge>
               )}
             </div>
@@ -218,7 +247,7 @@ function EventCard({ event, priority = false }: { event: Event; priority?: boole
 
           <div className="mt-auto pt-3 sm:pt-4 border-t border-gray-100">
             <div className="flex items-center gap-2 text-indigo-500 font-semibold group-hover:text-indigo-700 transition-colors text-sm sm:text-base">
-              <span>View Details</span>
+              <span>{viewDetails}</span>
               <ArrowRight className="w-3 h-3 sm:w-4 sm:h-4 group-hover:translate-x-1 transition-transform" />
             </div>
           </div>
@@ -232,10 +261,12 @@ function SectionHeader({
   title,
   subtitle,
   count,
+  countLabel,
 }: {
   title: string
   subtitle?: string
   count?: number
+  countLabel: string
 }) {
   return (
     <div className="mb-6 sm:mb-8">
@@ -250,7 +281,7 @@ function SectionHeader({
             className="flex sm:hidden md:flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-indigo-100 hover:bg-indigo-100 self-start sm:self-auto"
           >
             <span className="text-base sm:text-lg font-bold text-indigo-700">{count}</span>
-            <span className="text-xs sm:text-sm text-indigo-700">Events</span>
+            <span className="text-xs sm:text-sm text-indigo-700">{countLabel}</span>
           </Badge>
         )}
       </div>
@@ -263,7 +294,24 @@ interface PublicEventsListProps {
 }
 
 /** Server-rendered public events list (legacy name RealtimeEventsList). */
-export default function RealtimeEventsList({ initialEvents = [] }: PublicEventsListProps) {
+export default async function RealtimeEventsList({ initialEvents = [] }: PublicEventsListProps) {
+  const locale = await getLocale()
+  const t = await getTranslations('events.list')
+  const tTime = await getTranslations('events.time')
+  const timeT: TimeT = {
+    goingOn: tTime('goingOn'),
+    startingSoon: tTime('startingSoon'),
+    tomorrow: tTime('tomorrow'),
+    daysAway: (count) => tTime('daysAway', { count }),
+  }
+  const cardProps = {
+    locale,
+    statusUpcoming: t('statusUpcoming'),
+    statusCompleted: t('statusCompleted'),
+    viewDetails: t('viewDetails'),
+    timeT,
+  }
+
   const robofestCard = getRobofestEventsListCard()
   const withoutDuplicate = initialEvents.filter((event) => event.id !== ROBOFEST_EVENTS_LIST_CARD_ID)
   const displayEvents = [...withoutDuplicate, robofestCard]
@@ -294,13 +342,14 @@ export default function RealtimeEventsList({ initialEvents = [] }: PublicEventsL
       {upcomingEvents.length > 0 ? (
         <section className="mb-12 sm:mb-16 md:mb-20">
           <SectionHeader
-            title="Upcoming Events"
-            subtitle="Browse the full list—tap an event for details and registration"
+            title={t('upcomingTitle')}
+            subtitle={t('upcomingSubtitle')}
             count={upcomingEvents.length}
+            countLabel={t('countLabel')}
           />
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             {upcomingEvents.map((event, index) => (
-              <EventCard key={event.id} event={event} priority={index === 0} />
+              <EventCard key={event.id} event={event} priority={index === 0} {...cardProps} />
             ))}
           </div>
         </section>
@@ -309,12 +358,12 @@ export default function RealtimeEventsList({ initialEvents = [] }: PublicEventsL
           <Card className="border-2 border-dashed border-gray-300">
             <CardContent className="p-8 sm:p-12 text-center">
               <Calendar className="w-12 h-12 sm:w-16 sm:h-16 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">No Upcoming Events</h3>
+              <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">{t('emptyTitle')}</h3>
               <p className="text-sm sm:text-base text-gray-600 mb-6">
-                Check back soon for new events and workshops!
+                {t('emptyBody')}
               </p>
               <Button asChild className="bg-indigo-500 hover:bg-indigo-600 text-white text-sm sm:text-base">
-                <a href={`mailto:${SITE_CONFIG.email}`}>Contact Us</a>
+                <a href={`mailto:${SITE_CONFIG.email}`}>{t('emptyCta')}</a>
               </Button>
             </CardContent>
           </Card>
@@ -324,13 +373,14 @@ export default function RealtimeEventsList({ initialEvents = [] }: PublicEventsL
       {pastEvents.length > 0 && (
         <section>
           <SectionHeader
-            title="Past Events"
-            subtitle="Browse our previous events and workshops"
+            title={t('pastTitle')}
+            subtitle={t('pastSubtitle')}
             count={pastEvents.length}
+            countLabel={t('countLabel')}
           />
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             {pastEvents.map((event) => (
-              <EventCard key={event.id} event={event} />
+              <EventCard key={event.id} event={event} {...cardProps} />
             ))}
           </div>
         </section>

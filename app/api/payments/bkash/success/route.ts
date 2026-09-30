@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { finalizePaidEventBooking } from '@/app/(marketing)/events/actions'
-import { finalizeRobofestPaidRegistration } from '@/app/(marketing)/robofest/actions'
+import { finalizePaidEventBooking } from '@/app/[locale]/(marketing)/events/actions'
+import { finalizeRobofestPaidRegistration } from '@/app/[locale]/(marketing)/robofest/actions'
 import { collectionGet } from '@/lib/db/collections'
 
 function normalizeStatus(raw: string): string {

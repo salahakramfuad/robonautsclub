@@ -25,6 +25,8 @@ type PageMetadataOptions = {
   keywords?: string[];
   noindex?: boolean;
   twitterCard?: "summary" | "summary_large_image";
+  /** Active page locale — drives Open Graph locale + hreflang alternates. */
+  locale?: string;
 };
 
 export const PAGE_SEO = {
@@ -67,6 +69,15 @@ const DEFAULT_OG_IMAGE: OgImage = {
   alt: SITE_CONFIG.metadata.defaultImageAlt,
 };
 
+function localizedPath(path: string, locale: string): string {
+  const normalized = path.startsWith("/") ? path : `/${path}`;
+  if (locale === "bn") {
+    if (normalized === "/") return "/bn";
+    return `/bn${normalized}`;
+  }
+  return normalized === "/" ? "/" : normalized;
+}
+
 export function buildPageMetadata({
   title,
   description,
@@ -77,9 +88,13 @@ export function buildPageMetadata({
   keywords,
   noindex = false,
   twitterCard = "summary_large_image",
+  locale,
 }: PageMetadataOptions): Metadata {
   const resolvedTitle = absoluteTitle ? { absolute: title } : title;
   const ogTitle = absoluteTitle ? title : title.includes("|") ? title : `${title} | ${SITE_CONFIG.name}`;
+  const canonicalPath = locale ? localizedPath(path, locale) : path;
+  const enPath = localizedPath(path, "en");
+  const bnPath = localizedPath(path, "bn");
 
   return {
     title: resolvedTitle,
@@ -89,9 +104,14 @@ export function buildPageMetadata({
       type: ogType,
       title: ogTitle,
       description,
-      url: path,
+      url: canonicalPath,
       siteName: SITE_CONFIG.name,
       images: [ogImage],
+      ...(locale === "bn"
+        ? { locale: "bn_BD" }
+        : locale
+          ? { locale: "en_US" }
+          : {}),
     },
     twitter: {
       card: twitterCard,
@@ -101,7 +121,12 @@ export function buildPageMetadata({
       creator: SITE_CONFIG.metadata.twitterCreator,
     },
     alternates: {
-      canonical: path,
+      canonical: canonicalPath,
+      languages: {
+        en: enPath,
+        bn: bnPath,
+        "x-default": enPath,
+      },
     },
     ...(noindex ? { robots: NOINDEX_ROBOTS } : {}),
   };

@@ -1,0 +1,926 @@
+{
+  "nav": {
+    "Home": "Home",
+    "Events": "Events",
+    "News": "News",
+    "Robofest": "Robofest",
+    "Gallery": "Gallery",
+    "AboutUs": "About us",
+    "Contact": "Contact",
+    "skipToContent": "Skip to content",
+    "primaryAria": "Primary",
+    "openMenuAria": "Open main menu",
+    "menuTitle": "Menu",
+    "mobileAria": "Mobile navigation",
+    "languageToggleAria": "Change language",
+    "english": "English",
+    "bangla": "বাংলা"
+  },
+  "site": {
+    "name": "Robonauts",
+    "tagline": "Innovation meets curiosity in STEM education",
+    "description": "Bangladesh's first youth robotics club preparing students for Robofest & global STEM challenges.",
+    "descriptionExtended": "Bangladesh's first youth robotics club preparing students for Robofest and global STEM challenges through hands-on robotics workshops, programming, and competition training.",
+    "services": {
+      "workshops": "Robotics Workshops",
+      "handsOn": "Hands-on Training",
+      "roboFair": "Robo Fair",
+      "competitions": "Competitions and Simulations"
+    }
+  },
+  "footer": {
+    "quickLinks": "Quick Links",
+    "ourServices": "Our Services",
+    "contact": "Contact",
+    "paymentMethod": "Payment method",
+    "securePayments": "Secure online payments",
+    "allRightsReserved": "© {year} {name}. All rights reserved.",
+    "developedBy": "Developed by",
+    "social": {
+      "facebook": "Facebook",
+      "instagram": "Instagram",
+      "linkedin": "LinkedIn",
+      "youtube": "YouTube",
+      "whatsapp": "WhatsApp"
+    }
+  },
+  "seo": {
+    "default": {
+      "defaultTitle": "Robonauts | STEM, Robotics & Olympiad Education in Bangladesh",
+      "defaultDescription": "Robonauts is Bangladesh's youth robotics club offering STEM education, programming, robotics workshops, and olympiad training for students.",
+      "defaultImageAlt": "Robonauts logo",
+      "classification": "Education"
+    },
+    "pages": {
+      "home": {
+        "title": "Robonauts | STEM, Robotics & Olympiad Education in Bangladesh",
+        "description": "Robonauts is Bangladesh's youth robotics club offering STEM education, programming, robotics workshops, and olympiad training for students."
+      },
+      "about": {
+        "title": "About Robonauts | STEM & Robotics Education in Bangladesh",
+        "description": "Learn about Robonauts — Bangladesh's youth robotics club. Discover our mission, values, and how we prepare students for Robofest and global STEM challenges."
+      },
+      "events": {
+        "title": "Robotics & STEM Events in Bangladesh | Robonauts",
+        "description": "Discover upcoming robotics workshops, competitions, bootcamps, and STEM events across Bangladesh with Robonauts."
+      },
+      "robofest": {
+        "title": "RoboFest Bangladesh 2026 | Robonauts",
+        "description": "Register for Robofest Bangladesh 2026 local rounds in Chittagong (11 Sep) and Dhaka (18 Sep). Compete in BottleSumo, BuildAthon, Line Following Bot, or Robo Exhibition."
+      },
+      "news": {
+        "title": "Robonauts News | Robotics, STEM & Student Achievements",
+        "description": "Updates, stories, and announcements from Robonauts — workshops, competitions, partnerships, and student achievements in robotics and STEM."
+      },
+      "gallery": {
+        "title": "Robonauts Gallery | Robotics, STEM & Events",
+        "description": "Photo gallery from Robonauts workshops, robotics competitions, Robofest, and community STEM events across Bangladesh."
+      }
+    }
+  },
+  "home": {
+    "hero": {
+      "h1": "Robonauts – STEM, Robotics & Olympiad Education in Bangladesh",
+      "headlineAria": "Build Skills. Break Barriers. Go Global.",
+      "line1": "Build Skills.",
+      "line2": "Break Barriers.",
+      "line3": "Go Global.",
+      "subtitle": "Hands-on robotics, competition pathways, and international stages for students ready to build what comes next.",
+      "ctaEvents": "Explore Events",
+      "ctaAbout": "About Robonauts",
+      "linkNews": "Robonauts News",
+      "linkGallery": "Event Gallery",
+      "linkRobofest": "RoboFest",
+      "tagStem": "STEM",
+      "tagRobotics": "Robotics",
+      "tagOlympiad": "Olympiad",
+      "tagInnovation": "Innovation",
+      "unmuteAria": "Unmute video",
+      "muteAria": "Mute video"
+    },
+    "bento": {
+      "eyebrow": "Why {name}",
+      "titleLine1": "More Than Learning.",
+      "titleLine2": "A Launchpad for What Comes Next.",
+      "handsOnTitle": "Hands-on STEM",
+      "handsOnDescription": "Build and program real robots and projects that turn theory into something you can hold, test, and improve.",
+      "handsOnExtra": "Circuits, code, mechanical design — practiced in the lab, not just on a slide.",
+      "mentorsTitle": "Expert Mentors",
+      "mentorsDescription": "Learn beside instructors who have walked the competition floor and know how to coach the next step.",
+      "mentorsExtra": "Guidance that scales from first build to international briefings.",
+      "mentorsCaption": "Coaches & alumni mentors",
+      "olympiadTitle": "Olympiad & Competition Focus",
+      "olympiadDescription": "Specialized pathways for national and international robotics, STEM, and academic contests.",
+      "olympiadExtra": "Strategy, teamwork, and stage-ready confidence.",
+      "ecosystemTitle": "One Stop ECA Solution",
+      "ecosystemDescription": "Workshops, competitions, mentorship, and community — one ecosystem for young innovators.",
+      "ecosystemExtra": "From first curiosity to a portfolio that travels.",
+      "tagWorkshops": "Workshops",
+      "tagCompetitions": "Competitions",
+      "tagMentorship": "Mentorship",
+      "tagCommunity": "Community"
+    },
+    "programs": {
+      "eyebrow": "Programs",
+      "title": "Learn with Robonauts",
+      "subtitle": "Discover pathways designed for every stage — from first build to competition-ready.",
+      "exploreAll": "Explore all",
+      "empty": "No courses available at the moment. Check back soon!"
+    },
+    "courseCard": {
+      "featuredLabel": "Featured program",
+      "explore": "Explore this program",
+      "learnMore": "Learn more",
+      "contact": "Contact about this program"
+    },
+    "olympiads": {
+      "eyebrow": "Beyond the classroom",
+      "title": "Students from {name} participate on the world stage.",
+      "subtitle": "Our teams train for leading national and international olympiads — experience that shapes how we coach every member, every season.",
+      "countriesHeading": "Countries our teams have reached",
+      "genius": "GENIUS Olympiad",
+      "igo": "International Greenwich Olympiad (IGO)",
+      "nasaHerc": "NASA Human Exploration Rover Challenge (HERC)",
+      "nextgen": "NextGen Olympiad",
+      "worldScholars": "World Scholars Cup",
+      "owlypia": "Owlypia International",
+      "robofest": "Robofest"
+    },
+    "stats": {
+      "participants": "Participants",
+      "awards": "Awards",
+      "satisfaction": "Satisfaction"
+    },
+    "partners": {
+      "eyebrow": "Partners",
+      "title": "Our Strategic Partners",
+      "subtitle": "Trusted by organizations who believe in the future of learning.",
+      "logoAlt": "{name} logo"
+    },
+    "schools": {
+      "eyebrow": "Schools",
+      "title": "Taking Innovation Beyond Our Walls",
+      "subtitle": "Through seminars, workshops, and hands-on experiences, we bring future-ready learning to schools across our community.",
+      "logoAlt": "{name} logo"
+    },
+    "faq": {
+      "section": {
+        "eyebrow": "FAQ",
+        "titleLine1": "Questions?",
+        "titleLine2": "We've Got Answers.",
+        "intro": "Eligibility, ages, experience, and certificates — the essentials for families and students considering the next step.",
+        "sidebar": "Still curious? Reach out — we're happy to help you find the right pathway."
+      },
+      "items": {
+        "0": {
+          "q": "Who is eligible to join {name}?",
+          "a": "{name} welcomes students from grades 3-12 who have an interest in robotics, STEM, and innovation. No prior experience is required for beginner courses."
+        },
+        "1": {
+          "q": "What age groups do you serve?",
+          "a": "We serve students aged 8-18 years old, with courses tailored to different age groups and skill levels. Our programs are designed to grow with students from elementary through high school."
+        },
+        "2": {
+          "q": "Do I need any background knowledge?",
+          "a": "No background knowledge is required for our beginner courses. We start from the basics and guide you through every step. For intermediate and advanced courses, we recommend completing prerequisite courses first."
+        },
+        "3": {
+          "q": "Do you provide certificates?",
+          "a": "Yes! Students who complete our courses receive certificates of completion. We also provide certificates for participation in competitions and special workshops."
+        }
+      }
+    },
+    "eventsRail": {
+      "eyebrow": "Upcoming opportunities",
+      "link": "Robotics & STEM Events",
+      "monthSoon": "Soon",
+      "dayPlaceholder": "—",
+      "categoryFallback": "Event",
+      "viewEventAria": "View {title}"
+    }
+  },
+  "about": {
+    "hero": {
+      "badge": "About {name}",
+      "title": "Where Innovation Meets Curiosity",
+      "subtitle": "Empowering young minds through hands-on STEM education in Dhaka. Join us in exploring the exciting world of robotics, automation, and innovation."
+    },
+    "whoWeAre": {
+      "title": "Who We Are",
+      "p1": "Founded in 2022, {name} delivers engaging STEM education through real-world projects.",
+      "p2": "We help students turn curiosity into confidence, providing hands-on learning experiences that prepare them for future challenges in technology and engineering."
+    },
+    "achievements": {
+      "title": "Our Achievements & Impact",
+      "subtitle": "Celebrating milestones and student success"
+    },
+    "stats": {
+      "activeMembers": "Active Members",
+      "eventsHosted": "Events Hosted",
+      "competitionAwards": "Competition Awards",
+      "projectsCompleted": "Projects Completed"
+    },
+    "impact": {
+      "title": "Making a Difference",
+      "successStoriesTitle": "Student Success Stories",
+      "successStoriesBody": "Our students have gone on to win national robotics competitions, secure scholarships, and pursue careers in engineering and technology. Many have represented Bangladesh in international robotics olympiads.",
+      "communityTitle": "Community Impact",
+      "communityBody": "We've partnered with schools across Dhaka to bring robotics education to underserved communities, organizing free workshops and providing resources to students who might not otherwise have access to STEM education."
+    },
+    "values": {
+      "title": "Our Core Values",
+      "subtitle": "The principles that guide everything we do",
+      "innovationTitle": "Innovation",
+      "innovationDescription": "Creative problem solving and cutting-edge thinking",
+      "collaborationTitle": "Collaboration",
+      "collaborationDescription": "Learning together and building strong communities",
+      "empowermentTitle": "Empowerment",
+      "empowermentDescription": "Building confidence and unlocking potential"
+    },
+    "whatWeDo": {
+      "title": "What We Do",
+      "subtitle": "Comprehensive robotics and STEM education programs",
+      "workshopsTitle": "Robotics Workshops",
+      "workshopsDescription": "Hands-on workshops covering robot assembly, programming, and troubleshooting.",
+      "competitionTitle": "Competition Training",
+      "competitionDescription": "Specialized programs preparing students for national and international robotics competitions.",
+      "stemTitle": "STEM Education",
+      "stemDescription": "Comprehensive STEM curriculum integrating science, technology, engineering, and mathematics.",
+      "pblTitle": "Project-Based Learning",
+      "pblDescription": "Students work on real-world projects that develop problem-solving and critical thinking skills.",
+      "mentorshipTitle": "Mentorship Programs",
+      "mentorshipDescription": "One-on-one and group mentorship from experienced robotics educators and engineers.",
+      "communityTitle": "Community Events",
+      "communityDescription": "Regular community events, exhibitions, and showcases celebrating student achievements."
+    },
+    "team": {
+      "title": "Our Team & Mentors",
+      "subtitle": "Meet the passionate educators guiding our students",
+      "roles": {
+        "roboticsInstructor": "Robotics Instructor",
+        "programmingInstructor": "Programming & Web Development Instructor",
+        "competitionCoordinator": "Competition Coordinator",
+        "hardwareExpert": "Hardware & Electronics Expert",
+        "youthProgramDirector": "Youth Program Director"
+      },
+      "expertise": {
+        "roboticsEngineering": "Robotics Engineering, Competition Strategy",
+        "curriculumMentorship": "Curriculum Development, Student Mentorship",
+        "pythonMlArduino": "Python, Machine Learning, Arduino",
+        "eventTeamBuilding": "Event Management, Team Building",
+        "circuitSensors": "Circuit Design, Sensor Integration",
+        "educationalPsychology": "Educational Psychology, Student Engagement"
+      }
+    },
+    "contact": {
+      "title": "Contact Information",
+      "subtitle": "Get in touch with us",
+      "detailsTitle": "Contact Details",
+      "addressLabel": "Address",
+      "addressLine": "5B, House #4, Road #7, Sector #3, Uttara",
+      "mapsLink": "View on Google Maps",
+      "serviceAreaLabel": "Service Area",
+      "serviceArea": "Dhaka, Dhaka Division, Bangladesh",
+      "mobileLabel": "Mobile",
+      "mobile": "01824-863366",
+      "whatsappLabel": "WhatsApp",
+      "whatsapp": "+880 1824-863366",
+      "emailLabel": "Email"
+    },
+    "images": {
+      "workshopAlt": "Robonauts Workshop",
+      "heroAlt": "Robonauts classroom and robotics lab"
+    }
+  },
+  "events": {
+    "list": {
+      "heroBadge": "{count} Upcoming Events",
+      "heroTitle": "Events & Competitions",
+      "heroSubtitle": "Discover robotics competitions, workshops, and club events—build skills, compete, and connect with the Robonauts community.",
+      "statUpcoming": "Upcoming Events",
+      "statTotal": "Total Events",
+      "statPast": "Past Events",
+      "upcomingTitle": "Upcoming Events",
+      "upcomingSubtitle": "Browse the full list—tap an event for details and registration",
+      "pastTitle": "Past Events",
+      "pastSubtitle": "Browse our previous events and workshops",
+      "countLabel": "Events",
+      "statusUpcoming": "Upcoming",
+      "statusCompleted": "Completed",
+      "emptyTitle": "No Upcoming Events",
+      "emptyBody": "Check back soon for new events and workshops!",
+      "emptyCta": "Contact Us",
+      "ctaTitle": "Want to Organize an Event?",
+      "ctaBody": "We're always open to collaborating with schools and communities to bring robotics education to more students.",
+      "ctaButton": "Contact Robonauts",
+      "viewDetails": "View Details",
+      "nextUp": "Next up",
+      "readyToCompete": "Ready to compete?",
+      "carouselTitle": "Upcoming competitions & events",
+      "carouselIntro": "Spotlight on what's next—workshops, competitions, and community events from {name}.",
+      "highlights": "Highlights",
+      "register": "Register",
+      "details": "Details",
+      "prevAria": "Previous featured event",
+      "nextAria": "Next featured event",
+      "dotAria": "Show {title}"
+    },
+    "card": {
+      "categoryFallback": "Event",
+      "viewDetails": "View Details",
+      "register": "Register"
+    },
+    "time": {
+      "goingOn": "Event going on",
+      "startingSoon": "Starting soon",
+      "tomorrow": "Tomorrow",
+      "daysAway": "{count} days away"
+    },
+    "detail": {
+      "back": "Back to Events",
+      "overview": "Overview",
+      "details": "Event Details",
+      "dateLabel": "Date",
+      "datesLabel": "Dates",
+      "timeLabel": "Time",
+      "venueLabel": "Venue",
+      "modeLabel": "Mode",
+      "modeOnline": "Online Streaming",
+      "modeInPerson": "In-person",
+      "audienceLabel": "Audience",
+      "feeLabel": "Fee",
+      "feeStartsFrom": "Starts from BDT {amount}",
+      "feeAmount": "BDT {amount}",
+      "contactPerson": "Contact Person",
+      "contactName": "Name:",
+      "contactDesignation": "Designation:",
+      "contactMobileEmail": "Mobile/Email:",
+      "agenda": "Agenda",
+      "organizerTitle": "About the Organizer",
+      "organizerP1": "Robonauts Club is Bangladesh's first youth robotics club, dedicated to preparing students for RoboFest and global STEM challenges. We empower the next generation of robotics innovators through hands-on learning, expert mentorship, and competitive opportunities.",
+      "organizerP2": "Our events bring together passionate students, experienced mentors, and industry leaders to share knowledge, tools, and inspiration that shape the future of robotics and technology in Bangladesh.",
+      "passedTitle": "Event Has Passed",
+      "passedBody": "This event has already taken place. Check out our upcoming events for new opportunities!",
+      "passedCta": "View Upcoming Events",
+      "registrationClosedTitle": "Registration Closed",
+      "registrationClosedBody": "Registration for this event is closed. Check out our other events for new opportunities!",
+      "registrationClosedCta": "View Other Events"
+    },
+    "booking": {
+      "title": "Registration Form",
+      "successTitle": "Registration Successful!",
+      "successConfirmed": "Your registration for {title} has been confirmed!",
+      "successEmailSent": "A confirmation email with event details has been sent to your email address. Please check your inbox (and spam folder).",
+      "successCheckSpam": "If you don't see it in a few minutes, check your spam or junk folder.",
+      "emailWarningTitle": "Heads up — confirmation email not delivered",
+      "feeTitle": "Registration Fee",
+      "feeSelectCategory": "Select a category to see the fee",
+      "feeBdt": "BDT {amount}",
+      "feeBkashNote": "You will be redirected to bKash secure checkout after submitting this form.",
+      "labelName": "Name",
+      "labelCategory": "Category",
+      "labelSchool": "School (If you are private candidate, write private candidate)",
+      "labelEmail": "Email Address (We will use this to send you the confirmation email)",
+      "labelPhone": "Phone Number",
+      "labelOtherInfo": "Other Information",
+      "placeholderEmail": "Enter your email",
+      "placeholderPhone": "01XXXXXXXXX (11 digits starting with 01)",
+      "placeholderCustomSchool": "Type your school name",
+      "placeholderOtherInfo": "Any additional information you'd like to share (optional)...",
+      "placeholderCustomAnswer": "Enter your answer",
+      "selectCategory": "Select category",
+      "selectSchool": "Select school",
+      "selectOption": "Select an option",
+      "optionPrivateCandidate": "Private Candidate",
+      "optionSchoolNotFound": "School not found (type manually)",
+      "categoryWithFee": "{name} - BDT {amount}",
+      "additionalInfo": "Additional Information",
+      "submit": "Submit",
+      "submitting": "Submitting...",
+      "proceedBkash": "Proceed to bKash",
+      "errorSubmitFailed": "Failed to submit registration. Please try again.",
+      "errorUnexpected": "An unexpected error occurred. Please try again."
+    },
+    "validation": {
+      "nameRequired": "Name is required",
+      "emailRequired": "Email is required",
+      "emailInvalid": "Invalid email format",
+      "phoneRequired": "Phone number is required",
+      "phoneFormat": "Phone number must be 11 digits and start with 01",
+      "schoolRequired": "School is required",
+      "categoryRequired": "Please select a category",
+      "otherInfoRequired": "Other information is required",
+      "customRequired": "{name} is required"
+    },
+    "tags": {
+      "workshop": "Workshop",
+      "competition": "Competition",
+      "bootcamp": "Bootcamp",
+      "programming": "Programming",
+      "robotics": "Robotics",
+      "stem": "STEM",
+      "ai": "AI",
+      "electronics": "Electronics",
+      "education": "Education"
+    }
+  },
+  "news": {
+    "hero": {
+      "badge": "Club News",
+      "title": "News & Stories",
+      "subtitle": "Follow the latest workshops, competitions, achievements, partnerships and stories from the Robonauts community."
+    },
+    "empty": {
+      "title": "No published stories yet",
+      "body": "News, workshops, competitions and community updates will appear here soon."
+    },
+    "list": {
+      "featuredSr": "Featured story",
+      "featuredLabel": "Featured story",
+      "latestEyebrow": "From the community",
+      "latestTitle": "Latest Stories"
+    },
+    "card": {
+      "readMore": "Read more",
+      "readStory": "Read story"
+    },
+    "article": {
+      "back": "Back to News",
+      "eyebrow": "Robonauts News",
+      "published": "Published",
+      "brand": "Robonauts",
+      "tagline": "News & Community",
+      "coverEnlarge": "Click to enlarge",
+      "openViewerAria": "Open image viewer (cover and gallery)",
+      "openFullAria": "Open full image",
+      "photoCountOne": "+{count} photo",
+      "photoCountOther": "+{count} photos",
+      "photosBack": "Back to article",
+      "photosBadge": "Photos",
+      "photosCount": "{count, plural, one {# photo} other {# photos}}",
+      "openImageAria": "Open image {count} of {title}"
+    },
+    "gallery": {
+      "title": "Gallery",
+      "subtitle": "Moments from the event",
+      "viewAllPhotos": "View all photos",
+      "seeAllPhotos": "See all {count} photos",
+      "openImageAria": "Open image {count} of {title}",
+      "seeAllAria": "See all {count} photos"
+    }
+  },
+  "gallery": {
+    "list": {
+      "badge": "Robogallery",
+      "title": "Gallery",
+      "subtitle": "Snapshots from workshops, competitions, and community events.",
+      "albumCount": "{count, plural, one {# album} other {# albums}}",
+      "photoCount": "{count, plural, one {# photo} other {# photos}}",
+      "emptyTitle": "No gallery albums yet.",
+      "emptySubtitle": "Check back soon for moments from the lab and stage."
+    },
+    "card": {
+      "photoBadge": "{count, plural, one {# photo} other {# photos}}"
+    },
+    "album": {
+      "back": "Back to gallery",
+      "badge": "Album",
+      "empty": "No images in this album yet."
+    },
+    "lightbox": {
+      "closeAria": "Close",
+      "prevAria": "Previous image",
+      "nextAria": "Next image",
+      "title": "Image {count} of {title}",
+      "description": "Full-size gallery image. Use arrow keys to navigate between photos.",
+      "openImageAria": "Open image {count} of {title}",
+      "seeAll": "See all {count} images"
+    }
+  },
+  "robofest": {
+    "landing": {
+      "statusBadge": "Local Round · September 2026",
+      "presentsLabel": "Robonauts Ltd Presents",
+      "headline": "RoboFest Bangladesh 2026",
+      "lead": "Compete in Dhaka & Chittagong for a Path to the RoboFest World Championship 2027 in South Korea.",
+      "dateLabel": "11 September (CTG) · 18 September (DHK)",
+      "venueLabel": "Chittagong Grammar School · Manarat Dhaka International School & College",
+      "hostName": "Robonauts Ltd",
+      "factDate": "Date",
+      "factVenue": "Venue",
+      "factHost": "Host",
+      "factContact": "Contact",
+      "emailPrefix": "E-Mail:",
+      "dateCtg": "11 September (CTG)",
+      "dateDhk": "18 September (DHK)",
+      "venueCtg": "Chittagong - Chittagong Grammar School",
+      "venueDhk": "Dhaka - Manarat Dhaka International School & College",
+      "contact01": "Contact - 01",
+      "contact02": "Contact - 02",
+      "competitionsRelated": "Competitions Related",
+      "registrationsRelated": "Registrations Related",
+      "categoriesEyebrow": "Choose your arena",
+      "categoriesTitle": "Competition Categories",
+      "categoriesDescription": "Choose Your Challenge. Build, Code, Innovate & Compete at RoboFest Bangladesh 2026.",
+      "generalRules": "View General Rules & Regulations",
+      "viewRulebook": "View Rulebook",
+      "viewRegister": "View & register",
+      "coverAlt": "{name} competition cover — Robofest Bangladesh 2026",
+      "ctaEyebrow": "Local Round",
+      "ctaTitle": "Ready for the Local Round?",
+      "ctaP1": "RoboFest Bangladesh 2026 is coming to Chittagong & Dhaka this September.",
+      "ctaP2": "Choose Your Competition, Form Your Team, and Get Ready to Compete.",
+      "registerNow": "Register Now",
+      "helpTitle": "Need help registering?",
+      "emailLabel": "E-Mail",
+      "instagramAria": "Robonauts Ltd on Instagram",
+      "facebookAria": "Robonauts Ltd on Facebook",
+      "heroImageAlt": "{title} local round hero",
+      "roundCtgTitle": "ROBOFEST BANGLADESH ROUND 2026 | CHITTAGONG",
+      "roundDhkTitle": "ROBOFEST BANGLADESH ROUND 2026 | DHAKA",
+      "roundCtgDates": "11 September (CTG)",
+      "roundDhkDates": "18 September (DHK)",
+      "roundCtgVenue": "Chittagong Grammar School",
+      "roundDhkVenue": "Manarat Dhaka International School & College"
+    },
+    "howItWorks": {
+      "eyebrow": "Protocol",
+      "title": "How the Local Round Works",
+      "description": "Compete in RoboFest Bangladesh 2026 through Robotics, Programming & Innovation Challenges with Top Performers getting closer to the World Stage.",
+      "step1Title": "Form Your Team",
+      "step1Description": "Students in Grades 05 – 12 compete under Explorer (Grades 05 – 08) or Innovators (Grades 09 – 12) and form a Team of up to 4 Members.",
+      "step2Title": "Choose Your Competition",
+      "step2Description": "Select from BottleSumo, Line-Following Bot, BuildAthon, or Robo-Exhibition, based on your Team's Interests & Skills.",
+      "step3Title": "Compete in the Local Round",
+      "step3Description": "Compete in Dhaka or Chattogram under the Rules & Judging Format of your Selected Competition.",
+      "step4Title": "Path to the World Stage",
+      "step4Description": "Outstanding Teams may earn the opportunity to represent Bangladesh at the Robofest World Championship 2027 in Seoul, South Korea."
+    },
+    "categories": {
+      "back": "All competitions",
+      "eyebrow": "Robofest Local Round · Bangladesh",
+      "aboutTitle": "About this competition",
+      "skillLevelLabel": "Skill level",
+      "formatLabel": "Format",
+      "expectTitle": "What to expect",
+      "whoShouldJoinTitle": "Who should join",
+      "rulesTitle": "Official rules",
+      "rulesSummaryFallback": "Full competition rules, specs, and scoring are in the official PDF.",
+      "rulesNote": "On-page highlights only—open the PDF for complete details.",
+      "viewRulesPdf": "View rules (PDF)",
+      "viewRulesNamed": "View {name} rules",
+      "registerTitle": "Register for {name}",
+      "registerPaidFee": "Registration fee: BDT {amount} per member (e.g. 3 members = BDT {count}). Pay via bKash to confirm. After payment, do not close or leave the page until you see the registration successful message.",
+      "registerFreeNote": "Enter team details for the local round.",
+      "registerEmailPdf": "After you complete registration and payment, you will receive a confirmation email with your registration PDF.",
+      "registerBringPdf": "Bring this PDF for entry at the event.",
+      "registerMissingEmail": "If you registered and paid but did not receive the email or PDF, check your junk/spam folder. If it is still missing, contact us at {name} or {title} ({count}).",
+      "siblingsTitle": "Other competitions",
+      "siblingsSubtitle": "Explore more Robofest Bangladesh 2026 local-round categories.",
+      "viewDetails": "View details",
+      "heroAlt": "{name} — Robofest Bangladesh 2026 local round",
+      "bottlesumo": {
+        "name": "BottleSumo",
+        "description": "Autonomous bottle-pushing: time trials, then head-to-head—no remotes.",
+        "skillLevel": "Beginner to intermediate",
+        "format": "Time trial + single elimination",
+        "about": "Push bottles off the table in a timed seed round, then fight head-to-head. Fully autonomous only.",
+        "whoShouldJoin": "Teams building and programming their own autonomous sumo-style robot.",
+        "highlights": {
+          "0": "Time-trial seeding, then single-elimination matches.",
+          "1": "Explorer and Innovator size/weight/motor limits.",
+          "2": "Edge and object sensors required; 3-second start delay.",
+          "3": "Win by pushing the opponent off and surviving on the table."
+        }
+      },
+      "buildathon": {
+        "name": "BuildAthon",
+        "description": "Design, build, and present a robotics project under BuildAthon constraints.",
+        "skillLevel": "Intermediate",
+        "format": "Project build + presentation",
+        "about": "Build a working robotics prototype under theme and time pressure, then pitch it to judges.",
+        "whoShouldJoin": "Teams who want to invent and present an original robotics build.",
+        "highlights": {
+          "0": "Prototype + live presentation to judges.",
+          "1": "Scored on engineering, creativity, and clarity.",
+          "2": "Hardware, software, and storytelling all count.",
+          "3": "No fixed arena game—your idea leads."
+        }
+      },
+      "lineFollowingBot": {
+        "name": "Line Following Bot",
+        "description": "Race an autonomous bot along a marked line—accuracy and speed win.",
+        "skillLevel": "Beginner to advanced",
+        "format": "Timed autonomous course",
+        "about": "Program your robot to track a line course as fast and clean as possible. Sensors and control tuning decide the podium.",
+        "whoShouldJoin": "Teams who love autonomous control, tuning, and racing the clock.",
+        "highlights": {
+          "0": "Timed runs on a defined line path.",
+          "1": "Focus on sensors, control loops, and calibration.",
+          "2": "Beginners finish; advanced teams chase best times.",
+          "3": "Simple game rules—performance is everything."
+        }
+      },
+      "roboExhibition": {
+        "name": "Robo Exhibition",
+        "description": "Showcase an intelligent robotics project to judges and visitors.",
+        "skillLevel": "All levels",
+        "format": "Project showcase + demo",
+        "about": "Bring any intelligent robotics project, demo it live, and explain the impact. Judged on innovation and presentation.",
+        "whoShouldJoin": "Teams with a distinctive project ready to show, not only race or fight.",
+        "highlights": {
+          "0": "Free theme within intelligent, autonomous robotics.",
+          "1": "Live demo plus clear explanation to judges.",
+          "2": "Scored on innovation, craft, and communication.",
+          "3": "Ideal for research-style or long-horizon school projects."
+        }
+      }
+    },
+    "form": {
+      "teamNumberHint": "Team number is assigned automatically after registration (e.g. BS#001) and is used as your Team Number.",
+      "labelCompetition": "Competition",
+      "labelDivision": "Select Division",
+      "labelAgeCategory": "Category",
+      "labelTeamSize": "Number of Members",
+      "labelAmbassador": "Campus Ambassador",
+      "selectDivision": "Select division",
+      "selectCategory": "Select category",
+      "selectAmbassador": "Select campus ambassador",
+      "divisionClosedSuffix": "(closed)",
+      "divisionClosedTitle": "Division closed",
+      "divisionClosedBody": "Registration for the {name} division has closed. Please select another open division, or contact us if you need help.",
+      "allClosedTitle": "Registration closed",
+      "allClosedBody": "The registration deadline has passed for all divisions. New team registrations are no longer accepted online.",
+      "successTitle": "Registration confirmed",
+      "successBody": "Thanks for registering for {name}. A confirmation email with PDF has been sent.",
+      "successBodyNoPdf": "Thanks for registering for {name}. A confirmation email has been sent.",
+      "successId": "ID: {count}",
+      "successTeamNumber": "Team number: {name}",
+      "registerAnother": "Register another team",
+      "memberLegend": "Team Member {count}",
+      "memberName": "Full Name",
+      "memberNameLeader": "Full Name (Team Leader)",
+      "memberEmail": "E-Mail Address",
+      "memberPhone": "Mobile Number",
+      "memberPhoneHint": "11 digits starting with 01",
+      "memberInstitution": "Institution Name",
+      "memberCustomInstitution": "Enter institution name",
+      "memberBranch": "Branch",
+      "memberBranchOptional": "(optional)",
+      "memberBranchPlaceholder": "Campus / branch",
+      "memberGrade": "Grade",
+      "selectInstitution": "Select institution",
+      "selectGrade": "Select grade",
+      "selectCategoryFirst": "Select category first",
+      "rulesCheckbox": "Yes, I have read and understood the rules found in the rulebook for {name} (open rulebook).",
+      "feeCheckbox": "I understand the registration fee is BDT {count} ({title} member(s) × BDT {name}), and after paying on bKash I will not close or leave this browser until I see the registration successful message.",
+      "submitPaid": "Pay BDT {count} to confirm registration",
+      "submitFree": "Submit registration",
+      "submitRedirecting": "Redirecting to bKash…",
+      "submitSubmitting": "Submitting…",
+      "optionPrivateCandidate": "Private Candidate",
+      "optionSchoolNotFound": "School not found (type manually)",
+      "optionAmbassadorNA": "Not applicable",
+      "ageExplorer": "Explorer (Grades 05 – 08)",
+      "ageInnovators": "Innovators (Grades 09 – 12)",
+      "divisionDhaka": "Dhaka Division",
+      "divisionChittagong": "Chittagong Division",
+      "grade05": "Grade - 05",
+      "grade06": "Grade - 06",
+      "grade07": "Grade - 07",
+      "grade08": "Grade - 08",
+      "grade09": "Grade - 09",
+      "grade10": "Grade - 10",
+      "grade11": "Grade - 11",
+      "grade12": "Grade - 12"
+    },
+    "countdown": {
+      "closes": "Registration closes",
+      "closesDivision": "Registration closes · {name}",
+      "closed": "Registration closed",
+      "closedDivision": "{name} registration closed",
+      "deadlineWas": "(deadline was {title})",
+      "days": "Days",
+      "hours": "Hours",
+      "mins": "Mins",
+      "secs": "Secs",
+      "placeholder": "—"
+    },
+    "errors": {
+      "couldNotSubmit": "Could not submit",
+      "divisionClosed": "Registration for the {name} division is closed.",
+      "selectDivision": "Please select a division.",
+      "rules": "Please confirm that you have read and understood the category rulebook.",
+      "fee": "Please confirm that you understand the fee and payment instructions.",
+      "payment": "Failed to start payment.",
+      "submit": "Failed to submit registration.",
+      "retry": "Failed to submit registration. Please try again."
+    }
+  },
+  "verify": {
+    "meta": {
+      "title": "Verify Registration",
+      "description": "Verify your event registration with Robonauts. Enter your registration ID to confirm your registration and view event details.",
+      "notFoundTitle": "Registration Not Found | Robonauts Club",
+      "notFoundDescription": "The registration ID you provided could not be found. Please verify your registration number and try again."
+    },
+    "booking": {
+      "missingIdTitle": "Registration Number Required",
+      "missingIdBody": "Please provide a registration number to verify your registration.",
+      "whereToFindTitle": "Where to find your registration number:",
+      "whereEmail": "In your confirmation email",
+      "wherePdf": "On your PDF confirmation document",
+      "whereFormat": "Format: REG-YYYYMMDD-XXXXX",
+      "viewAllEvents": "View All Events",
+      "notFoundTitle": "Registration Not Found",
+      "notFoundBody": "The registration number you provided could not be found in our database.",
+      "regNumberLabel": "Registration Number",
+      "checkTitle": "Please check:",
+      "checkFormat": "The registration number is correct (format: REG-YYYYMMDD-XXXXX)",
+      "checkSpaces": "There are no extra spaces or characters",
+      "checkCompleted": "The registration was completed successfully",
+      "viewEvents": "View Events",
+      "tryAgain": "Try Again",
+      "verifiedTitle": "Registration Verified",
+      "verifiedSubtitle": "Your registration has been successfully verified and confirmed",
+      "validBadge": "Valid Registration",
+      "saveId": "Save this number for your records",
+      "qrAlt": "QR Code for registration verification",
+      "participantDetails": "Participant Details",
+      "eligibility": "Eligibility",
+      "footerQrNote": "This page can be accessed by scanning the QR code on your confirmation PDF",
+      "backHome": "Back to Home",
+      "trustBadge": "Securely verified by {name}",
+      "invalidTitle": "Invalid Registration",
+      "invalidBody": "The registration ID {name} could not be found.",
+      "invalidHint": "Please check the registration ID and try again.",
+      "idLabel": "Registration ID",
+      "qrAltShort": "QR Code",
+      "scanVerify": "Scan to verify",
+      "eventDetails": "Event Details",
+      "eventName": "Event Name",
+      "date": "Date",
+      "time": "Time",
+      "venue": "Venue",
+      "registrationDetails": "Registration Details",
+      "name": "Name",
+      "school": "School",
+      "email": "Email",
+      "phone": "Phone",
+      "bkash": "bKash Number",
+      "registeredOn": "Registered On",
+      "additionalInfo": "Additional Information",
+      "footerNote": "This page can be accessed by scanning the QR code on the confirmation PDF",
+      "na": "N/A",
+      "tba": "TBA"
+    },
+    "robofest": {
+      "certificateVerifiedTitle": "Certificate Verified",
+      "certificateAuthentic": "This award certificate is authentic",
+      "certificateEvent": "RoboFest Bangladesh 2026",
+      "position": "Position",
+      "name": "Name",
+      "back": "Back to Robofest",
+      "memberNotFoundTitle": "Certificate member not found",
+      "memberNotFoundBody": "This registration is valid, but the certificate member index does not match a team member.",
+      "viewFull": "View full registration",
+      "teamVerifiedTitle": "Team Registration Verified",
+      "teamVerifiedSubtitle": "This Robofest team registration is valid and confirmed",
+      "validBadge": "Valid Robofest Registration",
+      "saveId": "Save this number for check-in and records",
+      "competitionSection": "Competition",
+      "eventLabel": "Event",
+      "eventFallback": "RoboFest Bangladesh 2026",
+      "competitionLabel": "Competition",
+      "divisionLabel": "Division",
+      "categoryLabel": "Category",
+      "eventDateLabel": "Event date",
+      "teamSection": "Team",
+      "teamNumber": "Team Number",
+      "teamLeadEmail": "Team Lead Email",
+      "teamLeadContact": "Team lead Contact",
+      "payment": "Payment",
+      "paid": "Paid",
+      "registeredOn": "Registered on",
+      "membersTitle": "Team Members",
+      "membersCount": "{count, plural, one {# member} other {# members}}",
+      "teamLeader": "(Team Leader)",
+      "noRoster": "No detailed member roster on file for this registration.",
+      "campusAmbassador": "Campus ambassador",
+      "notes": "Notes",
+      "qrNote": "Scan the QR on your Robofest confirmation PDF to reopen this page",
+      "viewRobofest": "View Robofest",
+      "participantFallback": "Participant"
+    }
+  },
+  "payments": {
+    "success": {
+      "title": "Payment Successful",
+      "confirmedTitle": "Registration Confirmed",
+      "eventBody": "Your payment is completed and your event registration is now confirmed. A confirmation email has been sent to your email address with all details.",
+      "robofestBody": "Your payment is completed and your registration for RoboFest Bangladesh 2026 is officially confirmed.",
+      "robofestEmail": "A confirmation email has been sent to all team members with your team details, along with a PDF of your registration.",
+      "safeLeave": "You can safely leave this page once you have noted your Registration ID below.",
+      "registrationId": "Registration ID:",
+      "bookingId": "Booking ID:",
+      "backRobofest": "Back to Robofest",
+      "backEvents": "Back to Events",
+      "emailIncompleteTitle": "Email delivery incomplete",
+      "emailNotSentTitle": "Confirmation email not sent",
+      "emailFallback": "We could not send the confirmation email automatically. Your registration and payment are still valid.",
+      "emailResendHint": "Please check spam/junk folders, or contact support with your Registration ID so we can resend the confirmation."
+    },
+    "fail": {
+      "title": "Payment Failed",
+      "alertTitle": "Registration was not created",
+      "body": "We could not complete your payment. {title} Your registration was not created — please try again and stay on this browser until you see the payment successful message.",
+      "defaultError": "Payment failed. Please try again.",
+      "retry": "Retry from Events"
+    },
+    "cancel": {
+      "title": "Payment Cancelled",
+      "alertTitle": "No registration created",
+      "body": "You cancelled the payment, so your registration was not created. You can try again anytime.",
+      "back": "Back to Events"
+    }
+  },
+  "auth": {
+    "login": {
+      "title": "Admin Login",
+      "subtitle": "Sign in to access the dashboard",
+      "emailLabel": "Email Address",
+      "emailPlaceholder": "admin@example.com",
+      "passwordLabel": "Password",
+      "passwordPlaceholder": "Enter your password",
+      "forgot": "Forgot Password?",
+      "submit": "Sign In",
+      "submitting": "Signing in...",
+      "closeAria": "Go back"
+    },
+    "forgot": {
+      "title": "Reset Password",
+      "description": "Reset your account password by entering your email address to receive a reset link.",
+      "intro": "Enter your email address and we'll send you a link to reset your password.",
+      "successTitle": "Check Your Email",
+      "successBody": "We've sent a password reset link to {name}",
+      "successHint": "Please check your inbox and follow the instructions to reset your password.",
+      "cancel": "Cancel",
+      "send": "Send Reset Link",
+      "sending": "Sending..."
+    },
+    "reset": {
+      "title": "Set a new password",
+      "passwordLabel": "New password",
+      "confirmLabel": "Confirm password",
+      "submit": "Update password",
+      "saving": "Saving…",
+      "success": "Password updated. Redirecting to login…",
+      "missingToken": "Missing reset token. Request a new link from the login page.",
+      "loading": "Loading…"
+    },
+    "errors": {
+      "invalidCredentials": "Invalid email or password",
+      "signInFailed": "Failed to sign in. Please try again.",
+      "forgotFailed": "Failed to send reset email. Please try again.",
+      "resetFailed": "Reset failed",
+      "resetRetry": "Reset failed. Please try again."
+    },
+    "validation": {
+      "emailRequired": "Email is required",
+      "emailInvalid": "Invalid email address",
+      "passwordRequired": "Password is required",
+      "forgotEmailRequired": "Please enter your email address",
+      "passwordMin": "Password must be at least 8 characters",
+      "passwordMismatch": "Passwords do not match"
+    }
+  },
+  "common": {
+    "copy": "Copy",
+    "copied": "Copied!",
+    "tryAgain": "Try again",
+    "loading": "Loading…",
+    "copyNamed": "Copy {name}"
+  },
+  "errors": {
+    "notFound": {
+      "code": "404",
+      "title": "Page Not Found",
+      "body": "This robot needs recharging to continue.",
+      "redirecting": "Redirecting in",
+      "seconds": "{seconds}s",
+      "goHome": "Go Home",
+      "exploreEvents": "Explore Events"
+    }
+  },
+  "breadcrumbs": {
+    "home": "Home",
+    "events": "Events",
+    "news": "News",
+    "gallery": "Gallery",
+    "about": "About us",
+    "robofest": "Robofest Bangladesh",
+    "contact": "Contact",
+    "login": "Login",
+    "verify": "Verify Registration"
+  }
+}

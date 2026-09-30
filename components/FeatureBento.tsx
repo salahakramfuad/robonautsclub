@@ -1,70 +1,73 @@
 import Image from 'next/image'
 import { BookOpen, Trophy, Users, Wrench } from 'lucide-react'
+import { getTranslations } from 'next-intl/server'
 import { SITE_CONFIG } from '@/lib/site-config'
 import Reveal from '@/components/Reveal'
 import { cn } from '@/lib/utils'
 
-const FEATURES = [
+const FEATURE_META = [
   {
     id: 'hands-on',
     icon: Wrench,
-    title: 'Hands-on STEM',
-    description:
-      'Build and program real robots and projects that turn theory into something you can hold, test, and improve.',
-    extra: 'Circuits, code, mechanical design — practiced in the lab, not just on a slide.',
+    titleKey: 'handsOnTitle',
+    descriptionKey: 'handsOnDescription',
+    extraKey: 'handsOnExtra',
     span: 'md:col-span-2 lg:col-span-7 lg:row-span-2',
-    article:
-      'min-h-[280px] lg:min-h-[420px] bg-slate-950 text-white',
+    article: 'min-h-[280px] lg:min-h-[420px] bg-slate-950 text-white',
   },
   {
     id: 'mentors',
     icon: Users,
-    title: 'Expert Mentors',
-    description:
-      'Learn beside instructors who have walked the competition floor and know how to coach the next step.',
-    extra: 'Guidance that scales from first build to international briefings.',
+    titleKey: 'mentorsTitle',
+    descriptionKey: 'mentorsDescription',
+    extraKey: 'mentorsExtra',
     span: 'lg:col-span-5',
     article: 'bg-white',
   },
   {
     id: 'olympiad',
     icon: Trophy,
-    title: 'Olympiad & Competition Focus',
-    description:
-      'Specialized pathways for national and international robotics, STEM, and academic contests.',
-    extra: 'Strategy, teamwork, and stage-ready confidence.',
+    titleKey: 'olympiadTitle',
+    descriptionKey: 'olympiadDescription',
+    extraKey: 'olympiadExtra',
     span: 'lg:col-span-5',
     article: 'bg-linear-to-br from-indigo-50 via-white to-sky-50',
   },
   {
     id: 'ecosystem',
     icon: BookOpen,
-    title: 'One Stop ECA Solution',
-    description:
-      'Workshops, competitions, mentorship, and community — one ecosystem for young innovators.',
-    extra: 'From first curiosity to a portfolio that travels.',
+    titleKey: 'ecosystemTitle',
+    descriptionKey: 'ecosystemDescription',
+    extraKey: 'ecosystemExtra',
     span: 'md:col-span-2 lg:col-span-12',
     article: 'bg-white',
   },
 ] as const
 
-const ECOSYSTEM_TAGS = ['Workshops', 'Competitions', 'Mentorship', 'Community'] as const
+const ECOSYSTEM_TAG_KEYS = [
+  'tagWorkshops',
+  'tagCompetitions',
+  'tagMentorship',
+  'tagCommunity',
+] as const
 
-export default function FeatureBento() {
+export default async function FeatureBento() {
+  const t = await getTranslations('home.bento')
+
   return (
     <div>
       <Reveal className="mb-8 max-w-3xl sm:mb-10 md:mb-12">
         <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-indigo-600 sm:text-xs">
-          Why {SITE_CONFIG.name}
+          {t('eyebrow', { name: SITE_CONFIG.name })}
         </p>
         <h2 className="mt-3 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl md:text-5xl">
-          More Than Learning.
-          <span className="mt-1 block text-indigo-700">A Launchpad for What Comes Next.</span>
+          {t('titleLine1')}
+          <span className="mt-1 block text-indigo-700">{t('titleLine2')}</span>
         </h2>
       </Reveal>
 
       <ul className="m-0 grid list-none grid-cols-1 gap-3 p-0 sm:gap-4 md:grid-cols-2 lg:grid-cols-12">
-        {FEATURES.map((feature, index) => {
+        {FEATURE_META.map((feature, index) => {
           const Icon = feature.icon
           const isHandsOn = feature.id === 'hands-on'
           const isEcosystem = feature.id === 'ecosystem'
@@ -143,7 +146,7 @@ export default function FeatureBento() {
                         isHandsOn ? 'text-2xl sm:text-3xl lg:text-4xl' : 'text-lg sm:text-xl',
                       )}
                     >
-                      {feature.title}
+                      {t(feature.titleKey)}
                     </h3>
                     <p
                       className={cn(
@@ -153,7 +156,7 @@ export default function FeatureBento() {
                           : 'text-sm text-gray-600 sm:text-[15px]',
                       )}
                     >
-                      {feature.description}
+                      {t(feature.descriptionKey)}
                     </p>
                     <p
                       className={cn(
@@ -162,7 +165,7 @@ export default function FeatureBento() {
                         'opacity-100 lg:opacity-0 lg:group-hover:opacity-100',
                       )}
                     >
-                      {feature.extra}
+                      {t(feature.extraKey)}
                     </p>
                     {feature.id === 'mentors' ? (
                       <div className="mt-5 flex items-center">
@@ -177,7 +180,7 @@ export default function FeatureBento() {
                           ),
                         )}
                         <span className="ml-3 text-xs font-medium text-gray-500">
-                          Coaches & alumni mentors
+                          {t('mentorsCaption')}
                         </span>
                       </div>
                     ) : null}
@@ -185,12 +188,12 @@ export default function FeatureBento() {
 
                   {isEcosystem ? (
                     <ul className="mt-5 flex flex-wrap gap-2 sm:mt-0 sm:justify-end">
-                      {ECOSYSTEM_TAGS.map((tag) => (
+                      {ECOSYSTEM_TAG_KEYS.map((key) => (
                         <li
-                          key={tag}
+                          key={key}
                           className="rounded-full border border-indigo-100 bg-indigo-50/70 px-3 py-1 text-xs font-semibold text-indigo-700"
                         >
-                          {tag}
+                          {t(key)}
                         </li>
                       ))}
                     </ul>

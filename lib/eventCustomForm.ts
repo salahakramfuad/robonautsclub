@@ -26,10 +26,21 @@ export function normalizeCustomFormFields(fields: EventCustomFormField[] | undef
     const type = ALLOWED_TYPES.has(rawType) ? rawType : 'shortText'
     const required = Boolean(field.required)
     const placeholder = typeof field.placeholder === 'string' ? field.placeholder.trim() : ''
-    const options =
-      type === 'select' || type === 'radio' || type === 'checkbox'
-        ? (field.options ?? []).map((option) => option.trim()).filter((option) => option.length > 0)
-        : []
+    const labelBn = typeof field.labelBn === 'string' ? field.labelBn.trim() : ''
+    const placeholderBn = typeof field.placeholderBn === 'string' ? field.placeholderBn.trim() : ''
+    const rawOptions =
+      type === 'select' || type === 'radio' || type === 'checkbox' ? (field.options ?? []) : []
+    const rawOptionsBn =
+      type === 'select' || type === 'radio' || type === 'checkbox' ? (field.optionsBn ?? []) : []
+    const options: string[] = []
+    const optionsBn: string[] = []
+    for (let optionIndex = 0; optionIndex < rawOptions.length; optionIndex += 1) {
+      const option = String(rawOptions[optionIndex] ?? '').trim()
+      if (!option) continue
+      options.push(option)
+      const bn = String(rawOptionsBn[optionIndex] ?? '').trim()
+      optionsBn.push(bn)
+    }
 
     if ((type === 'select' || type === 'radio' || type === 'checkbox') && options.length === 0) {
       continue
@@ -44,13 +55,19 @@ export function normalizeCustomFormFields(fields: EventCustomFormField[] | undef
     }
     usedIds.add(id)
 
+    const hasOptionsBn = optionsBn.some((option) => option.length > 0)
+
     normalized.push({
       id,
       label,
+      ...(labelBn ? { labelBn } : {}),
       type,
       required,
       ...(placeholder ? { placeholder } : {}),
-      ...((type === 'select' || type === 'radio' || type === 'checkbox') && options.length > 0 ? { options } : {}),
+      ...(placeholderBn ? { placeholderBn } : {}),
+      ...((type === 'select' || type === 'radio' || type === 'checkbox') && options.length > 0
+        ? { options, ...(hasOptionsBn ? { optionsBn } : {}) }
+        : {}),
     })
   }
 

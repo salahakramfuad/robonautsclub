@@ -1,8 +1,10 @@
 'use client'
 
-import Link from 'next/link'
 import { ArrowRight } from 'lucide-react'
+import { useLocale, useTranslations } from 'next-intl'
+import { Link } from '@/i18n/navigation'
 import type { Event } from '@/types/event'
+import { pickLocalized, pickLocalizedList } from '@/lib/i18n-localized'
 import { eventPublicHref } from '@/lib/event-ui'
 import { parseEventDates } from '@/lib/dateUtils'
 import {
@@ -15,7 +17,11 @@ import {
 import Autoplay from 'embla-carousel-autoplay'
 import { useRef } from 'react'
 
-function eventDateParts(date: Event['date']) {
+function eventDateParts(
+  date: Event['date'],
+  monthSoon: string,
+  dayPlaceholder: string,
+) {
   const dates = parseEventDates(date)
   const raw = dates[0] ?? ''
   const match = raw.match(/^(\d{4})-(\d{2})-(\d{2})/)
@@ -26,15 +32,18 @@ function eventDateParts(date: Event['date']) {
     )
     return { month, day: String(Number(match[3])) }
   }
-  return { month: 'Soon', day: '—' }
+  return { month: monthSoon, day: dayPlaceholder }
 }
 
-function categoryLabel(event: Event) {
-  if (event.tags && event.tags.length > 0) return event.tags[0]
-  return 'Event'
+function categoryLabel(locale: string, event: Event, fallback: string) {
+  const tags = pickLocalizedList(locale, event.tags, event.tagsBn)
+  if (tags.length > 0) return tags[0]
+  return fallback
 }
 
 export default function UpcomingEventsRail({ events }: { events: Event[] }) {
+  const locale = useLocale()
+  const t = useTranslations('home.eventsRail')
   const autoplay = useRef(
     Autoplay({ delay: 5200, stopOnInteraction: false, stopOnMouseEnter: true }),
   )
@@ -45,14 +54,14 @@ export default function UpcomingEventsRail({ events }: { events: Event[] }) {
     <div className="w-full">
       <div className="mb-3 flex items-end justify-between gap-3">
         <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-sky-200/90">
-          Upcoming opportunities
+          {t('eyebrow')}
         </p>
         <Link
           href="/events"
           prefetch={false}
           className="group inline-flex items-center gap-1 text-xs font-medium text-white/70 transition-colors hover:text-white"
         >
-          Robotics &amp; STEM Events
+          {t('link')}
           <ArrowRight className="size-3.5 transition-transform duration-300 group-hover:translate-x-0.5" />
         </Link>
       </div>
@@ -71,8 +80,9 @@ export default function UpcomingEventsRail({ events }: { events: Event[] }) {
 
         <CarouselContent className="-ml-3">
           {events.map((event) => {
-            const parts = eventDateParts(event.date)
-            const category = categoryLabel(event)
+            const parts = eventDateParts(event.date, t('monthSoon'), t('dayPlaceholder'))
+            const title = pickLocalized(locale, event.title, event.titleBn)
+            const category = categoryLabel(locale, event, t('categoryFallback'))
             return (
               <CarouselItem
                 key={event.id}
@@ -92,14 +102,14 @@ export default function UpcomingEventsRail({ events }: { events: Event[] }) {
                     </span>
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-semibold text-white">{event.title}</p>
+                    <p className="truncate text-sm font-semibold text-white">{title}</p>
                     <span className="mt-1 inline-flex rounded-full bg-indigo-400/20 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-indigo-100 ring-1 ring-indigo-300/20">
                       {category}
                     </span>
                   </div>
                   <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-white/10 text-white/80 transition-all duration-300 group-hover:bg-indigo-500 group-hover:text-white">
                     <ArrowRight className="size-3.5 transition-transform duration-300 group-hover:translate-x-0.5" />
-                    <span className="sr-only">View {event.title}</span>
+                    <span className="sr-only">{t('viewEventAria', { title })}</span>
                   </span>
                 </Link>
               </CarouselItem>

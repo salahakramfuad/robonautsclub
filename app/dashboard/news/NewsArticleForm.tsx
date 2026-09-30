@@ -56,8 +56,10 @@ export default function NewsArticleForm({ article }: Props) {
     resolver: standardSchemaResolver(newsArticleFormSchema),
     defaultValues: {
       title: article?.title ?? '',
+      titleBn: article?.titleBn ?? '',
       slugOverride: article?.slug ?? '',
       body: article?.body ?? '',
+      bodyBn: article?.bodyBn ?? '',
       coverImageUrl: article?.coverImageUrl ?? '',
       displayDateInput:
         article
@@ -131,8 +133,10 @@ export default function NewsArticleForm({ article }: Props) {
       if (isEdit && article) {
         await updateNewsArticle(article.id, {
           title: values.title,
+          titleBn: values.titleBn,
           slug: values.slugOverride.trim() || undefined,
           body: values.body,
+          bodyBn: values.bodyBn,
           coverImageUrl: values.coverImageUrl || undefined,
           images,
           published: values.published,
@@ -143,8 +147,10 @@ export default function NewsArticleForm({ article }: Props) {
       } else {
         await createNewsArticle({
           title: values.title,
+          titleBn: values.titleBn,
           slug: values.slugOverride.trim() || undefined,
           body: values.body,
+          bodyBn: values.bodyBn,
           coverImageUrl: values.coverImageUrl || undefined,
           images,
           published: values.published,
@@ -245,6 +251,43 @@ export default function NewsArticleForm({ article }: Props) {
             </FormItem>
           )}
         />
+
+        <details className="rounded-xl border border-amber-200/80 bg-amber-50/40 p-4 open:pb-4">
+          <summary className="cursor-pointer text-sm font-semibold text-amber-900">
+            Bengali (optional)
+          </summary>
+          <p className="mt-1 text-xs text-amber-800/80">
+            Shown on the public site when the visitor selects Bangla. Leave blank to fall back to English.
+          </p>
+          <div className="mt-4 space-y-4">
+            <FormField
+              control={form.control}
+              name="titleBn"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Title (Bengali)</FormLabel>
+                  <FormControl>
+                    <Input {...field} placeholder="বাংলা শিরোনাম" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="bodyBn"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Article (Bengali)</FormLabel>
+                  <FormControl>
+                    <Textarea rows={10} className="font-sans min-h-[240px]" placeholder="বাংলা নিবন্ধ" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+        </details>
 
         <div className="rounded-xl border border-gray-200 bg-white p-4 space-y-3">
           <p className="text-sm font-medium text-gray-900 flex items-center gap-2">

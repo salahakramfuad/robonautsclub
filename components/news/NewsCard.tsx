@@ -1,7 +1,9 @@
-import Link from 'next/link'
 import Image from 'next/image'
 import { ArrowRight } from 'lucide-react'
+import { getLocale, getTranslations } from 'next-intl/server'
+import { Link } from '@/i18n/navigation'
 import type { NewsArticle } from '@/types/news'
+import { pickLocalized } from '@/lib/i18n-localized'
 import { effectiveNewsDisplayRaw } from '@/lib/publicContentDates'
 import { excerptBody, formatNewsDate, newsArticleHref, newsDateTimeAttr } from '@/lib/news-ui'
 import NewsCoverFallback from '@/components/news/NewsCoverFallback'
@@ -10,11 +12,14 @@ type Props = {
   article: NewsArticle
 }
 
-export default function NewsCard({ article }: Props) {
+export default async function NewsCard({ article }: Props) {
+  const locale = await getLocale()
+  const t = await getTranslations('news.card')
   const href = newsArticleHref(article)
   const dateRaw = effectiveNewsDisplayRaw(article)
   const dateLabel = formatNewsDate(dateRaw)
-  const excerpt = excerptBody(article.body, 110)
+  const title = pickLocalized(locale, article.title, article.titleBn)
+  const excerpt = excerptBody(pickLocalized(locale, article.body, article.bodyBn), 110)
 
   return (
     <Link
@@ -27,7 +32,7 @@ export default function NewsCard({ article }: Props) {
           {article.coverImageUrl ? (
             <Image
               src={article.coverImageUrl}
-              alt={article.title}
+              alt={title}
               fill
               className="object-cover transition-transform duration-500 ease-out motion-reduce:transition-none group-hover:scale-[1.03]"
               sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
@@ -46,13 +51,13 @@ export default function NewsCard({ article }: Props) {
             </time>
           ) : null}
           <h3 className="mt-2 line-clamp-2 text-lg font-bold leading-snug text-gray-900 transition-colors duration-300 group-hover:text-indigo-700 sm:text-xl">
-            {article.title}
+            {title}
           </h3>
           {excerpt ? (
             <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-gray-600">{excerpt}</p>
           ) : null}
           <span className="mt-auto inline-flex items-center gap-1.5 pt-4 text-sm font-semibold text-indigo-600">
-            Read more
+            {t('readMore')}
             <ArrowRight
               className="size-4 transition-transform duration-300 motion-reduce:transition-none group-hover:translate-x-1"
               aria-hidden

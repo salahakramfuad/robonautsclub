@@ -1,10 +1,11 @@
 'use client'
 
-import Link from 'next/link'
-import { usePathname } from 'next/navigation'
 import { useState } from 'react'
+import { useTranslations } from 'next-intl'
 import { ChevronDown, Menu } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { Link, usePathname } from '@/i18n/navigation'
+import LanguageToggle from '@/components/LanguageToggle'
 import {
   Sheet,
   SheetContent,
@@ -35,6 +36,7 @@ const isActive = (href?: string, current?: string) => {
 }
 
 export default function NavbarMobileMenu({ menuItems }: { menuItems: readonly MenuItem[] }) {
+  const t = useTranslations('nav')
   const pathname = usePathname()
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
   const [mobileOpenIdx, setMobileOpenIdx] = useState<number | null>(null)
@@ -52,7 +54,7 @@ export default function NavbarMobileMenu({ menuItems }: { menuItems: readonly Me
           variant="ghost"
           size="icon"
           className="lg:hidden size-11 text-gray-700 hover:bg-indigo-50 hover:text-indigo-700"
-          aria-label="Open main menu"
+          aria-label={t('openMenuAria')}
         >
           <Menu className="size-5" />
         </Button>
@@ -62,11 +64,14 @@ export default function NavbarMobileMenu({ menuItems }: { menuItems: readonly Me
         className="w-4/5 max-w-sm bg-blue-50 p-0 flex flex-col gap-0"
       >
         <SheetHeader className="px-4 py-3 sticky top-0 bg-blue-100/95 backdrop-blur border-b border-blue-200/60 z-10">
-          <SheetTitle className="text-gray-900">Menu</SheetTitle>
+          <div className="flex items-center justify-between gap-3 pr-8">
+            <SheetTitle className="text-gray-900">{t('menuTitle')}</SheetTitle>
+            <LanguageToggle />
+          </div>
         </SheetHeader>
 
         <div className="flex-1 overflow-y-auto overscroll-contain px-4 py-4">
-          <nav className="grid gap-2" aria-label="Mobile navigation">
+          <nav className="grid gap-2" aria-label={t('mobileAria')}>
             {menuItems.map((item, idx) => (
               <div key={idx}>
                 {item.subLinks ? (

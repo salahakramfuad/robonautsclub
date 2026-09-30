@@ -85,8 +85,11 @@ export async function getCourse(id: string): Promise<Course | null> {
 
 export async function createCourse(formData: {
   title: string
+  titleBn?: string
   level: string
+  levelBn?: string
   blurb: string
+  blurbBn?: string
   href: string
   image: string
 }): Promise<{ success: boolean; error?: string; courseId?: string }> {
@@ -108,8 +111,11 @@ export async function createCourse(formData: {
     const now = new Date().toISOString()
     const courseId = await collectionAdd('courses', {
       title: formData.title.trim(),
+      titleBn: formData.titleBn?.trim() ?? '',
       level: formData.level.trim(),
+      levelBn: formData.levelBn?.trim() ?? '',
       blurb: formData.blurb.trim(),
+      blurbBn: formData.blurbBn?.trim() ?? '',
       href: formData.href.trim() || `/courses/${formData.title.toLowerCase().replace(/\s+/g, '-')}`,
       image: formData.image.trim(),
       isArchived: false,
@@ -142,8 +148,11 @@ export async function updateCourse(
   courseId: string,
   formData: {
     title: string
+    titleBn?: string
     level: string
+    levelBn?: string
     blurb: string
+    blurbBn?: string
     href: string
     image: string
   },
@@ -174,8 +183,11 @@ export async function updateCourse(
       courseId,
       {
         title: formData.title.trim(),
+        titleBn: formData.titleBn?.trim() ?? '',
         level: formData.level.trim(),
+        levelBn: formData.levelBn?.trim() ?? '',
         blurb: formData.blurb.trim(),
+        blurbBn: formData.blurbBn?.trim() ?? '',
         href: formData.href.trim() || `/courses/${formData.title.toLowerCase().replace(/\s+/g, '-')}`,
         image: formData.image.trim(),
         updatedAt: new Date().toISOString(),

@@ -1,0 +1,320 @@
+import { CheckCircle, XCircle, Calendar, MapPin, Clock, User, Mail, Phone, School } from 'lucide-react'
+import { formatEventDates, parseEventDates } from '@/lib/dateUtils'
+import { generateQRCodeDataURL } from '@/lib/qrCode'
+import { collectionGet, getBookingByRegistrationId as lookupBookingByRegistrationId } from '@/lib/db/collections'
+import type { Booking } from '@/types/booking'
+import type { Event } from '@/types/event'
+import { format } from 'date-fns'
+import Image from 'next/image'
+import { Metadata } from 'next'
+import { getTranslations, setRequestLocale } from 'next-intl/server'
+import { absoluteSiteUrl } from '@/lib/seo'
+
+export const dynamic = 'force-dynamic'
+
+interface VerificationPageProps {
+  params: Promise<{ locale: string; registrationId: string }>
+}
+
+function parseTimestamp(value: unknown): unknown {
+  if (value && typeof value === 'object' && 'toDate' in value) {
+    return (value as { toDate: () => Date }).toDate()
+  }
+  return value
+}
+
+async function getBookingByRegistrationId(registrationId: string): Promise<{
+  booking: Booking | null
+  event: Event | null
+}> {
+  try {
+    const bookingDoc = await lookupBookingByRegistrationId(registrationId)
+    if (!bookingDoc) {
+      return { booking: null, event: null }
+    }
+
+    const bookingData = bookingDoc as Record<string, unknown>
+    const booking: Booking = {
+      id: String(bookingDoc.id),
+      ...bookingData,
+      createdAt: parseTimestamp(bookingData.createdAt),
+    } as Booking
+
+    const eventDoc = await collectionGet('events', String(booking.eventId))
+    if (!eventDoc) {
+      return { booking, event: null }
+    }
+
+    const eventData = eventDoc as Record<string, unknown>
+    const event: Event = {
+      id: String(eventDoc.id),
+      ...eventData,
+      createdAt: parseTimestamp(eventData.createdAt),
+      updatedAt: parseTimestamp(eventData.updatedAt),
+    } as Event
+
+    return { booking, event }
+  } catch (error) {
+    console.error('Error fetching booking:', error)
+    return { booking: null, event: null }
+  }
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string; registrationId: string }>
+}): Promise<Metadata> {
+  const { registrationId, locale } = await params
+  setRequestLocale(locale)
+  const tMeta = await getTranslations('verify.meta')
+  const { booking, event } = await getBookingByRegistrationId(registrationId)
+
+  const noindex = {
+    robots: {
+      index: false,
+      follow: false,
+      googleBot: { index: false, follow: false },
+    },
+  } as const
+
+  if (!booking || !event) {
+    return {
+      title: tMeta('notFoundTitle'),
+      description: tMeta('notFoundDescription'),
+      alternates: {
+        canonical: `/verify/${registrationId}`,
+      },
+      ...noindex,
+    }
+  }
+
+  const title = `{t('verifiedTitle')} - ${event.title} | Robonauts Club`
+  const description = `Your registration for ${event.title} is verified. Event date: ${formatEventDates(parseEventDates(event.date), 'long')}.`
+
+  const ogImage =
+    event.image && event.image.startsWith('http')
+      ? event.image
+      : absoluteSiteUrl(event.image || '/robotics-event.jpg')
+
+  return {
+    title,
+    description,
+    keywords: [
+      'registration verification',
+      'event confirmation',
+      'robotics event',
+      'Robonauts Club',
+      event.title,
+    ],
+    openGraph: {
+      title,
+      description,
+      url: `/verify/${registrationId}`,
+      type: 'website',
+      images: [
+        {
+          url: ogImage,
+          width: 1200,
+          height: 630,
+          alt: event.title,
+        },
+      ],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+      images: [ogImage],
+    },
+    alternates: {
+      canonical: `/verify/${registrationId}`,
+    },
+    ...noindex,
+  }
+}
+
+export default async function VerificationPage({ params }: VerificationPageProps) {
+  const { registrationId, locale } = await params
+  setRequestLocale(locale)
+  const t = await getTranslations('verify.booking')
+  const { booking, event } = await getBookingByRegistrationId(registrationId)
+
+  const isValid = booking !== null && event !== null
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL 
+    || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null)
+    || 'http://localhost:3000'
+  const verificationUrl = `${baseUrl}/verify/${registrationId}`
+  const qrCodeDataURL = isValid ? await generateQRCodeDataURL(verificationUrl, 200) : null
+
+  if (!isValid) {
+    return (
+      <div className="min-h-screen bg-linaer-to-br from-gray-50 to-gray-100 flex items-center justify-center p-4">
+        <div className="max-w-md w-full bg-white rounded-2xl shadow-xl border-2 border-red-200 p-8 text-center">
+          <div className="w-20 h-20 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-6">
+            <XCircle className="w-12 h-12 text-red-500" />
+          </div>
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">{t('invalidTitle')}</h1>
+          <p className="text-gray-600 mb-4">
+            {t('invalidBody', { name: registrationId })}
+          </p>
+          <p className="text-sm text-gray-500">
+            {t('invalidHint')}
+          </p>
+        </div>
+      </div>
+    )
+  }
+
+  const eventDates = parseEventDates(event!.date)
+  const formattedDate = eventDates.length > 0 ? formatEventDates(eventDates, 'long') : t('tba')
+  const bookingDate = booking!.createdAt instanceof Date 
+    ? booking!.createdAt 
+    : new Date(booking!.createdAt)
+
+  return (
+    <div className="min-h-screen bg-linear-to-br from-gray-50 to-gray-100 py-8 px-4">
+      <div className="max-w-4xl mx-auto">
+        {/* Header */}
+        <div className="bg-white rounded-2xl shadow-xl border-2 border-green-200 overflow-hidden mb-6">
+          <div className="bg-gradient-to-r from-green-500 to-emerald-500 px-8 py-6 text-center">
+            <div className="w-20 h-20 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center mx-auto mb-4">
+              <CheckCircle className="w-12 h-12 text-white" />
+            </div>
+            <h1 className="text-3xl font-bold text-white mb-2">{t('verifiedTitle')}</h1>
+            <p className="text-green-50">{t('verifiedSubtitle')}</p>
+          </div>
+
+          <div className="p-8">
+            {/* {t('idLabel')} */}
+            <div className="bg-indigo-50 border-2 border-indigo-200 rounded-xl p-6 mb-6">
+              <div className="flex items-center justify-between flex-wrap gap-4">
+                <div>
+                  <p className="text-sm font-medium text-indigo-600 mb-1">{t('idLabel')}</p>
+                  <p className="text-2xl font-bold text-indigo-900 font-mono">{booking!.registrationId}</p>
+                </div>
+                {qrCodeDataURL && (
+                  <div className="flex-shrink-0">
+                    <Image
+                      src={qrCodeDataURL}
+                      alt={t("qrAltShort")}
+                      width={128}
+                      height={128}
+                      className="w-32 h-32 border-2 border-indigo-200 rounded-lg"
+                      unoptimized
+                    />
+                    <p className="text-xs text-center text-gray-500 mt-2">{t('scanVerify')}</p>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-6">
+              {/* {t('eventDetails')} */}
+              <div className="bg-gray-50 rounded-xl p-6 border border-gray-200">
+                <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                  <Calendar className="w-5 h-5 text-indigo-600" />
+                  {t('eventDetails')}
+                </h2>
+                <div className="space-y-3">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600 mb-1">{t('eventName')}</p>
+                    <p className="text-base font-semibold text-gray-900">{event!.title}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-600 mb-1">{t('date')}</p>
+                    <p className="text-base text-gray-900">{formattedDate}</p>
+                  </div>
+                  {event!.time && (
+                    <div>
+                      <p className="text-sm font-medium text-gray-600 mb-1 flex items-center gap-1">
+                        <Clock className="w-4 h-4" />
+                        {t('time')}
+                      </p>
+                      <p className="text-base text-gray-900">{event!.time}</p>
+                    </div>
+                  )}
+                  {(event!.venue || event!.location) && (
+                    <div>
+                      <p className="text-sm font-medium text-gray-600 mb-1 flex items-center gap-1">
+                        <MapPin className="w-4 h-4" />
+                        {t('venue')}
+                      </p>
+                      <p className="text-base text-gray-900">{event!.venue || event!.location}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* {t('registrationDetails')} */}
+              <div className="bg-gray-50 rounded-xl p-6 border border-gray-200">
+                <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                  <User className="w-5 h-5 text-indigo-600" />
+                  {t('registrationDetails')}
+                </h2>
+                <div className="space-y-3">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600 mb-1 flex items-center gap-1">
+                      <User className="w-4 h-4" />
+                      {t('name')}
+                    </p>
+                    <p className="text-base font-semibold text-gray-900">{booking!.name}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-600 mb-1 flex items-center gap-1">
+                      <School className="w-4 h-4" />
+                      {t('school')}
+                    </p>
+                    <p className="text-base text-gray-900">{booking!.school}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-600 mb-1 flex items-center gap-1">
+                      <Mail className="w-4 h-4" />
+                      {t('email')}
+                    </p>
+                    <p className="text-base text-gray-900 break-all">{booking!.email}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-600 mb-1 flex items-center gap-1">
+                      <Phone className="w-4 h-4" />
+                      {t('phone')}
+                    </p>
+                    <p className="text-base text-gray-900">{booking!.phone || t('na')}</p>
+                  </div>
+                  {booking!.bkashNumber && (
+                    <div>
+                      <p className="text-sm font-medium text-gray-600 mb-1 flex items-center gap-1">
+                        <Phone className="w-4 h-4" />
+                        {t('bkash')}
+                      </p>
+                      <p className="text-base text-gray-900">{booking!.bkashNumber}</p>
+                    </div>
+                  )}
+                  <div>
+                    <p className="text-sm font-medium text-gray-600 mb-1">{t('registeredOn')}</p>
+                    <p className="text-base text-gray-900">
+                      {format(bookingDate, 'MMMM d, yyyy HH:mm')}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {booking!.information && (
+              <div className="mt-6 bg-blue-50 rounded-xl p-6 border border-blue-200">
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">{t('additionalInfo')}</h3>
+                <p className="text-gray-700 whitespace-pre-wrap">{booking!.information}</p>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Footer Note */}
+        <div className="text-center text-sm text-gray-500">
+          <p>{t('footerNote')}</p>
+        </div>
+      </div>
+    </div>
+  )
+}
+
