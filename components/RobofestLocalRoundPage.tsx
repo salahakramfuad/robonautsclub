@@ -20,6 +20,7 @@ import {
 import { SITE_CONFIG } from "@/lib/site-config";
 import RobofestRegistrationCountdown from "@/components/RobofestRegistrationCountdown";
 import RobofestIcon from "@/components/RobofestIcon";
+import Breadcrumbs from "@/components/Breadcrumbs";
 import { resolveRobofestDivisionClosingDate } from "@/lib/robofest-deadlines";
 
 function CircuitBackdrop({ className = "" }: { className?: string }) {
@@ -173,6 +174,16 @@ export default async function RobofestLocalRoundPage() {
         />
 
         <div className="relative z-10 max-w-7xl mx-auto text-center animate-fade-in-up">
+          <div className="mb-4 flex justify-center sm:mb-5">
+            <Breadcrumbs
+              tone="onDark"
+              className="mb-0"
+              items={[
+                { name: "Home", href: "/" },
+                { name: "Robofest" },
+              ]}
+            />
+          </div>
           <div className="inline-flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full border border-white/35 bg-white/15 backdrop-blur-md shadow-sm mb-5 sm:mb-7">
             <RobofestIcon
               name="precision_manufacturing"

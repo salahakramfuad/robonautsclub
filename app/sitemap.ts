@@ -16,40 +16,35 @@ export const revalidate = 3600
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = getSiteOrigin()
 
+  // Omit lastModified on evergreen static hubs rather than emitting "now" on every build.
   const staticPages: MetadataRoute.Sitemap = [
     {
       url: `${baseUrl}/`,
-      lastModified: new Date(),
       changeFrequency: 'daily',
       priority: 1,
     },
     {
       url: `${baseUrl}/events`,
-      lastModified: new Date(),
       changeFrequency: 'daily',
       priority: 0.9,
     },
     {
       url: `${baseUrl}/robofest`,
-      lastModified: new Date(),
       changeFrequency: 'weekly',
       priority: 0.9,
     },
     {
       url: `${baseUrl}/news`,
-      lastModified: new Date(),
       changeFrequency: 'weekly',
       priority: 0.85,
     },
     {
       url: `${baseUrl}/gallery`,
-      lastModified: new Date(),
       changeFrequency: 'weekly',
       priority: 0.85,
     },
     {
       url: `${baseUrl}/about`,
-      lastModified: new Date(),
       changeFrequency: 'monthly',
       priority: 0.8,
     },

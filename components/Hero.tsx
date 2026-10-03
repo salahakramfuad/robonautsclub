@@ -85,20 +85,19 @@ export default function Hero({ upcomingEvents = [] }: { upcomingEvents?: Event[]
       <div className="relative z-10 flex w-full flex-1 flex-col pt-28 sm:pt-32 lg:pt-28">
         <div className="flex flex-1 items-center px-4 py-8 sm:px-6 sm:py-10 lg:px-10 xl:px-14">
           <div className="w-full max-w-[28rem] space-y-6 text-left sm:max-w-md md:max-w-lg lg:max-w-xl lg:space-y-7">
-            <h1 className="text-sm font-semibold uppercase tracking-[0.2em] text-sky-200/95 sm:text-base md:text-lg">
+            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-sky-200/95 sm:text-base md:text-lg">
               Robonauts – STEM, Robotics &amp; Olympiad Education in Bangladesh
-            </h1>
+            </p>
 
-            <p
+            <h1
               className="text-4xl font-bold tracking-tight text-white drop-shadow-[0_2px_12px_rgba(0,0,0,0.55)] sm:text-5xl md:text-6xl lg:text-[4.25rem] lg:leading-[0.95]"
-              aria-label="Build Skills. Break Barriers. Go Global."
             >
               <span className="block">Build Skills.</span>
               <span className="block">Break Barriers.</span>
               <span className="mt-1 block bg-linear-to-r from-sky-200 via-indigo-200 to-sky-100 bg-clip-text text-transparent">
                 Go Global.
               </span>
-            </p>
+            </h1>
 
             <p className="max-w-md text-base leading-relaxed text-slate-100/90 sm:text-lg">
               Hands-on robotics, competition pathways, and international stages for students

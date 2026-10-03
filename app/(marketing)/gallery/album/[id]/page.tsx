@@ -8,6 +8,7 @@ import { getBreadcrumbSchema } from '@/lib/seo'
 import { buildPageMetadata } from '@/lib/seo-metadata'
 import RoboHudHero from '@/components/RoboHudHero'
 import ImageLightboxGallery from '@/components/ImageLightboxGallery'
+import Breadcrumbs from '@/components/Breadcrumbs'
 import { getPublicGalleryGroupById } from '../../actions'
 
 export const revalidate = 1800
@@ -77,6 +78,14 @@ export default async function GalleryAlbumPage({ params }: Props) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
       />
       <RoboHudHero compact align="left">
+        <Breadcrumbs
+          tone="onDark"
+          items={[
+            { name: 'Home', href: '/' },
+            { name: 'Gallery', href: '/gallery' },
+            { name: group.title },
+          ]}
+        />
         <Link
           href="/gallery"
           prefetch={false}
@@ -136,6 +145,7 @@ export default async function GalleryAlbumPage({ params }: Props) {
             <ImageLightboxGallery
               images={urls}
               aspect="square"
+              altBase={group.title}
               className="[&_button]:rounded-2xl [&_button]:border-slate-200/80 [&_button]:shadow-sm [&_button]:ring-1 [&_button]:ring-slate-900/5 hover:[&_button]:ring-cyan-400/30"
             />
           )}

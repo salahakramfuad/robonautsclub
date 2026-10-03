@@ -125,19 +125,25 @@ This document outlines the comprehensive SEO improvements implemented for Robona
 ## 🔧 Configuration Required
 
 ### Environment Variables
-Add to `.env.local`:
+Add to `.env.local` (and Cloudflare Worker vars for production):
 ```env
-NEXT_PUBLIC_SITE_URL=https://robonautsclub.com
+NEXT_PUBLIC_SITE_URL=https://www.robonautsltd.com
+NEXT_PUBLIC_BASE_URL=https://www.robonautsltd.com
+# Optional HTML-tag Search Console verification (also set as CF secret/var):
+# GOOGLE_SITE_VERIFICATION=your-token-from-search-console
 ```
 
-### Google Search Console
-1. Verify website ownership
-2. Submit sitemap: `https://robonautsclub.com/sitemap.xml`
-3. Monitor search performance
+### Google Search Console (manual / external)
+1. Verify website ownership for `https://www.robonautsltd.com` (DNS or HTML meta via `GOOGLE_SITE_VERIFICATION`)
+2. Submit sitemap: `https://www.robonautsltd.com/sitemap.xml`
+3. Confirm Cloudflare redirects: apex → www, HTTP → HTTPS, and any legacy `robonautsclub.com` → `www.robonautsltd.com`
+4. Inspect homepage, `/events`, `/robofest`, and key news URLs
+5. Link GA4 property `G-X87SJ4G3R7` to Search Console
+6. Monitor indexing, Core Web Vitals, and Search Performance
 
 ### Bing Webmaster Tools
 1. Add and verify website
-2. Submit sitemap
+2. Submit sitemap: `https://www.robonautsltd.com/sitemap.xml`
 3. Monitor indexing
 
 ## 📈 Ongoing SEO Maintenance

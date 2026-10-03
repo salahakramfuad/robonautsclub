@@ -84,7 +84,7 @@ export default function EventActions({
         fullDescription: event.fullDescription ?? event.description ?? '',
         eligibility: event.eligibility ?? '',
         agenda: event.agenda ?? '',
-        image: event.image ?? '/robotics-event.gif',
+        image: event.image ?? '/robotics-event.jpg',
         tags: event.tags ?? [],
         isPaid: event.isPaid ?? false,
         amount: event.amount ?? 0,

@@ -36,7 +36,7 @@ export default function GalleryAlbumCard({ group, dateLine = '', featured = fals
         {cover ? (
           <Image
             src={cover}
-            alt=""
+            alt={`${group.title} cover photo`}
             fill
             className="object-cover transition-transform duration-500 ease-out group-hover:scale-[1.03] motion-reduce:transition-none motion-reduce:group-hover:scale-100"
             sizes={

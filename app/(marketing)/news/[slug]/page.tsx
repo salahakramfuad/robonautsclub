@@ -17,6 +17,7 @@ import { buildPageMetadata } from '@/lib/seo-metadata'
 import ArticleCoverLightbox from '@/components/ArticleCoverLightbox'
 import ArticleGallery from '@/components/news/ArticleGallery'
 import NewsCoverFallback from '@/components/news/NewsCoverFallback'
+import Breadcrumbs from '@/components/Breadcrumbs'
 import { getNewsArticleBySlug } from '../actions'
 
 export const revalidate = 1800
@@ -104,6 +105,13 @@ export default async function NewsArticlePage({ params }: Props) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
       />
       <div className="mx-auto max-w-[1100px] px-4 py-10 sm:px-6 sm:py-14 lg:px-8">
+        <Breadcrumbs
+          items={[
+            { name: 'Home', href: '/' },
+            { name: 'News', href: '/news' },
+            { name: article.title },
+          ]}
+        />
         <Link
           href="/news"
           prefetch={false}
@@ -135,6 +143,7 @@ export default async function NewsArticlePage({ params }: Props) {
             <ArticleCoverLightbox
               coverUrl={article.coverImageUrl}
               extraUrls={extraImages}
+              alt={article.title}
               photoCountLabel={
                 extraPhotoCount > 0
                   ? `+${extraPhotoCount} photo${extraPhotoCount === 1 ? '' : 's'}`
@@ -161,6 +170,7 @@ export default async function NewsArticlePage({ params }: Props) {
                 images={extraImages}
                 totalWithCover={totalWithCover}
                 viewAllHref={moreThanFourImages ? photosHref : undefined}
+                altBase={article.title}
               />
             ) : null}
           </div>

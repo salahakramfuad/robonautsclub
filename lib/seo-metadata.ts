@@ -62,10 +62,20 @@ export const PAGE_SEO = {
 
 const DEFAULT_OG_IMAGE: OgImage = {
   url: SITE_CONFIG.metadata.defaultImage,
-  width: 407,
-  height: 407,
+  width: SITE_CONFIG.metadata.defaultImageWidth,
+  height: SITE_CONFIG.metadata.defaultImageHeight,
   alt: SITE_CONFIG.metadata.defaultImageAlt,
 };
+
+/** Truncate plain text for meta descriptions (~155–160 chars for SERP). */
+export function truncateMetaDescription(text: string, maxLength = 155): string {
+  const normalized = text.replace(/\s+/g, " ").trim();
+  if (normalized.length <= maxLength) return normalized;
+  const sliced = normalized.slice(0, maxLength - 1);
+  const lastSpace = sliced.lastIndexOf(" ");
+  const base = lastSpace > 80 ? sliced.slice(0, lastSpace) : sliced;
+  return `${base.replace(/[,.;:\-–—\s]+$/, "")}…`;
+}
 
 export function buildPageMetadata({
   title,

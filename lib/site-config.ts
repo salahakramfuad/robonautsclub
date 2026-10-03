@@ -3,9 +3,12 @@
  * Import from here instead of hardcoding values across the codebase.
  */
 
-/** Production public origins, preferred in this order when env is unset. */
+/** Canonical production origin — never use preview/workers hosts for SEO URLs in production. */
+export const PRIMARY_SITE_ORIGIN = 'https://www.robonautsltd.com' as const
+
+/** Dev / non-production fallbacks only (not used when NODE_ENV=production). */
 export const PUBLIC_BASE_URL_FALLBACKS = [
-  'https://www.robonautsltd.com',
+  PRIMARY_SITE_ORIGIN,
   'https://www.robonautsclub.com',
   'https://robonautsclubbd.atm3collab.workers.dev',
 ] as const
@@ -25,8 +28,8 @@ function normalizeOrigin(raw: string): string {
 /**
  * Resolve the public site/base URL for PDFs, emails, verification, and payment callbacks.
  * Order: explicit arg → NEXT_PUBLIC_BASE_URL → NEXT_PUBLIC_SITE_URL →
- * Vercel preview hosts → localhost (dev) →
- * www.robonautsltd.com → www.robonautsclub.com → workers.dev
+ * (non-production only) Vercel preview / localhost / legacy fallbacks →
+ * (production) PRIMARY_SITE_ORIGIN only
  */
 export function resolvePublicBaseUrl(explicit?: string | null): string {
   const candidates: Array<string | null | undefined> = [
@@ -35,18 +38,21 @@ export function resolvePublicBaseUrl(explicit?: string | null): string {
     process.env.NEXT_PUBLIC_SITE_URL,
   ]
 
-  if (process.env.VERCEL_URL) {
-    candidates.push(`https://${process.env.VERCEL_URL}`)
+  if (process.env.NODE_ENV !== 'production') {
+    if (process.env.VERCEL_URL) {
+      candidates.push(`https://${process.env.VERCEL_URL}`)
+    }
+    if (process.env.VERCEL_BRANCH_URL) {
+      const branch = process.env.VERCEL_BRANCH_URL
+      candidates.push(branch.startsWith('http') ? branch : `https://${branch}`)
+    }
+    if (process.env.NODE_ENV === 'development') {
+      candidates.push('http://localhost:3000')
+    }
+    candidates.push(...PUBLIC_BASE_URL_FALLBACKS)
+  } else {
+    candidates.push(PRIMARY_SITE_ORIGIN)
   }
-  if (process.env.VERCEL_BRANCH_URL) {
-    const branch = process.env.VERCEL_BRANCH_URL
-    candidates.push(branch.startsWith('http') ? branch : `https://${branch}`)
-  }
-  if (process.env.NODE_ENV === 'development') {
-    candidates.push('http://localhost:3000')
-  }
-
-  candidates.push(...PUBLIC_BASE_URL_FALLBACKS)
 
   for (const candidate of candidates) {
     if (typeof candidate === 'string' && candidate.trim()) {
@@ -54,7 +60,7 @@ export function resolvePublicBaseUrl(explicit?: string | null): string {
     }
   }
 
-  return PUBLIC_BASE_URL_FALLBACKS[0]
+  return PRIMARY_SITE_ORIGIN
 }
 
 /** Canonical site origin with no trailing slash (safe for string concatenation). */
@@ -69,7 +75,7 @@ export const SITE_CONFIG = {
   alternateName: "Robonauts  Bangladesh",
   tagline: "Innovation meets curiosity in STEM education",
   /** Prefer `getSiteOrigin()` / `resolvePublicBaseUrl()` when building absolute URLs. */
-  url: `${PUBLIC_BASE_URL_FALLBACKS[0]}/`,
+  url: `${PRIMARY_SITE_ORIGIN}/`,
   description:
     "Bangladesh's first youth robotics club preparing students for Robofest & global STEM challenges.",
   extendedDescription:
@@ -128,14 +134,16 @@ export const SITE_CONFIG = {
       "robotics club Dhaka",
       "STEM club Bangladesh",
     ],
-    /** Used for Open Graph / Twitter link previews (not in-page hero art). */
-    defaultImage: "/robologo.png",
-    defaultImageAlt: "Robonauts logo",
+    /** Used for Open Graph / Twitter link previews (1200×630). */
+    defaultImage: "/og-default.jpg",
+    defaultImageAlt: "Robonauts — STEM, robotics & olympiad education in Bangladesh",
+    defaultImageWidth: 1200,
+    defaultImageHeight: 630,
     twitterCreator: "@robonauts_club",
   },
   assets: {
     logo: "/robologo.png",
-    defaultEventImage: "/robotics-event.gif",
+    defaultEventImage: "/robotics-event.jpg",
   },
   developer: {
     name: "Mohammad Salah",

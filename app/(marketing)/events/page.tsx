@@ -23,7 +23,7 @@ export const metadata: Metadata = buildPageMetadata({
   path: '/events',
   absoluteTitle: true,
   ogImage: {
-    url: '/robotics-event.gif',
+    url: SITE_CONFIG.assets.defaultEventImage,
     width: 1200,
     height: 630,
     alt: `${SITE_CONFIG.name} Events`,
@@ -63,7 +63,7 @@ export default async function EventsPage() {
       {initialUpcoming.length > 0 ? (
         <JsonLdScript id="events-itemlist-schema" data={itemListSchema} />
       ) : null}
-      <ListingHeroSection overlay="dark" imageSrc="/robotics-event.gif">
+      <ListingHeroSection overlay="dark" imageSrc={SITE_CONFIG.assets.defaultEventImage}>
         <div className="max-w-7xl mx-auto relative">
           <div className="text-center mb-6 sm:mb-8">
             <div className="inline-flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-white/10 backdrop-blur-sm mb-4 sm:mb-6">
