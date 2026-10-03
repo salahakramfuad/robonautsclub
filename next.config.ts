@@ -102,5 +102,18 @@ export default withBundleAnalyzer(nextConfig);
 // Do not start the local Workers runtime during `next build`; a stale local
 // SQLite file otherwise aborts the production build.
 if (process.env.NODE_ENV === 'development') {
-  import('@opennextjs/cloudflare').then((m) => m.initOpenNextCloudflareForDev())
+  // Project path contains a space ("work done"), which breaks Miniflare/workerd
+  // SQLite persistence ("invalid digit found in string"). Disable disk persist for
+  // local `next dev`. Prefer cloning/opening the repo under a space-free path for
+  // durable local D1. Production Cloudflare is unaffected.
+  console.info(
+    '[opennext] initOpenNextCloudflareForDev(persist: false) — avoiding space-in-path D1 crash',
+  )
+  import('@opennextjs/cloudflare').then((m) =>
+    m.initOpenNextCloudflareForDev({
+      persist: false,
+    }),
+  ).catch((err) => {
+    console.error('[opennext] initOpenNextCloudflareForDev failed:', err)
+  })
 }
