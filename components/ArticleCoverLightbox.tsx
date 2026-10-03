@@ -11,9 +11,15 @@ type Props = {
   extraUrls: string[]
   /** Optional label when more photos exist beyond the cover */
   photoCountLabel?: string
+  alt?: string
 }
 
-export default function ArticleCoverLightbox({ coverUrl, extraUrls, photoCountLabel }: Props) {
+export default function ArticleCoverLightbox({
+  coverUrl,
+  extraUrls,
+  photoCountLabel,
+  alt = 'Article cover',
+}: Props) {
   const [openIndex, setOpenIndex] = useState<number | null>(null)
   const close = useCallback(() => setOpenIndex(null), [])
 
@@ -46,7 +52,7 @@ export default function ArticleCoverLightbox({ coverUrl, extraUrls, photoCountLa
       >
         <Image
           src={coverUrl}
-          alt=""
+          alt={alt}
           fill
           className="object-cover transition-transform duration-500 ease-out motion-reduce:transition-none group-hover:scale-[1.02]"
           priority
@@ -76,6 +82,7 @@ export default function ArticleCoverLightbox({ coverUrl, extraUrls, photoCountLa
         openIndex={openIndex}
         onClose={close}
         setOpenIndex={setOpenIndex}
+        altBase={alt}
       />
     </>
   )

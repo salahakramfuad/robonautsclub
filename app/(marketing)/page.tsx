@@ -1,6 +1,9 @@
 import { Metadata } from "next";
 import Feed from "@/components/Feed";
+import JsonLdScript from "@/components/JsonLdScript";
 import { PAGE_SEO, buildPageMetadata } from "@/lib/seo-metadata";
+import { getFAQPageSchema } from "@/lib/seo";
+import { HOME_FAQ_ITEMS } from "@/lib/home-faq";
 import {
   getPublicCourses,
   getPublicEventsForHome,
@@ -16,8 +19,8 @@ export const metadata: Metadata = buildPageMetadata({
   absoluteTitle: true,
   ogImage: {
     url: SITE_CONFIG.metadata.defaultImage,
-    width: 407,
-    height: 407,
+    width: SITE_CONFIG.metadata.defaultImageWidth,
+    height: SITE_CONFIG.metadata.defaultImageHeight,
     alt: SITE_CONFIG.metadata.defaultImageAlt,
   },
 });
@@ -32,9 +35,11 @@ export default async function Home() {
     getPublicHomepageOrgs(),
   ])
   const initialUpcomingEvents = events.filter((e) => isEventUpcoming(e.date))
+  const faqSchema = getFAQPageSchema(HOME_FAQ_ITEMS)
 
   return (
     <main id="main" className="flex flex-col w-full min-w-full">
+      <JsonLdScript id="home-faq-schema" data={faqSchema} />
       <Feed
         initialCourses={courses}
         initialUpcomingEvents={initialUpcomingEvents}

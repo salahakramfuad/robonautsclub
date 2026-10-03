@@ -37,8 +37,8 @@ export const metadata: Metadata = {
     images: [
       {
         url: SITE_CONFIG.metadata.defaultImage,
-        width: 407,
-        height: 407,
+        width: SITE_CONFIG.metadata.defaultImageWidth,
+        height: SITE_CONFIG.metadata.defaultImageHeight,
         alt: SITE_CONFIG.metadata.defaultImageAlt,
       },
     ],

@@ -8,11 +8,13 @@ import { LightboxPortal } from '@/components/ImageLightboxGallery'
 
 type Props = {
   images: string[]
+  /** Used for meaningful alt text (e.g. article title) */
+  altBase?: string
   className?: string
 }
 
 /** Immersive full-album grid for `/news/[slug]/photos`. */
-export default function NewsPhotosGrid({ images, className }: Props) {
+export default function NewsPhotosGrid({ images, altBase = 'Photo', className }: Props) {
   const [openIndex, setOpenIndex] = useState<number | null>(null)
   const close = useCallback(() => setOpenIndex(null), [])
 
@@ -23,6 +25,7 @@ export default function NewsPhotosGrid({ images, className }: Props) {
       <ul className="m-0 grid list-none grid-cols-1 gap-3 p-0 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3">
         {images.map((url, i) => {
           const tall = i % 5 === 1 || i % 5 === 3
+          const alt = `${altBase} — photo ${i + 1} of ${images.length}`
           return (
             <li
               key={`${url}-${i}`}
@@ -41,7 +44,7 @@ export default function NewsPhotosGrid({ images, className }: Props) {
               >
                 <Image
                   src={url}
-                  alt=""
+                  alt={alt}
                   fill
                   className="object-cover transition-transform duration-500 ease-out motion-reduce:transition-none group-hover:scale-[1.03]"
                   sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
@@ -61,6 +64,7 @@ export default function NewsPhotosGrid({ images, className }: Props) {
         openIndex={openIndex}
         onClose={close}
         setOpenIndex={setOpenIndex}
+        altBase={altBase}
       />
     </div>
   )

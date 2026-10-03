@@ -27,7 +27,7 @@ export const metadata: Metadata = buildPageMetadata({
   path: '/verify-booking',
   noindex: true,
   ogImage: {
-    url: '/robotics-event.jpg',
+    url: SITE_CONFIG.assets.defaultEventImage,
     width: 1200,
     height: 630,
     alt: `${SITE_CONFIG.name} - Verify Registration`,

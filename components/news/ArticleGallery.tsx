@@ -15,6 +15,7 @@ type Props = {
   totalWithCover: number
   viewAllHref?: string
   className?: string
+  altBase?: string
 }
 
 export default function ArticleGallery({
@@ -22,6 +23,7 @@ export default function ArticleGallery({
   totalWithCover,
   viewAllHref,
   className,
+  altBase = 'Article photo',
 }: Props) {
   const [openIndex, setOpenIndex] = useState<number | null>(null)
   const close = useCallback(() => setOpenIndex(null), [])
@@ -74,7 +76,7 @@ export default function ArticleGallery({
               >
                 <Image
                   src={url}
-                  alt=""
+                  alt={`${altBase} — photo ${i + 1}`}
                   fill
                   className="object-cover transition-transform duration-500 ease-out motion-reduce:transition-none group-hover/item:scale-[1.03]"
                   sizes="(max-width: 640px) 50vw, 33vw"
@@ -111,7 +113,7 @@ export default function ArticleGallery({
             >
               <Image
                 src={url}
-                alt=""
+                alt={`${altBase} — photo ${i + 1}`}
                 fill
                 className="object-cover transition-transform duration-500 ease-out motion-reduce:transition-none group-hover/item:scale-[1.03]"
                 sizes={
@@ -143,6 +145,7 @@ export default function ArticleGallery({
         openIndex={openIndex}
         onClose={close}
         setOpenIndex={setOpenIndex}
+        altBase={altBase}
       />
     </section>
   )

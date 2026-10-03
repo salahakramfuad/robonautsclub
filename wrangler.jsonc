@@ -49,6 +49,9 @@
     }
   ],
   "vars": {
+    // Optional HTML-tag Search Console verification:
+    //   wrangler secret put GOOGLE_SITE_VERIFICATION
+    // (read by app/layout.tsx when present)
     "NODE_ENV": "production",
     "NEXT_PUBLIC_BASE_URL": "https://www.robonautsltd.com",
     "NEXT_PUBLIC_SITE_URL": "https://www.robonautsltd.com",

@@ -245,3 +245,23 @@ export function getEventsItemListSchema(events: ItemListEventItem[], maxItems = 
     })),
   };
 }
+
+/**
+ * FAQPage JSON-LD for visible FAQ content (homepage).
+ */
+export function getFAQPageSchema(
+  items: Array<{ question: string; answer: string }>,
+) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: items.map((item) => ({
+      "@type": "Question",
+      name: item.question,
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: item.answer,
+      },
+    })),
+  };
+}

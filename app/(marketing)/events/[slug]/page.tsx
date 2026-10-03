@@ -9,6 +9,8 @@ import { notFound, permanentRedirect } from 'next/navigation'
 import { eventPublicHref } from '@/lib/event-ui'
 import EventImage from './EventImage'
 import { getEventSchema, getBreadcrumbSchema, absoluteSiteUrl } from '@/lib/seo'
+import { truncateMetaDescription } from '@/lib/seo-metadata'
+import Breadcrumbs from '@/components/Breadcrumbs'
 import { parseEventDates, formatEventDates, hasEventPassed, isRegistrationOpen } from '@/lib/dateUtils'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -149,13 +151,17 @@ export async function generateMetadata({
     return Number.isNaN(d.getTime()) ? undefined : d.toISOString()
   })()
 
+  const metaDescription = truncateMetaDescription(
+    event.fullDescription || event.description || event.title,
+  )
+
   return {
     title: event.title,
-    description: event.fullDescription || event.description,
+    description: metaDescription,
     keywords: event.tags || ['robotics', 'STEM', 'workshop', 'competition'],
     openGraph: {
       title: event.title,
-      description: event.fullDescription || event.description,
+      description: metaDescription,
       url: eventPageUrl,
       type: 'article',
       ...(publishedTime ? { publishedTime } : {}),
@@ -172,7 +178,7 @@ export async function generateMetadata({
     twitter: {
       card: 'summary_large_image',
       title: event.title,
-      description: event.description,
+      description: metaDescription,
       images: [ogImageUrl],
     },
     alternates: {
@@ -267,6 +273,13 @@ export default async function EventDetailPage({
         </div>
 
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 pt-4 sm:pt-6 md:pt-8 pb-4 sm:pb-6">
+          <Breadcrumbs
+            items={[
+              { name: 'Home', href: '/' },
+              { name: 'Events', href: '/events' },
+              { name: event.title },
+            ]}
+          />
           <Link
             href="/events"
             prefetch={false}
@@ -304,7 +317,7 @@ export default async function EventDetailPage({
             {/* Overview Section */}
             <Card className="border-2 border-gray-200 shadow-lg">
               <CardContent className="p-4 sm:p-6 md:p-8">
-                <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-3 sm:mb-4">Overview</h3>
+                <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-3 sm:mb-4">Overview</h2>
                 <p className="text-gray-700 leading-relaxed text-sm sm:text-base md:text-lg">
                   {event.fullDescription || event.description}
                 </p>
@@ -314,7 +327,7 @@ export default async function EventDetailPage({
             {/* Event Details Section */}
             <Card className="border-2 border-gray-200 shadow-lg">
               <CardContent className="p-4 sm:p-6 md:p-8">
-                <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">Event Details</h3>
+                <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">Event Details</h2>
                 <div className="space-y-3 sm:space-y-4">
                 <div className="flex items-start gap-2 sm:gap-3 p-3 sm:p-4 rounded-lg sm:rounded-xl bg-indigo-50/50 border border-indigo-100">
                   <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-indigo-100 flex items-center justify-center shrink-0">
@@ -398,7 +411,7 @@ export default async function EventDetailPage({
             {hasContactDetails && (
               <Card className="border-2 border-gray-200 shadow-lg">
                 <CardContent className="p-4 sm:p-6 md:p-8">
-                  <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">Contact Person</h3>
+                  <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">Contact Person</h2>
                   <div className="space-y-3">
                     {event.contactPersonName && (
                       <p className="text-sm sm:text-base text-gray-800">
@@ -424,7 +437,7 @@ export default async function EventDetailPage({
             {event.agenda && (
               <Card className="border-2 border-gray-200 shadow-lg">
                 <CardContent className="p-4 sm:p-6 md:p-8">
-                  <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">Agenda</h3>
+                  <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">Agenda</h2>
                   <div className="text-gray-700 leading-relaxed text-sm sm:text-base md:text-lg whitespace-pre-line">
                     {event.agenda}
                   </div>
@@ -435,7 +448,7 @@ export default async function EventDetailPage({
             {/* About the Organizer Section */}
             <Card className="border-2 border-gray-200 shadow-lg">
               <CardContent className="p-4 sm:p-6 md:p-8">
-                <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-3 sm:mb-4">About the Organizer</h3>
+                <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-3 sm:mb-4">About the Organizer</h2>
                 <div className="space-y-3 sm:space-y-4 text-gray-700 leading-relaxed text-sm sm:text-base md:text-lg">
                   <p>
                     Robonauts Club is Bangladesh&apos;s first youth robotics club, dedicated to preparing students for RoboFest and global STEM challenges. We empower the next generation of robotics innovators through hands-on learning, expert mentorship, and competitive opportunities.

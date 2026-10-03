@@ -18,9 +18,17 @@ type LightboxPortalProps = {
   openIndex: number | null
   onClose: () => void
   setOpenIndex: React.Dispatch<React.SetStateAction<number | null>>
+  /** Prefix for alt text, e.g. album or article title */
+  altBase?: string
 }
 
-export function LightboxPortal({ images, openIndex, onClose, setOpenIndex }: LightboxPortalProps) {
+export function LightboxPortal({
+  images,
+  openIndex,
+  onClose,
+  setOpenIndex,
+  altBase = 'Photo',
+}: LightboxPortalProps) {
   const total = images.length
   const isOpen = openIndex !== null
 
@@ -48,6 +56,7 @@ export function LightboxPortal({ images, openIndex, onClose, setOpenIndex }: Lig
   if (!isOpen || !images[openIndex]) return null
 
   const label = `Image ${openIndex + 1} of ${total}`
+  const imageAlt = `${altBase} — photo ${openIndex + 1} of ${total}`
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => { if (!open) onClose() }}>
@@ -113,7 +122,7 @@ export function LightboxPortal({ images, openIndex, onClose, setOpenIndex }: Lig
           {/* eslint-disable-next-line @next/next/no-img-element -- large modal uses native img for simplicity */}
           <img
             src={images[openIndex]}
-            alt=""
+            alt={imageAlt}
             className="h-auto max-h-full w-auto max-w-full object-contain"
           />
         </div>
@@ -141,6 +150,8 @@ type Props = {
   showViewAllLink?: boolean
   aspect?: Aspect
   className?: string
+  /** Prefix for image alt text */
+  altBase?: string
 }
 
 export default function ImageLightboxGallery({
@@ -151,6 +162,7 @@ export default function ImageLightboxGallery({
   showViewAllLink = false,
   aspect = 'square',
   className,
+  altBase = 'Gallery photo',
 }: Props) {
   const [openIndex, setOpenIndex] = useState<number | null>(null)
 
@@ -194,7 +206,7 @@ export default function ImageLightboxGallery({
           >
             <Image
               src={url}
-              alt=""
+              alt={`${altBase} — photo ${i + 1} of ${totalShown}`}
               fill
               className="object-cover group-hover:scale-[1.02] transition-transform duration-300"
               sizes={
@@ -223,6 +235,7 @@ export default function ImageLightboxGallery({
         openIndex={openIndex}
         onClose={close}
         setOpenIndex={setOpenIndex}
+        altBase={altBase}
       />
     </div>
   )

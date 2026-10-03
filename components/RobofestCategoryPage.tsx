@@ -16,6 +16,7 @@ import RobofestRegistrationCountdown from "@/components/RobofestRegistrationCoun
 import { resolveRobofestDivisionClosingDate } from "@/lib/robofest-deadlines";
 import { Button } from "@/components/ui/button";
 import RobofestIcon from "@/components/RobofestIcon";
+import Breadcrumbs from "@/components/Breadcrumbs";
 
 const RobofestCategoryRegistrationForm = dynamic(
   () => import("@/components/RobofestCategoryRegistrationForm"),
@@ -106,6 +107,14 @@ export default function RobofestCategoryPage({
         />
 
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 py-10 sm:py-14 md:py-16">
+          <Breadcrumbs
+            tone="onDark"
+            items={[
+              { name: "Home", href: "/" },
+              { name: "Robofest", href: "/robofest" },
+              { name: category.name },
+            ]}
+          />
           <Link
             href="/robofest"
             prefetch={false}

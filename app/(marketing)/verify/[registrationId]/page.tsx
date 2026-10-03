@@ -8,6 +8,7 @@ import { format } from 'date-fns'
 import Image from 'next/image'
 import { Metadata } from 'next'
 import { absoluteSiteUrl } from '@/lib/seo'
+import { getSiteOrigin } from '@/lib/site-config'
 
 export const dynamic = 'force-dynamic'
 
@@ -93,7 +94,7 @@ export async function generateMetadata({
   const ogImage =
     event.image && event.image.startsWith('http')
       ? event.image
-      : absoluteSiteUrl(event.image || '/robotics-event.jpg')
+      : absoluteSiteUrl(event.image || '/robotics-event.jpg') // static JPG fallback (not .gif)
 
   return {
     title,
@@ -137,10 +138,7 @@ export default async function VerificationPage({ params }: VerificationPageProps
   const { booking, event } = await getBookingByRegistrationId(registrationId)
 
   const isValid = booking !== null && event !== null
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL 
-    || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null)
-    || 'http://localhost:3000'
-  const verificationUrl = `${baseUrl}/verify/${registrationId}`
+  const verificationUrl = `${getSiteOrigin()}/verify/${registrationId}`
   const qrCodeDataURL = isValid ? await generateQRCodeDataURL(verificationUrl, 200) : null
 
   if (!isValid) {

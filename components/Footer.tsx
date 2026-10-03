@@ -45,9 +45,9 @@ export default function Footer() {
               priority
             />
             <div>
-              <h2 className="text-lg sm:text-xl font-semibold text-brand-blue">
+              <p className="text-lg sm:text-xl font-semibold text-brand-blue">
                 {SITE_CONFIG.name}
-              </h2>
+              </p>
               <p className="mt-1 max-w-sm text-xs sm:text-sm text-brand-dark/70">
                 {SITE_CONFIG.tagline}
               </p>

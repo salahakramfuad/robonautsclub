@@ -1,10 +1,13 @@
 import Link from 'next/link'
 import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
+import Script from 'next/script'
 import { ArrowLeft, Images } from 'lucide-react'
 import { SITE_CONFIG } from '@/lib/site-config'
 import { collectArticleImageUrls } from '@/lib/news-ui'
 import { buildPageMetadata } from '@/lib/seo-metadata'
+import { getBreadcrumbSchema } from '@/lib/seo'
+import Breadcrumbs from '@/components/Breadcrumbs'
 import { getNewsArticleBySlug } from '../../actions'
 import NewsPhotosGrid from '@/components/news/NewsPhotosGrid'
 
@@ -46,8 +49,22 @@ export default async function NewsArticlePhotosPage({ params }: Props) {
   const urls = collectArticleImageUrls(article)
   if (urls.length === 0) notFound()
 
+  const articlePath = `/news/${article.slug}`
+  const photosPath = `${articlePath}/photos`
+  const breadcrumbSchema = getBreadcrumbSchema([
+    { name: 'Home', url: '/' },
+    { name: 'News', url: '/news' },
+    { name: article.title, url: articlePath },
+    { name: 'Photos', url: photosPath },
+  ])
+
   return (
     <div className="min-h-screen bg-linear-to-b from-slate-50 via-white to-slate-50/80">
+      <Script
+        id="news-photos-breadcrumb-schema"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
       <div className="relative overflow-hidden border-b border-slate-200/70 bg-linear-to-br from-slate-950 via-indigo-950 to-slate-900 text-white">
         <div className="bg-tech-grid pointer-events-none absolute inset-0 opacity-40" aria-hidden />
         <div className="bg-circuit-dots pointer-events-none absolute inset-0 opacity-25" aria-hidden />
@@ -57,8 +74,17 @@ export default async function NewsArticlePhotosPage({ params }: Props) {
         />
 
         <div className="relative z-10 mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-12 lg:px-8">
+          <Breadcrumbs
+            tone="onDark"
+            items={[
+              { name: 'Home', href: '/' },
+              { name: 'News', href: '/news' },
+              { name: article.title, href: articlePath },
+              { name: 'Photos' },
+            ]}
+          />
           <Link
-            href={`/news/${article.slug}`}
+            href={articlePath}
             prefetch={false}
             className="inline-flex items-center gap-2 rounded-md text-sm font-medium text-sky-200 transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-300 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950"
           >
@@ -84,7 +110,7 @@ export default async function NewsArticlePhotosPage({ params }: Props) {
       </div>
 
       <main className="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-14 lg:px-8">
-        <NewsPhotosGrid images={urls} />
+        <NewsPhotosGrid images={urls} altBase={article.title} />
       </main>
     </div>
   )
