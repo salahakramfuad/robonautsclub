@@ -207,15 +207,23 @@ export default function Footer() {
             © {new Date().getFullYear()} {SITE_CONFIG.name}. All rights reserved.
           </span>
 
-          <a
-            href={SITE_CONFIG.developer.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="transition hover:text-brand-blue"
-          >
-            Developed by{" "}
-            <span className="font-semibold">{SITE_CONFIG.developer.name}</span>
-          </a>
+          <div className="flex flex-col items-center gap-2 sm:flex-row sm:gap-4">
+            <Link
+              href="/privacy"
+              className="transition hover:text-brand-blue"
+            >
+              Privacy Policy
+            </Link>
+            <a
+              href={SITE_CONFIG.developer.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="transition hover:text-brand-blue"
+            >
+              Developed by{" "}
+              <span className="font-semibold">{SITE_CONFIG.developer.name}</span>
+            </a>
+          </div>
         </div>
       </div>
     </footer>

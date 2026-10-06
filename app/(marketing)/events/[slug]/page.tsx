@@ -10,6 +10,8 @@ import { eventPublicHref } from '@/lib/event-ui'
 import EventImage from './EventImage'
 import { getEventSchema, getBreadcrumbSchema, absoluteSiteUrl } from '@/lib/seo'
 import { parseEventDates, formatEventDates, hasEventPassed, isRegistrationOpen } from '@/lib/dateUtils'
+import { ADSENSE_SLOT_IN_ARTICLE } from '@/lib/adsense'
+import AdUnit from '@/components/ads/AdUnit'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -310,6 +312,8 @@ export default async function EventDetailPage({
                 </p>
               </CardContent>
             </Card>
+
+            <AdUnit slot={ADSENSE_SLOT_IN_ARTICLE} />
 
             {/* Event Details Section */}
             <Card className="border-2 border-gray-200 shadow-lg">

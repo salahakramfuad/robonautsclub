@@ -1,5 +1,6 @@
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
+import AdSenseScript from '@/components/ads/AdSenseScript'
 
 export default function MarketingLayout({
   children,
@@ -8,11 +9,7 @@ export default function MarketingLayout({
 }) {
   return (
     <>
-      <script
-        async
-        src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1079258526503093"
-        crossOrigin="anonymous"
-      />
+      <AdSenseScript />
       <Navbar />
       {children}
       <Footer />

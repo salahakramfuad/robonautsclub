@@ -14,9 +14,11 @@ import {
 } from '@/lib/news-ui'
 import { getArticleSchema, getBreadcrumbSchema } from '@/lib/seo'
 import { buildPageMetadata } from '@/lib/seo-metadata'
+import { ADSENSE_SLOT_IN_ARTICLE } from '@/lib/adsense'
 import ArticleCoverLightbox from '@/components/ArticleCoverLightbox'
 import ArticleGallery from '@/components/news/ArticleGallery'
 import NewsCoverFallback from '@/components/news/NewsCoverFallback'
+import AdUnit from '@/components/ads/AdUnit'
 import { getNewsArticleBySlug } from '../actions'
 
 export const revalidate = 1800
@@ -155,6 +157,8 @@ export default async function NewsArticlePage({ params }: Props) {
                 {article.body}
               </p>
             </div>
+
+            <AdUnit slot={ADSENSE_SLOT_IN_ARTICLE} className="mx-auto max-w-[48rem] lg:mx-0" />
 
             {extraImages.length > 0 ? (
               <ArticleGallery
