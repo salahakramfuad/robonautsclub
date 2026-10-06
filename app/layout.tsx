@@ -3,6 +3,7 @@ import { Geist } from "next/font/google";
 import "./globals.css";
 import OrganizationSchema from "@/components/OrganizationSchema";
 import ConditionalAnalytics from "@/components/ConditionalAnalytics";
+import { ADSENSE_PUBLISHER_ID } from "@/lib/adsense";
 import { SITE_CONFIG, getSiteOrigin } from "@/lib/site-config";
 
 const geistSans = Geist({
@@ -74,6 +75,7 @@ export const metadata: Metadata = {
     'geo.placename': 'Dhaka',
     'geo.position': '23.8103;90.4125',
     'ICBM': '23.8103, 90.4125',
+    'google-adsense-account': ADSENSE_PUBLISHER_ID,
   },
   ...(process.env.GOOGLE_SITE_VERIFICATION
     ? { verification: { google: process.env.GOOGLE_SITE_VERIFICATION } }

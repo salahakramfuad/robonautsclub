@@ -58,6 +58,11 @@ export const PAGE_SEO = {
     description:
       "Photo gallery from Robonauts workshops, robotics competitions, Robofest, and community STEM events across Bangladesh.",
   },
+  privacy: {
+    title: "Privacy Policy | Robonauts",
+    description:
+      "How Robonauts collects, uses, and protects personal information, including cookies and advertising (Google AdSense).",
+  },
 } as const;
 
 const DEFAULT_OG_IMAGE: OgImage = {

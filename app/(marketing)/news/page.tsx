@@ -1,5 +1,7 @@
 import { Metadata } from 'next'
 import { PAGE_SEO, buildPageMetadata } from '@/lib/seo-metadata'
+import { ADSENSE_SLOT_DISPLAY } from '@/lib/adsense'
+import AdUnit from '@/components/ads/AdUnit'
 import { getPublishedNews } from './actions'
 import NewsHero from '@/components/news/NewsHero'
 import FeaturedNewsCard from '@/components/news/FeaturedNewsCard'
@@ -45,6 +47,8 @@ export default async function NewsPage() {
                 </h2>
                 <FeaturedNewsCard article={featured} />
               </section>
+
+              <AdUnit slot={ADSENSE_SLOT_DISPLAY} />
 
               {rest.length > 0 ? (
                 <section aria-labelledby="latest-stories-heading">
