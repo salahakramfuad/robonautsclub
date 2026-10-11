@@ -6,6 +6,11 @@
 import { unstable_cache } from "next/cache";
 import { collectionGet, collectionSet } from "@/lib/db/collections";
 import {
+  normalizeRobofestResults,
+  ROBOFEST_RESULTS_SEED,
+  type RobofestResults,
+} from "@/lib/robofest-results";
+import {
   ROBOFEST_CATEGORIES,
   ROBOFEST_HOW_IT_WORKS,
   ROBOFEST_LOCAL,
@@ -210,6 +215,8 @@ export type RobofestContent = {
   amount: number;
   /** YYYY-MM-DDTHH:mm (Asia/Dhaka) or legacy YYYY-MM-DD. Null = no deadline. */
   registrationClosingDate: string | null;
+  /** Public competition results (team level). */
+  results: RobofestResults;
   updatedAt?: string | null;
   updatedBy?: string | null;
 };
@@ -322,6 +329,7 @@ export function getDefaultRobofestContent(): RobofestContent {
     isPaid: true,
     amount: 300,
     registrationClosingDate: null,
+    results: normalizeRobofestResults(ROBOFEST_RESULTS_SEED),
     updatedAt: null,
     updatedBy: null,
   };
@@ -537,6 +545,8 @@ export function mapRobofestContentDoc(
     registrationClosingDate: normalizeRobofestClosingDate(
       data.registrationClosingDate,
     ),
+    // Stored payloads written before results existed fall back to the seed.
+    results: normalizeRobofestResults(data.results),
     updatedAt: toIso(data.updatedAt),
     updatedBy: data.updatedBy ? asString(data.updatedBy) : null,
   };

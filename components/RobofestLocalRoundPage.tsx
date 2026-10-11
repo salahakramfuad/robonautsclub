@@ -21,6 +21,7 @@ import { SITE_CONFIG } from "@/lib/site-config";
 import RobofestRegistrationCountdown from "@/components/RobofestRegistrationCountdown";
 import RobofestIcon from "@/components/RobofestIcon";
 import { resolveRobofestDivisionClosingDate } from "@/lib/robofest-deadlines";
+import type { RobofestResultRow } from "@/lib/robofest-results";
 
 function CircuitBackdrop({ className = "" }: { className?: string }) {
   return (
@@ -67,8 +68,41 @@ function SectionHeading({
   );
 }
 
+type ResultDivision = { division: string; rows: RobofestResultRow[] };
+type ResultCompetition = { competition: string; divisions: ResultDivision[] };
+type ResultRegion = { region: string; competitions: ResultCompetition[] };
+
+/** Groups flat result rows into region → competition → division, keeping source order. */
+function groupRobofestResults(rows: RobofestResultRow[]): ResultRegion[] {
+  const regions = new Map<string, Map<string, Map<string, RobofestResultRow[]>>>();
+  for (const row of rows) {
+    const competitions = regions.get(row.region) ?? new Map();
+    regions.set(row.region, competitions);
+    const divisions = competitions.get(row.competition) ?? new Map();
+    competitions.set(row.competition, divisions);
+    const list = divisions.get(row.division) ?? [];
+    divisions.set(row.division, list);
+    list.push(row);
+  }
+  return [...regions].map(([region, competitions]) => ({
+    region,
+    competitions: [...competitions].map(([competition, divisions]) => ({
+      competition,
+      divisions: [...divisions].map(([division, rows]) => ({ division, rows })),
+    })),
+  }));
+}
+
+const PLACE_STYLES: Record<string, string> = {
+  "1st": "bg-amber-100 text-amber-900 border-amber-300",
+  "2nd": "bg-slate-100 text-slate-800 border-slate-300",
+  "3rd": "bg-orange-50 text-orange-900 border-orange-300",
+};
+
 export default async function RobofestLocalRoundPage() {
   const content = await getRobofestContent();
+  const resultRegions = groupRobofestResults(content.results.rows);
+  const resultsProvisional = content.results.status === "provisional";
   const categories = getActiveRobofestCategories(content);
   const howItWorks = content.howItWorks?.length ? content.howItWorks : [];
   const dateLines = content.dateLines?.length
@@ -465,6 +499,98 @@ export default async function RobofestLocalRoundPage() {
             </div>
           </div>
         </section>
+
+        {resultRegions.length > 0 ? (
+          <section
+            id="results"
+            className="relative py-14 sm:py-20 px-4 sm:px-6 overflow-hidden border-y border-slate-200 bg-white"
+          >
+            <CircuitBackdrop className="opacity-50" />
+            <div className="relative max-w-7xl mx-auto">
+              <SectionHeading
+                eyebrow="Results"
+                title="RoboFest Bangladesh 2026 Winners"
+                description="Top teams from the National and Chittagong Regional rounds."
+              />
+
+              {resultsProvisional ? (
+                <p className="mx-auto mb-10 max-w-3xl rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+                  Provisional: team codes and school names are being checked against
+                  registration records. Corrections will be published here.
+                </p>
+              ) : null}
+
+              <div className="space-y-12">
+                {resultRegions.map((region) => (
+                  <div key={region.region}>
+                    <h3 className="text-lg sm:text-xl font-bold text-slate-900 mb-6 flex items-center gap-2">
+                      <RobofestIcon name="rocket_launch" className="text-cyan-700" />
+                      {region.region === "National"
+                        ? "National Round"
+                        : `${region.region} Regional Round`}
+                    </h3>
+                    <div className="space-y-8">
+                      {region.competitions.map((competition) => (
+                        <div key={competition.competition}>
+                          <h4 className="text-base font-semibold text-cyan-800 mb-4">
+                            {competition.competition}
+                          </h4>
+                          <div className="grid gap-4 md:grid-cols-2">
+                            {competition.divisions.map((division) => (
+                              <div
+                                key={division.division}
+                                className="rounded-2xl border border-slate-200 bg-slate-50/80 p-5"
+                              >
+                                <p className="text-sm font-semibold text-slate-700 mb-3">
+                                  {division.division}
+                                </p>
+                                <ul className="divide-y divide-slate-200">
+                                  {division.rows.map((row) => (
+                                    <li
+                                      key={`${row.teamCode}-${row.place}-${row.school}`}
+                                      className="flex items-start gap-3 py-3"
+                                    >
+                                      <span
+                                        className={`shrink-0 rounded-full border px-2.5 py-0.5 text-xs font-bold ${PLACE_STYLES[row.place] ?? "bg-white text-slate-700 border-slate-300"}`}
+                                      >
+                                        {row.place}
+                                      </span>
+                                      <div className="min-w-0 flex-1">
+                                        <p className="text-sm font-semibold text-slate-900">
+                                          {row.school}
+                                        </p>
+                                        <p className="text-xs text-slate-600">
+                                          {row.teamCode ? (
+                                            <span className="font-mono text-cyan-800">
+                                              {row.teamCode}
+                                            </span>
+                                          ) : null}
+                                          {row.project ? (
+                                            <span>{row.teamCode ? " · " : ""}{row.project}</span>
+                                          ) : null}
+                                          {row.recognition ? (
+                                            <span className="text-slate-500">
+                                              {row.teamCode || row.project ? " · " : ""}
+                                              {row.recognition}
+                                            </span>
+                                          ) : null}
+                                        </p>
+                                      </div>
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+        ) : null}
 
         <section className="relative py-14 sm:py-20 px-4 sm:px-6 overflow-hidden border-t border-slate-200 bg-slate-50">
           <CircuitBackdrop className="opacity-50" />

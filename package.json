@@ -86,7 +86,7 @@
     "prettier": "^3.7.4",
     "tailwindcss": "^4",
     "typescript": "^5",
-    "wrangler": "^4.85.0"
+    "wrangler": "^4.149.0"
   },
   "optionalDependencies": {
     "@react-pdf/renderer": "^4.3.2"
