@@ -55,3 +55,6 @@ next-env.d.ts
 /tmp/firebase-dump/
 tmp/firebase-dump/
 .cf-bkash-secrets.env
+
+# macOS/iCloud duplicate copies (e.g. "page 2.tsx")
+* [0-9].*
