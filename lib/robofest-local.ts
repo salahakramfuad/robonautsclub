@@ -18,7 +18,7 @@ export const ROBOFEST_LOCAL = {
   generalRulesPdf: "/robofest/General%20Rules%20%26%20Regulations.pdf",
   instagramUrl:
     "https://www.instagram.com/robonautsltd?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==",
-  contactHref: "/about#contact",
+  contactHref: "/contact",
   contactEmail: "events@robonautsltd.com",
   contactLines: [
     {

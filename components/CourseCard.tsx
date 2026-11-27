@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { ArrowRight } from 'lucide-react'
-import { resolveCourseHref, COURSE_FALLBACK_HREF } from '@/lib/course-ui'
+import { resolveCourseHref } from '@/lib/course-ui'
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
 
@@ -39,9 +39,8 @@ export default function CourseCard({
   const featured = variant === 'featured'
   const shortBlurb = !blurb || blurb.trim().length < 80
   const targetHref = resolveCourseHref(href)
-  const isContactFallback = targetHref === COURSE_FALLBACK_HREF
-  const featuredCta = isContactFallback ? 'Contact about this program' : 'Explore this program'
-  const defaultCta = isContactFallback ? 'Contact about this program' : 'Learn more'
+  const featuredCta = 'Explore this program'
+  const defaultCta = 'Learn more'
 
   if (featured) {
     return (
@@ -57,7 +56,6 @@ export default function CourseCard({
                   className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
                   quality={80}
                   sizes="(max-width: 1024px) 100vw, 55vw"
-                  loading="eager"
                 />
                 <div className="absolute inset-0 bg-linear-to-t from-slate-950/40 via-transparent to-transparent lg:bg-linear-to-r lg:from-transparent lg:to-slate-950/10" />
               </>

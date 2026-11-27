@@ -29,8 +29,8 @@ export default function NavbarDesktopMenu({ menuItems }: { menuItems: readonly M
   const pathname = usePathname()
 
   return (
-    <div className="hidden lg:block">
-      <ul className="flex items-center gap-2 text-[15px]">
+    <div className="hidden xl:block">
+      <ul className="flex items-center gap-1 text-[15px]">
         {menuItems.map((item, idx) => {
           const active = isActive(item.href, pathname)
           const sectionActive = item.subLinks?.some((s) => isActive(s.href, pathname))
@@ -47,8 +47,8 @@ export default function NavbarDesktopMenu({ menuItems }: { menuItems: readonly M
                         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-200',
                         '[&[data-state=open]>svg]:rotate-180',
                         sectionActive
-                          ? 'text-indigo-700 bg-indigo-400'
-                          : 'text-gray-700 hover:text-indigo-700 hover:bg-blue-200',
+                          ? 'text-indigo-700 bg-indigo-50'
+                          : 'text-slate-700 hover:text-indigo-700 hover:bg-indigo-50',
                       )}
                     >
                       <span>{item.title}</span>
@@ -94,9 +94,10 @@ export default function NavbarDesktopMenu({ menuItems }: { menuItems: readonly M
                 prefetch={false}
                 className={cn(
                   'py-2 px-3 font-medium rounded-lg transition-colors no-underline hover:no-underline focus:no-underline',
+                  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400',
                   active
-                    ? 'text-indigo-700 bg-blue-200'
-                    : 'text-gray-700 hover:text-indigo-700 hover:bg-sky-200',
+                    ? 'text-indigo-700 bg-indigo-50'
+                    : 'text-slate-700 hover:text-indigo-700 hover:bg-slate-100',
                 )}
                 aria-current={active ? 'page' : undefined}
               >

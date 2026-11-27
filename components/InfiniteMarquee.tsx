@@ -55,7 +55,8 @@ export default function InfiniteMarquee({
         style={{ '--marquee-duration': `${duration}s` } as CSSProperties}
       >
         <div className="flex shrink-0 items-center gap-3 pr-3">{children}</div>
-        <div className="flex shrink-0 items-center gap-3 pr-3" aria-hidden>
+        {/* Visual duplicate for the seamless loop: hidden from AT and removed from tab order. */}
+        <div className="flex shrink-0 items-center gap-3 pr-3" aria-hidden inert>
           {children}
         </div>
       </div>

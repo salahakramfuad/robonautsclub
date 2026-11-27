@@ -274,13 +274,15 @@ export default function RobofestCategoryPage({
                 <h2 className="text-lg font-bold text-slate-900 tracking-tight">
                   Register for {category.name}
                 </h2>
-                <ul className="mt-3 list-disc space-y-1.5 pl-5 text-sm font-medium text-red-700 leading-relaxed marker:text-red-600">
+                <ul className="mt-3 list-disc space-y-1.5 pl-5 text-sm text-slate-700 leading-relaxed marker:text-cyan-600">
                   {fee.isPaid ? (
                     <li>
                       Registration fee: BDT {fee.amount} per member (e.g. 3
-                      members = BDT {fee.amount * 3}). Pay via bKash to confirm.
-                      After payment, do not close or leave the page until you
-                      see the registration successful message.
+                      members = BDT {fee.amount * 3}). Pay via bKash to confirm.{" "}
+                      <strong className="font-semibold text-amber-800">
+                        After payment, don&apos;t close this page until you see
+                        the &ldquo;registration successful&rdquo; message.
+                      </strong>
                     </li>
                   ) : (
                     <li>Enter team details for the local round.</li>
@@ -300,7 +302,7 @@ export default function RobofestCategoryPage({
                         at{" "}
                         <a
                           href={`mailto:${contactEmail}`}
-                          className="font-semibold text-red-800 underline underline-offset-2 hover:text-red-900"
+                          className="font-semibold text-cyan-800 underline underline-offset-2 hover:text-cyan-900"
                         >
                           {contactEmail}
                         </a>
@@ -311,7 +313,7 @@ export default function RobofestCategoryPage({
                         {contactEmail ? " or " : " at "}
                         <a
                           href={`tel:${registrationContact.phone.replace(/\s/g, "")}`}
-                          className="font-semibold text-red-800 underline underline-offset-2 hover:text-red-900"
+                          className="font-semibold text-cyan-800 underline underline-offset-2 hover:text-cyan-900"
                         >
                           {registrationContact.phone}
                         </a>

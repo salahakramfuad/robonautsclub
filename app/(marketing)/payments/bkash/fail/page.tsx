@@ -3,6 +3,7 @@ import { XCircle } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
+import { SITE_CONFIG } from '@/lib/site-config'
 
 type FailPageProps = {
   searchParams: Promise<{
@@ -28,11 +29,18 @@ export default async function BkashFailPage({ searchParams }: FailPageProps) {
               see the payment successful message.
             </AlertDescription>
           </Alert>
-          <Button asChild className="bg-indigo-600 hover:bg-indigo-700 text-white">
-            <Link href="/events" prefetch={false}>
-              Retry from Events
-            </Link>
-          </Button>
+          <div className="flex flex-col gap-3 sm:flex-row">
+            <Button asChild className="bg-[#1f3a6f] hover:bg-[#14264a] text-white">
+              <Link href="/events" prefetch={false}>
+                Try again from Events
+              </Link>
+            </Button>
+            <Button asChild variant="outline">
+              <a href={SITE_CONFIG.social.whatsapp} target="_blank" rel="noreferrer">
+                Need help? WhatsApp us
+              </a>
+            </Button>
+          </div>
         </CardContent>
       </Card>
     </main>

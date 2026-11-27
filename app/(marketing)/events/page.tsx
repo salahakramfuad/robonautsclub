@@ -16,6 +16,9 @@ import ListingHeroSection from '@/components/ListingHeroSection'
 import { isEventUpcoming } from '@/lib/dateUtils'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import Link from 'next/link'
+import FAQSection from '@/components/FAQSection'
+import { EVENTS_FAQ, faqPageSchema } from '@/lib/faq'
 
 export const metadata: Metadata = buildPageMetadata({
   title: PAGE_SEO.events.title,
@@ -63,7 +66,7 @@ export default async function EventsPage() {
       {initialUpcoming.length > 0 ? (
         <JsonLdScript id="events-itemlist-schema" data={itemListSchema} />
       ) : null}
-      <ListingHeroSection overlay="dark" imageSrc="/robotics-event.gif">
+      <ListingHeroSection overlay="dark" imageSrc="/roboclass.jpg">
         <div className="max-w-7xl mx-auto relative">
           <div className="text-center mb-6 sm:mb-8">
             <div className="inline-flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-white/10 backdrop-blur-sm mb-4 sm:mb-6">
@@ -120,6 +123,15 @@ export default async function EventsPage() {
           {/* Server-rendered events list (no client realtime listeners) */}
           <RealtimeEventsList initialEvents={initialEvents} />
 
+          {/* Registration FAQ */}
+          <section className="mt-16 sm:mt-20 rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200 sm:p-10">
+            <JsonLdScript id="events-faq-schema" data={faqPageSchema(EVENTS_FAQ)} />
+            <FAQSection
+              items={EVENTS_FAQ}
+              intro="Registering, paying with bKash and finding your registration ID — the quick answers."
+            />
+          </section>
+
           {/* Call to action */}
           <div className="mt-12 sm:mt-16 md:mt-20 bg-linear-to-br from-indigo-400 to-blue-500 rounded-2xl sm:rounded-3xl p-8 sm:p-12 text-center text-white">
             <Sparkles className="w-8 h-8 sm:w-12 sm:h-12 mx-auto mb-3 sm:mb-4 text-indigo-200" />
@@ -135,10 +147,10 @@ export default async function EventsPage() {
               size="lg"
               className="bg-white text-indigo-500 hover:bg-gray-100 shadow-lg text-sm sm:text-base"
             >
-              <a href={`mailto:${SITE_CONFIG.email}`}>
+              <Link href="/contact?interest=Workshop%20for%20my%20school" prefetch={false}>
                 Contact Robonauts
                 <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5" />
-              </a>
+              </Link>
             </Button>
           </div>
         </div>

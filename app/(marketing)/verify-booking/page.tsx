@@ -13,6 +13,7 @@ import { SITE_CONFIG, resolvePublicBaseUrl } from '@/lib/site-config'
 import { buildPageMetadata } from '@/lib/seo-metadata'
 import CopyButton from './CopyButton'
 import RetryButton from './RetryButton'
+import RegistrationLookupForm from './RegistrationLookupForm'
 import VerifyRobofestRegistration from './VerifyRobofestRegistration'
 import { Card, CardContent } from '@/components/ui/card'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
@@ -140,13 +141,14 @@ export default async function VerifyBookingPage({ searchParams }: VerificationPa
 
         <Card className="relative z-10 max-w-md w-full shadow-2xl">
           <CardContent className="p-8 sm:p-10 text-center">
-            <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-linear-to-br from-red-100 to-red-200 flex items-center justify-center mx-auto mb-6 shadow-lg">
-              <XCircle className="w-12 h-12 sm:w-14 sm:h-14 text-red-500" />
+            <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-linear-to-br from-indigo-50 to-indigo-100 flex items-center justify-center mx-auto mb-6 shadow-lg">
+              <QrCode className="w-11 h-11 sm:w-12 sm:h-12 text-[#1f3a6f]" />
             </div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3">Registration Number Required</h1>
-            <p className="text-gray-600 mb-4 leading-relaxed">
-              Please provide a registration number to verify your registration.
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3">Find my registration</h1>
+            <p className="text-gray-600 mb-6 leading-relaxed">
+              Enter your registration ID to see your event pass and QR code.
             </p>
+            <RegistrationLookupForm />
             <Alert className="mt-6 border-blue-200 bg-blue-50 text-left">
               <AlertTitle className="text-blue-900">Where to find your registration number:</AlertTitle>
               <AlertDescription>
@@ -205,13 +207,10 @@ export default async function VerifyBookingPage({ searchParams }: VerificationPa
               The registration number you provided could not be found in our database.
             </p>
 
-            {/* Registration ID Display */}
-            <Card className="bg-gray-50 border-2 border-gray-200 mb-6">
-              <CardContent className="p-4">
-                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Registration Number</p>
-                <p className="text-lg font-mono font-bold text-gray-900 break-all">{registrationId}</p>
-              </CardContent>
-            </Card>
+            {/* Let the student correct a typo in place */}
+            <div className="mb-6">
+              <RegistrationLookupForm defaultValue={registrationId} />
+            </div>
 
             {/* Help Section */}
             <Alert className="mb-6 border-amber-200 bg-amber-50 text-left">

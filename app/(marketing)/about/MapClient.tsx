@@ -24,6 +24,8 @@ export default function MapClient() {
         center={position}
         zoom={14}
         scrollWheelZoom={false}
+        // One-finger drag on phones should scroll the page, not pan the map.
+        dragging={typeof window === "undefined" || !window.matchMedia("(pointer: coarse)").matches}
         className="h-full w-full"
       >
         <TileLayer

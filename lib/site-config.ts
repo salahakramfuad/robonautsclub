@@ -94,10 +94,12 @@ export const SITE_CONFIG = {
   navLinks: [
     { title: "Home", href: "/" },
     { title: "Events", href: "/events" },
-    { title: "News", href: "/news" },
+    { title: "Courses", href: "/courses" },
     { title: "Robofest", href: "/robofest" },
+    { title: "News", href: "/news" },
     { title: "Gallery", href: "/gallery" },
-    { title: "About us", href: "/about" },
+    { title: "About", href: "/about" },
+    { title: "Contact", href: "/contact" },
   ],
   services: [
     "Robotics Workshops",

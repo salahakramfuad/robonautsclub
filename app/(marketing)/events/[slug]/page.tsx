@@ -15,6 +15,9 @@ import AdUnit from '@/components/ads/AdUnit'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import EventShareActions from '@/components/EventShareActions'
+import { SITE_CONFIG } from '@/lib/site-config'
+import { FaWhatsapp } from 'react-icons/fa'
 
 const BookingForm = dynamic(() => import('./BookingForm'))
 
@@ -41,34 +44,8 @@ const getEventImageUrl = (imageUrl?: string): string => {
   return '/robologo.png'
 }
 
-// Helper function to get tags from event
-const getEventTags = (event: Event) => {
-  // Use stored tags if available, otherwise fall back to extracted tags
-  if (event.tags && event.tags.length > 0) {
-    return event.tags
-  }
-
-  // Fallback: Extract tags from content if no tags are stored
-  const tags: string[] = []
-  const titleLower = event.title.toLowerCase()
-  const descLower = (event.fullDescription || event.description).toLowerCase()
-
-  if (titleLower.includes('workshop') || descLower.includes('workshop')) tags.push('Workshop')
-  if (titleLower.includes('competition') || titleLower.includes('olympiad') || titleLower.includes('robfest')) tags.push('Competition')
-  if (titleLower.includes('bootcamp') || descLower.includes('bootcamp')) tags.push('Bootcamp')
-  if (titleLower.includes('coding') || descLower.includes('programming') || descLower.includes('python')) tags.push('Programming')
-  if (descLower.includes('robotics') || titleLower.includes('robot')) tags.push('Robotics')
-  if (descLower.includes('stem') || descLower.includes('science')) tags.push('STEM')
-  if (descLower.includes('ai') || descLower.includes('artificial intelligence')) tags.push('AI')
-  if (descLower.includes('arduino') || descLower.includes('electronics')) tags.push('Electronics')
-
-  // Default tags if none found
-  if (tags.length === 0) {
-    tags.push('Robotics', 'STEM', 'Education')
-  }
-
-  return tags.slice(0, 4) // Limit to 4 tags
-}
+// Only show tags the organiser actually set — guessed/default tags were misleading.
+const getEventTags = (event: Event) => (event.tags ?? []).filter((t) => t.trim()).slice(0, 6)
 
 // Event Passed Component
 const EventPassedMessage = () => {
@@ -285,6 +262,52 @@ export default async function EventDetailPage({
             <p className="text-sm sm:text-base md:text-lg lg:text-xl text-gray-600 leading-relaxed">
               {event.description}
             </p>
+
+            {/* Quick facts — the three things students and parents check first */}
+            <ul className="mt-4 flex flex-wrap gap-2 text-xs sm:text-sm">
+              <li className="inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 font-medium text-slate-700 shadow-sm ring-1 ring-slate-200">
+                <Calendar className="size-4 text-[#1f3a6f]" aria-hidden />
+                {formatEventDates(eventDates, 'short')}
+              </li>
+              <li className="inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 font-medium text-slate-700 shadow-sm ring-1 ring-slate-200">
+                {isOnline ? (
+                  <Monitor className="size-4 text-[#1f3a6f]" aria-hidden />
+                ) : (
+                  <MapPin className="size-4 text-[#1f3a6f]" aria-hidden />
+                )}
+                {isOnline ? 'Online' : event.venue || event.location}
+              </li>
+              <li className="inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 font-medium text-slate-700 shadow-sm ring-1 ring-slate-200">
+                <Banknote className="size-4 text-[#1f3a6f]" aria-hidden />
+                {!event.isPaid
+                  ? 'Free'
+                  : minCategoryFee != null
+                    ? `From BDT ${minCategoryFee}`
+                    : event.amount != null
+                      ? `BDT ${event.amount}`
+                      : 'Paid'}
+              </li>
+            </ul>
+
+            <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center">
+              {!hasPassed && registrationOpen ? (
+                <Button asChild className="hidden h-11 rounded-xl bg-[#d4163f] px-6 font-semibold text-white hover:bg-[#e8335a] md:inline-flex lg:hidden">
+                  <a href="#register">Register now</a>
+                </Button>
+              ) : null}
+              <EventShareActions
+                event={{
+                  title: event.title,
+                  date: event.date,
+                  time: event.time,
+                  location: event.location,
+                  venue: event.venue,
+                  description: event.description,
+                }}
+                pageUrl={eventUrl}
+                showCalendar={!hasPassed}
+              />
+            </div>
           </div>
         </div>
       </section>
@@ -306,7 +329,7 @@ export default async function EventDetailPage({
             {/* Overview Section */}
             <Card className="border-2 border-gray-200 shadow-lg">
               <CardContent className="p-4 sm:p-6 md:p-8">
-                <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-3 sm:mb-4">Overview</h3>
+                <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-3 sm:mb-4">Overview</h2>
                 <p className="text-gray-700 leading-relaxed text-sm sm:text-base md:text-lg">
                   {event.fullDescription || event.description}
                 </p>
@@ -318,7 +341,7 @@ export default async function EventDetailPage({
             {/* Event Details Section */}
             <Card className="border-2 border-gray-200 shadow-lg">
               <CardContent className="p-4 sm:p-6 md:p-8">
-                <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">Event Details</h3>
+                <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">Event Details</h2>
                 <div className="space-y-3 sm:space-y-4">
                 <div className="flex items-start gap-2 sm:gap-3 p-3 sm:p-4 rounded-lg sm:rounded-xl bg-indigo-50/50 border border-indigo-100">
                   <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-indigo-100 flex items-center justify-center shrink-0">
@@ -402,7 +425,7 @@ export default async function EventDetailPage({
             {hasContactDetails && (
               <Card className="border-2 border-gray-200 shadow-lg">
                 <CardContent className="p-4 sm:p-6 md:p-8">
-                  <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">Contact Person</h3>
+                  <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">Contact Person</h2>
                   <div className="space-y-3">
                     {event.contactPersonName && (
                       <p className="text-sm sm:text-base text-gray-800">
@@ -428,7 +451,7 @@ export default async function EventDetailPage({
             {event.agenda && (
               <Card className="border-2 border-gray-200 shadow-lg">
                 <CardContent className="p-4 sm:p-6 md:p-8">
-                  <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">Agenda</h3>
+                  <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">Agenda</h2>
                   <div className="text-gray-700 leading-relaxed text-sm sm:text-base md:text-lg whitespace-pre-line">
                     {event.agenda}
                   </div>
@@ -436,42 +459,55 @@ export default async function EventDetailPage({
               </Card>
             )}
 
-            {/* About the Organizer Section */}
+            {/* Organizer + questions */}
             <Card className="border-2 border-gray-200 shadow-lg">
-              <CardContent className="p-4 sm:p-6 md:p-8">
-                <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-3 sm:mb-4">About the Organizer</h3>
-                <div className="space-y-3 sm:space-y-4 text-gray-700 leading-relaxed text-sm sm:text-base md:text-lg">
-                  <p>
-                    Robonauts Club is Bangladesh&apos;s first youth robotics club, dedicated to preparing students for RoboFest and global STEM challenges. We empower the next generation of robotics innovators through hands-on learning, expert mentorship, and competitive opportunities.
-                  </p>
-                  <p>
-                    Our events bring together passionate students, experienced mentors, and industry leaders to share knowledge, tools, and inspiration that shape the future of robotics and technology in Bangladesh.
+              <CardContent className="flex flex-col gap-4 p-4 sm:p-6 md:p-8 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <h2 className="text-lg sm:text-xl font-bold text-gray-900">Questions about this event?</h2>
+                  <p className="mt-1 text-sm text-gray-600">
+                    Organised by{' '}
+                    <Link href="/about" prefetch={false} className="font-semibold text-[#1f3a6f] underline-offset-4 hover:underline">
+                      Robonauts
+                    </Link>
+                    . Message us and a mentor will reply.
                   </p>
                 </div>
+                <Button asChild className="shrink-0 bg-emerald-500 text-white hover:bg-emerald-600">
+                  <a
+                    href={`${SITE_CONFIG.social.whatsapp}?text=${encodeURIComponent(`Hi Robonauts! I have a question about "${event.title}".`)}`}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    <FaWhatsapp className="size-4" aria-hidden />
+                    Ask on WhatsApp
+                  </a>
+                </Button>
               </CardContent>
             </Card>
 
-            {/* Tags Section */}
-            <Card className="border-2 border-gray-200 shadow-lg">
-              <CardContent className="p-4 sm:p-6 md:p-8">
-                <div className="flex flex-wrap gap-2 sm:gap-3">
-                  {tags.map((tag, index) => (
+            {tags.length > 0 ? (
+              <ul className="flex flex-wrap gap-2 sm:gap-3" aria-label="Event tags">
+                {tags.map((tag) => (
+                  <li key={tag}>
                     <Badge
-                      key={index}
                       variant="secondary"
-                      className="px-3 sm:px-4 py-1.5 sm:py-2 bg-indigo-50 text-indigo-700 border border-indigo-200 hover:bg-indigo-100 text-xs sm:text-sm font-medium"
+                      className="px-3 sm:px-4 py-1.5 sm:py-2 bg-indigo-50 text-indigo-700 border border-indigo-200 text-xs sm:text-sm font-medium"
                     >
                       {tag}
                     </Badge>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
+                  </li>
+                ))}
+              </ul>
+            ) : null}
           </div>
 
           {/* Right Column - Booking Form */}
-          <div className="lg:col-span-1">
-            <div className="sticky top-4 sm:top-6">
+          <div
+            id="register"
+            data-open={!hasPassed && registrationOpen ? 'true' : 'false'}
+            className="lg:col-span-1 scroll-mt-24"
+          >
+            <div className="sticky top-20 sm:top-24">
               {hasPassed ? (
                 <EventPassedMessage />
               ) : !registrationOpen ? (

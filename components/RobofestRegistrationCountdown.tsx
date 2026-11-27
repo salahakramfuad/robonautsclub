@@ -137,8 +137,8 @@ export default function RobofestRegistrationCountdown({
         </div>
         <div
           className="flex items-center gap-2 sm:gap-3"
-          aria-live="polite"
-          aria-atomic="true"
+          role="timer"
+          aria-live="off"
         >
           {units.map((unit, index) => (
             <div key={unit.label} className="flex items-center gap-2 sm:gap-3">

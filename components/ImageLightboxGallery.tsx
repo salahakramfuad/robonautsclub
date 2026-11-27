@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { ChevronLeft, ChevronRight, X } from 'lucide-react'
@@ -18,11 +18,16 @@ type LightboxPortalProps = {
   openIndex: number | null
   onClose: () => void
   setOpenIndex: React.Dispatch<React.SetStateAction<number | null>>
+  /** Album / article title used to build descriptive alt text. */
+  title?: string
 }
 
-export function LightboxPortal({ images, openIndex, onClose, setOpenIndex }: LightboxPortalProps) {
+const SWIPE_THRESHOLD_PX = 50
+
+export function LightboxPortal({ images, openIndex, onClose, setOpenIndex, title }: LightboxPortalProps) {
   const total = images.length
   const isOpen = openIndex !== null
+  const touchStartX = useRef<number | null>(null)
 
   const go = useCallback(
     (delta: number) => {
@@ -47,7 +52,9 @@ export function LightboxPortal({ images, openIndex, onClose, setOpenIndex }: Lig
 
   if (!isOpen || !images[openIndex]) return null
 
-  const label = `Image ${openIndex + 1} of ${total}`
+  const label = title
+    ? `${title} – photo ${openIndex + 1} of ${total}`
+    : `Image ${openIndex + 1} of ${total}`
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => { if (!open) onClose() }}>
@@ -63,7 +70,7 @@ export function LightboxPortal({ images, openIndex, onClose, setOpenIndex }: Lig
       >
         <DialogTitle className="sr-only">{label}</DialogTitle>
         <DialogDescription className="sr-only">
-          Full-size gallery image. Use arrow keys to navigate between photos.
+          Full-size gallery image. Swipe or use arrow keys to move between photos.
         </DialogDescription>
 
         <Button
@@ -109,11 +116,24 @@ export function LightboxPortal({ images, openIndex, onClose, setOpenIndex }: Lig
         ) : null}
 
         {/* min-h-0 so tall/portrait images can shrink inside the viewport */}
-        <div className="flex min-h-0 w-full flex-1 items-center justify-center px-3 pb-12 pt-14 sm:px-10 sm:pb-14 sm:pt-12">
+        <div
+          className="flex min-h-0 w-full flex-1 touch-pan-y items-center justify-center px-3 pb-12 pt-14 sm:px-10 sm:pb-14 sm:pt-12"
+          onTouchStart={(e) => {
+            touchStartX.current = e.touches[0]?.clientX ?? null
+          }}
+          onTouchEnd={(e) => {
+            const start = touchStartX.current
+            touchStartX.current = null
+            const end = e.changedTouches[0]?.clientX
+            if (start === null || end === undefined || total < 2) return
+            const dx = end - start
+            if (Math.abs(dx) >= SWIPE_THRESHOLD_PX) go(dx < 0 ? 1 : -1)
+          }}
+        >
           {/* eslint-disable-next-line @next/next/no-img-element -- large modal uses native img for simplicity */}
           <img
             src={images[openIndex]}
-            alt=""
+            alt={label}
             className="h-auto max-h-full w-auto max-w-full object-contain"
           />
         </div>
@@ -141,6 +161,8 @@ type Props = {
   showViewAllLink?: boolean
   aspect?: Aspect
   className?: string
+  /** Album / article title used to build descriptive alt text. */
+  title?: string
 }
 
 export default function ImageLightboxGallery({
@@ -151,6 +173,7 @@ export default function ImageLightboxGallery({
   showViewAllLink = false,
   aspect = 'square',
   className,
+  title,
 }: Props) {
   const [openIndex, setOpenIndex] = useState<number | null>(null)
 
@@ -190,7 +213,11 @@ export default function ImageLightboxGallery({
               'hover:opacity-95 hover:bg-gray-200 transition-opacity group',
               aspectClass
             )}
-            aria-label={`Open image ${i + 1} of ${totalShown}`}
+            aria-label={
+              title
+                ? `Open ${title} photo ${i + 1} of ${totalShown}`
+                : `Open image ${i + 1} of ${totalShown}`
+            }
           >
             <Image
               src={url}
@@ -223,6 +250,7 @@ export default function ImageLightboxGallery({
         openIndex={openIndex}
         onClose={close}
         setOpenIndex={setOpenIndex}
+        title={title}
       />
     </div>
   )
