@@ -22,7 +22,16 @@ const HERO_VIDEO_POSTER =
 
 const TRACK_TAGS = ['STEM', 'Robotics', 'Olympiad', 'Innovation'] as const
 
-export default function Hero({ upcomingEvents = [] }: { upcomingEvents?: Event[] }) {
+export default function Hero({
+  upcomingEvents = [],
+  videoEnabled = true,
+  coursesPageEnabled = true,
+}: {
+  upcomingEvents?: Event[]
+  /** `ui.heroVideo` feature flag; when off the still poster is always used. */
+  videoEnabled?: boolean
+  coursesPageEnabled?: boolean
+}) {
   const [muted, setMuted] = useState(true)
   /** Avoid Cloudinary video bytes on small viewports / reduced motion — fewer network requests. */
   const [useVideoBg, setUseVideoBg] = useState(false)
@@ -30,7 +39,7 @@ export default function Hero({ upcomingEvents = [] }: { upcomingEvents?: Event[]
   useEffect(() => {
     const mq = window.matchMedia('(min-width: 1024px)')
     const motion = window.matchMedia('(prefers-reduced-motion: reduce)')
-    const sync = () => setUseVideoBg(mq.matches && !motion.matches)
+    const sync = () => setUseVideoBg(videoEnabled && mq.matches && !motion.matches)
     sync()
     mq.addEventListener('change', sync)
     motion.addEventListener('change', sync)
@@ -38,7 +47,7 @@ export default function Hero({ upcomingEvents = [] }: { upcomingEvents?: Event[]
       mq.removeEventListener('change', sync)
       motion.removeEventListener('change', sync)
     }
-  }, [])
+  }, [videoEnabled])
 
   const hasEvents = upcomingEvents.length > 0
 
@@ -121,8 +130,8 @@ export default function Hero({ upcomingEvents = [] }: { upcomingEvents?: Event[]
                 variant="outline"
                 className="h-12 rounded-xl border-white/30 bg-transparent px-7 text-base font-medium text-white/90 hover:border-white/50 hover:bg-white/10 hover:text-white"
               >
-                <Link href="/courses" prefetch={false}>
-                  See our courses
+                <Link href={coursesPageEnabled ? '/courses' : '/about'} prefetch={false}>
+                  {coursesPageEnabled ? 'See our courses' : 'About Robonauts'}
                 </Link>
               </Button>
             </div>

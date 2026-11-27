@@ -258,6 +258,31 @@ export async function getBookingsPage(
   return pageBookingsFromItems(filtered, options.cursor, pageSize)
 }
 
+/**
+ * Initial event-detail load: first page + stats from a single bookings read
+ * (previously two parallel full reads of the same rows).
+ */
+export async function getInitialBookingsWithStats(
+  eventId: string,
+  pageSize: number = BOOKING_DEFAULT_PAGE_SIZE,
+): Promise<{ page: BookingsPage; stats: EventBookingStats }> {
+  await requireAuth()
+  const size = Math.min(Math.max(pageSize, 1), 100)
+  try {
+    const all = await fetchBookingsForEventFromDb(eventId)
+    return {
+      page: pageBookingsFromItems(all, null, size),
+      stats: computeStatsFromBookings(all),
+    }
+  } catch (error) {
+    console.error('Error fetching bookings:', error)
+    return {
+      page: pageBookingsFromItems([], null, size),
+      stats: { ...EMPTY_EVENT_BOOKING_STATS },
+    }
+  }
+}
+
 export type CreateBookingManualInput = BookingInput & {
   paymentMode?: 'paid_offline' | 'waived'
   amountPaid?: number

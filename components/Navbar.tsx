@@ -5,8 +5,8 @@ import NavbarScrollShell from '@/components/NavbarScrollShell'
 import NavbarDesktopMenu from '@/components/NavbarDesktopMenu'
 import NavbarMobileMenu from '@/components/NavbarMobileMenu'
 
-export default function Nav() {
-  const menuItems = SITE_CONFIG.navLinks
+export default function Nav({ hiddenHrefs = [] }: { hiddenHrefs?: string[] }) {
+  const menuItems = SITE_CONFIG.navLinks.filter((link) => !hiddenHrefs.includes(link.href))
 
   return (
     <NavbarScrollShell>

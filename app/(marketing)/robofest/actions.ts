@@ -14,6 +14,7 @@ import {
   type RobofestTeamMember,
 } from "@/lib/robofest-content";
 import { isRobofestDivisionRegistrationClosed } from "@/lib/robofest-deadlines";
+import { isFeatureEnabledFresh } from "@/lib/feature-flags";
 import { computeRobofestRegistrationTotal } from "@/lib/robofest-fee";
 import type { RobofestAgeCategory } from "@/lib/robofest-registration-options";
 import {
@@ -77,6 +78,13 @@ export async function submitRobofestRegistration(
     const validated = await validateRobofestRegistrationInput(formData);
     if (!validated.ok) return { success: false, error: validated.error };
 
+    if (!(await isFeatureEnabledFresh("registration.robofest"))) {
+      return {
+        success: false,
+        error: "Robofest registration is temporarily paused. Please try again later or contact us.",
+      };
+    }
+
     const content = await getRobofestContentFresh();
     if (isRobofestDivisionRegistrationClosed(content, validated.data.roundCity)) {
       return {
@@ -126,6 +134,13 @@ export async function initiateRobofestPaidCheckout(
   try {
     const validated = await validateRobofestRegistrationInput(formData);
     if (!validated.ok) return { success: false, error: validated.error };
+
+    if (!(await isFeatureEnabledFresh("registration.robofest"))) {
+      return {
+        success: false,
+        error: "Robofest registration is temporarily paused. Please try again later or contact us.",
+      };
+    }
 
     const content = await getRobofestContentFresh();
     if (isRobofestDivisionRegistrationClosed(content, validated.data.roundCity)) {

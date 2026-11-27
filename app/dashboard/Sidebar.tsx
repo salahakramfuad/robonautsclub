@@ -73,8 +73,7 @@ export default function Sidebar({
             const link = (
               <Link
                 href={item.href}
-                prefetch={false}
-                className={cn(
+                                className={cn(
                   'flex items-center rounded-lg transition-all font-medium text-sm',
                   'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-200',
                   collapsed

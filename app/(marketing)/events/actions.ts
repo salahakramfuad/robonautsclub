@@ -6,6 +6,7 @@ import {
 } from '@/lib/db/collections'
 import { Event } from '@/types/event'
 import { isRegistrationOpen } from '@/lib/dateUtils'
+import { isFeatureEnabledFresh } from '@/lib/feature-flags'
 import {
   BkashApiError,
   bkashCreateCheckout,
@@ -77,6 +78,9 @@ export async function createBooking(
         : String(eventData.updatedAt ?? ''),
     } as Event
 
+    if (!(await isFeatureEnabledFresh('registration.events'))) {
+      return { success: false, error: 'Event registration is temporarily paused. Please try again later or WhatsApp us.' }
+    }
     if (!isRegistrationOpen(event)) {
       return { success: false, error: 'Registration for this event is closed.' }
     }
@@ -161,6 +165,9 @@ export async function initiatePaidEventCheckout(
 
     if (!event.isPaid) {
       return { success: false, error: 'This event does not require payment.' }
+    }
+    if (!(await isFeatureEnabledFresh('registration.events'))) {
+      return { success: false, error: 'Event registration is temporarily paused. Please try again later or WhatsApp us.' }
     }
     if (!isRegistrationOpen(event)) {
       return { success: false, error: 'Registration for this event is closed.' }

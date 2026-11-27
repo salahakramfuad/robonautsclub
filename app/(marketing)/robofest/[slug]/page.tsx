@@ -22,6 +22,7 @@ import {
 } from "@/lib/seo";
 import { SITE_CONFIG } from "@/lib/site-config";
 import RobofestCategoryPage from "@/components/RobofestCategoryPage";
+import { isFeatureEnabled } from "@/lib/feature-flags";
 
 // ISR: align with other marketing pages; content updates call revalidatePath/Tag
 export const revalidate = 1800;
@@ -174,6 +175,7 @@ export default async function RobofestCategoryRoute({ params }: PageProps) {
         schools={schools}
         campusAmbassadors={campusAmbassadors}
         siblingCategories={activeCategories.filter((c) => c.slug !== slug)}
+        registrationPaused={!(await isFeatureEnabled("registration.robofest"))}
       />
     </>
   );

@@ -1,6 +1,7 @@
 'use server'
 
 import { SITE_CONFIG } from '@/lib/site-config'
+import { isFeatureEnabledFresh } from '@/lib/feature-flags'
 import {
   createBrevoClient,
   createSendSmtpEmail,
@@ -64,6 +65,9 @@ export async function submitContactForm(
 }
 
 async function handleContactForm(formData: FormData): Promise<ContactFormState> {
+  if (!(await isFeatureEnabledFresh('pages.contactForm'))) {
+    return { status: 'error', message: `The contact form is paused. Please WhatsApp or call us at ${SITE_CONFIG.phone}.` }
+  }
   // Honeypot: real users never see or fill this field. Pretend success for bots.
   if (field(formData, 'website', 200)) {
     return { status: 'success', message: 'Thanks! We will get back to you soon.' }

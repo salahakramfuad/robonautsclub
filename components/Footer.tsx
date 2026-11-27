@@ -30,7 +30,17 @@ const STUDENT_LINKS = [
 const linkClass =
   "rounded transition hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400";
 
-export default function Footer() {
+export default function Footer({
+  hiddenHrefs = [],
+  reserveMobileBar = true,
+}: {
+  /** Links hidden by feature flags (e.g. /courses). */
+  hiddenHrefs?: string[]
+  /** Leave room at the bottom for the mobile action bar. */
+  reserveMobileBar?: boolean
+} = {}) {
+  const navLinks = SITE_CONFIG.navLinks.filter((l) => !hiddenHrefs.includes(l.href))
+  const studentLinks = STUDENT_LINKS.filter((l) => !hiddenHrefs.includes(l.href))
   return (
     <footer className="bg-[#14264a] text-slate-300">
       {/* Top accent strip — logo colours */}
@@ -84,7 +94,7 @@ export default function Footer() {
               Explore
             </h3>
             <ul className="space-y-2 sm:space-y-3 text-sm">
-              {SITE_CONFIG.navLinks.map((link) => (
+              {navLinks.map((link) => (
                 <li key={link.href}>
                   <Link href={link.href} prefetch={false} className={linkClass}>
                     {link.title}
@@ -99,7 +109,7 @@ export default function Footer() {
               Students & parents
             </h3>
             <ul className="space-y-2 sm:space-y-3 text-sm">
-              {STUDENT_LINKS.map((item) => (
+              {studentLinks.map((item) => (
                 <li key={item.href}>
                   <Link href={item.href} prefetch={false} className={linkClass}>
                     {item.title}
@@ -167,7 +177,7 @@ export default function Footer() {
       <div className="h-px w-full bg-white/10" />
 
       {/* Bottom text row */}
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 py-4 pb-24 md:pb-4">
+      <div className={`mx-auto max-w-7xl px-4 sm:px-6 py-4 ${reserveMobileBar ? "pb-24 md:pb-4" : ""}`}>
         <div className="flex flex-col gap-2 text-xs sm:text-sm text-slate-400 md:flex-row md:items-center md:justify-between text-center md:text-left">
           <span>
             © {new Date().getFullYear()} {SITE_CONFIG.name}. All rights reserved.
