@@ -19,6 +19,13 @@ export const FEATURE_FLAG_DEFS = [
     defaultEnabled: true,
   },
   {
+    key: 'registration.researchHub',
+    group: 'Registration',
+    label: 'Research Hub booking',
+    description: 'Shows the /research-hub page and lets people book and pay for hourly seats. Set price and seats in Dashboard → Research Hub → Settings first.',
+    defaultEnabled: false,
+  },
+  {
     key: 'ads.enabled',
     group: 'Ads',
     label: 'Google AdSense',

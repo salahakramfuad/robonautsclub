@@ -3,6 +3,11 @@ import { finalizePaidEventBooking } from '@/app/[locale]/(marketing)/events/acti
 import { finalizeRobofestPaidRegistration } from '@/app/[locale]/(marketing)/robofest/actions'
 import { collectionGet } from '@/lib/db/collections'
 import { PAYMENT_LOCALE_COOKIE, localizePaymentPath } from '@/lib/payment-locale'
+import {
+  finalizeResearchHubPayment,
+  getResearchHubPending,
+  releaseResearchHubCheckout,
+} from '@/lib/research-hub/payment'
 
 function normalizeStatus(raw: string): string {
   const value = raw.toLowerCase()
@@ -40,6 +45,11 @@ async function handleCallback(
     return NextResponse.redirect(
       `${baseUrl}/payments/bkash/fail?error=${encodeURIComponent('Missing payment id from bKash callback.')}`
     )
+  }
+
+  const researchHubPending = await getResearchHubPending(paymentId).catch(() => null)
+  if (researchHubPending) {
+    return handleResearchHubCallback(baseUrl, status, researchHubPending)
   }
 
   if (status === 'cancel') {
@@ -119,6 +129,55 @@ async function handleCallback(
   return NextResponse.redirect(
     `${baseUrl}/payments/bkash/success?bookingId=${encodeURIComponent(result.bookingId || '')}`
   )
+}
+
+async function handleResearchHubCallback(
+  baseUrl: string,
+  status: string,
+  pending: NonNullable<Awaited<ReturnType<typeof getResearchHubPending>>>,
+) {
+  const failUrl = (error: string, reason: string) => {
+    const params = new URLSearchParams({ source: 'researchHub', reason, error })
+    return NextResponse.redirect(`${baseUrl}/payments/bkash/fail?${params.toString()}`)
+  }
+
+  if (status !== 'success') {
+    console.info('[bkash-callback] research hub not paid', { paymentId: pending.paymentId, status })
+    await releaseResearchHubCheckout(pending).catch((error) => {
+      console.error('[bkash-callback] research hub release failed', { paymentId: pending.paymentId, error })
+    })
+    return failUrl(
+      status === 'cancel' ? 'Payment was canceled in bKash.' : 'bKash reports payment failure.',
+      status === 'cancel' ? 'cancelled' : 'paymentFailed',
+    )
+  }
+
+  const result = await finalizeResearchHubPayment(pending).catch((error) => {
+    console.error('[bkash-callback] research hub finalize threw', { paymentId: pending.paymentId, error })
+    return {
+      success: false as const,
+      reason: 'error' as const,
+      error: 'Failed to finalize payment. Please contact support.',
+      code: undefined,
+    }
+  })
+  if (!result.success) {
+    console.error('[bkash-callback] research hub finalize failed', {
+      paymentId: pending.paymentId,
+      reason: result.reason,
+      error: result.error,
+    })
+    return failUrl(result.error, result.reason)
+  }
+
+  console.info('[bkash-callback] research hub confirmed', { code: result.booking.code })
+  const params = new URLSearchParams({
+    source: 'researchHub',
+    code: result.booking.code,
+    t: result.booking.manageToken,
+    emailSent: result.emailSent ? '1' : '0',
+  })
+  return NextResponse.redirect(`${baseUrl}/payments/bkash/success?${params.toString()}`)
 }
 
 export async function GET(request: NextRequest) {

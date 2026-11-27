@@ -22,7 +22,10 @@ export default async function MarketingLayout({
   const announcement = flags['banner.announcement'].enabled
     ? parseAnnouncement(flags['banner.announcement'].value)
     : null
-  const hiddenHrefs = flags['pages.courses'].enabled ? [] : ['/courses']
+  const hiddenHrefs = [
+    ...(flags['pages.courses'].enabled ? [] : ['/courses']),
+    ...(flags['registration.researchHub'].enabled ? [] : ['/research-hub']),
+  ]
 
   return (
     <AdsEnabledProvider enabled={adsEnabled}>

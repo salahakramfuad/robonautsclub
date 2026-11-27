@@ -96,6 +96,7 @@ export const SITE_CONFIG = {
     { key: "events", title: "Events", href: "/events" },
     { key: "courses", title: "Courses", href: "/courses" },
     { key: "robofest", title: "Robofest", href: "/robofest" },
+    { key: "researchHub", title: "Research Hub", href: "/research-hub" },
     { key: "news", title: "News", href: "/news" },
     { key: "gallery", title: "Gallery", href: "/gallery" },
     { key: "about", title: "About", href: "/about" },

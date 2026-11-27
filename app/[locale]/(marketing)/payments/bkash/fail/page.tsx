@@ -10,6 +10,8 @@ type FailPageProps = {
   params: Promise<{ locale: string }>
   searchParams: Promise<{
     error?: string
+    source?: string
+    reason?: string
   }>
 }
 
@@ -19,6 +21,9 @@ export default async function BkashFailPage({ params: routeParams, searchParams 
   const t = await getTranslations('payments')
   const params = await searchParams
   const error = params.error || t('fail.defaultError')
+  const isResearchHub = params.source === 'researchHub'
+  const hubReasons = ['cancelled', 'slotTaken', 'refunded', 'paymentFailed', 'error'] as const
+  const hubReason = hubReasons.find((r) => r === params.reason) ?? 'paymentFailed'
 
   return (
     <main className="min-h-[60vh] flex items-center justify-center px-4 py-12">
@@ -27,15 +32,15 @@ export default async function BkashFailPage({ params: routeParams, searchParams 
           <h1 className="text-2xl font-bold text-red-700 mb-3">{t('fail.title')}</h1>
           <Alert variant="destructive" className="mb-6">
             <XCircle className="h-5 w-5" />
-            <AlertTitle>{t('fail.alertTitle')}</AlertTitle>
+            <AlertTitle>{isResearchHub ? t('researchHub.failTitle') : t('fail.alertTitle')}</AlertTitle>
             <AlertDescription>
-              {t('fail.alertText', { error })}
+              {isResearchHub ? t(`researchHub.${hubReason}`, { error }) : t('fail.alertText', { error })}
             </AlertDescription>
           </Alert>
           <div className="flex flex-col gap-3 sm:flex-row">
             <Button asChild className="bg-[#1f3a6f] hover:bg-[#14264a] text-white">
-              <Link href="/events" prefetch={false}>
-                {t('fail.tryAgain')}
+              <Link href={isResearchHub ? '/research-hub#book' : '/events'} prefetch={false}>
+                {isResearchHub ? t('researchHub.tryAgain') : t('fail.tryAgain')}
               </Link>
             </Button>
             <Button asChild variant="outline">

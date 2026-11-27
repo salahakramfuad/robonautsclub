@@ -15,6 +15,8 @@ type SuccessPageProps = {
     source?: string
     emailSent?: string
     emailWarning?: string
+    code?: string
+    t?: string
   }>
 }
 
@@ -28,6 +30,57 @@ export default async function BkashSuccessPage({ params: routeParams, searchPara
   const isRobofest = params.source === 'robofest'
   const emailSent = params.emailSent !== '0'
   const emailWarning = params.emailWarning?.trim() || ''
+  const isResearchHub = params.source === 'researchHub'
+  const hubCode = params.code || ''
+  const hubToken = params.t || ''
+
+  if (isResearchHub) {
+    return (
+      <main className="min-h-[60vh] flex items-center justify-center px-4 py-12">
+        <Card className="w-full max-w-2xl border-2 border-green-200 shadow-lg">
+          <CardContent className="p-8">
+            <h1 className="text-2xl font-bold text-green-700 mb-3">{t('success.title')}</h1>
+            <Alert className="mb-4 border-green-200 bg-green-50">
+              <CheckCircle className="h-5 w-5 text-green-600" />
+              <AlertTitle className="text-green-900">{t('researchHub.confirmedTitle')}</AlertTitle>
+              <AlertDescription className="text-green-800">
+                <p>{emailSent ? t('researchHub.confirmed') : t('researchHub.confirmedNoEmail')}</p>
+              </AlertDescription>
+            </Alert>
+            {hubCode ? (
+              <div className="mb-6 rounded-xl border border-dashed border-[#1f3a6f]/30 bg-slate-50 px-4 py-3">
+                <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+                  {t('researchHub.codeLabel')}
+                </p>
+                <div className="mt-1 flex items-center">
+                  <span className="font-mono text-lg font-bold text-slate-900 break-all">{hubCode}</span>
+                  <CopyButton text={hubCode} label={t('researchHub.code')} />
+                </div>
+              </div>
+            ) : null}
+            <div className="flex flex-col gap-3 sm:flex-row">
+              {hubCode && hubToken ? (
+                <Button asChild className="bg-[#1f3a6f] hover:bg-[#14264a] text-white">
+                  <Link
+                    href={`/research-hub/booking/${encodeURIComponent(hubCode)}?t=${encodeURIComponent(hubToken)}`}
+                    prefetch={false}
+                  >
+                    <Ticket className="size-4" aria-hidden />
+                    {t('researchHub.viewPass')}
+                  </Link>
+                </Button>
+              ) : null}
+              <Button asChild variant="outline">
+                <Link href="/research-hub" prefetch={false}>
+                  {t('backToResearchHub')}
+                </Link>
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </main>
+    )
+  }
 
   return (
     <main className="min-h-[60vh] flex items-center justify-center px-4 py-12">

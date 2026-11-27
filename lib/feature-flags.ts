@@ -36,14 +36,15 @@ async function loadFeatureFlagsFromDb(): Promise<FeatureFlags> {
  * Cached for an hour and invalidated immediately by `revalidateTag(FEATURE_FLAGS_TAG)`
  * when a Super Admin changes a flag — so public pages never pay a D1 query per request.
  */
-const getCachedFeatureFlags = unstable_cache(loadFeatureFlagsStrict, [FEATURE_FLAGS_TAG, 'v3'], {
+const getCachedFeatureFlags = unstable_cache(loadFeatureFlagsStrict, [FEATURE_FLAGS_TAG, 'v4'], {
   tags: [FEATURE_FLAGS_TAG],
   revalidate: 3600,
 })
 
 export async function getFeatureFlags(): Promise<FeatureFlags> {
   try {
-    return await getCachedFeatureFlags()
+    // Merge over defaults: a cache entry written before a flag existed must not crash readers.
+    return { ...defaultFeatureFlags(), ...(await getCachedFeatureFlags()) }
   } catch (error) {
     // Errors are not cached, so the next request retries the database.
     console.error('[feature-flags] Falling back to defaults:', error)

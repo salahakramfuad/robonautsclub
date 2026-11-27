@@ -14,6 +14,7 @@ export const NAMESPACES = [
   'robofest',
   'verify',
   'payments',
+  'researchHub',
   'legal',
   'faq',
   'seo',
