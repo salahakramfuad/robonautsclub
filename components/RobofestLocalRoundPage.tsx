@@ -10,8 +10,9 @@ import { getRobofestRoundStartDateIso } from "@/lib/robofest-local";
 import { Button } from "@/components/ui/button";
 import { Facebook, Instagram } from "lucide-react";
 import Image from "next/image";
-import Link from "next/link";
+import { Link } from '@/i18n/navigation'
 import Script from "next/script";
+import { getTranslations } from "next-intl/server";
 import {
   absoluteSiteUrl,
   getBreadcrumbSchema,
@@ -71,7 +72,14 @@ function SectionHeading({
 }
 
 export default async function RobofestLocalRoundPage() {
-  const content = await getRobofestContent();
+  const [content, t] = await Promise.all([
+    getRobofestContent(),
+    getTranslations("robofest"),
+  ]);
+  const cityName = (city: string) => {
+    const key = `cities.${city.trim().toLowerCase()}`;
+    return t.has(key) ? t(key) : city;
+  };
   const categories = getActiveRobofestCategories(content);
   const registrationClosed = areAllRobofestDivisionsClosed(content);
   const howItWorks = content.howItWorks?.length ? content.howItWorks : [];
@@ -161,7 +169,9 @@ export default async function RobofestLocalRoundPage() {
         <div className="absolute inset-0 bg-[#5c74b0]" aria-hidden />
         <Image
           src="/robofest/robofestbg.jpeg"
-          alt={`${content.headline || "Robofest Bangladesh"} local round hero`}
+          alt={t("landing.heroAlt", {
+            headline: content.headline || "Robofest Bangladesh",
+          })}
           fill
           priority
           className="object-cover object-top"
@@ -207,7 +217,7 @@ export default async function RobofestLocalRoundPage() {
                 <div className="flex items-center gap-2.5 text-cyan-700 mb-3">
                   <RobofestIcon name="calendar_month" className="text-2xl sm:text-[1.75rem]" />
                   <span className="text-xs sm:text-sm font-bold uppercase tracking-[0.14em] text-cyan-800/80">
-                    Date
+                    {t("landing.facts.date")}
                   </span>
                 </div>
                 <ul className="space-y-1.5">
@@ -226,7 +236,7 @@ export default async function RobofestLocalRoundPage() {
                 <div className="flex items-center gap-2.5 text-cyan-700 mb-3">
                   <RobofestIcon name="location_on" className="text-2xl sm:text-[1.75rem]" />
                   <span className="text-xs sm:text-sm font-bold uppercase tracking-[0.14em] text-cyan-800/80">
-                    Venue
+                    {t("landing.facts.venue")}
                   </span>
                 </div>
                 <ul className="space-y-1.5">
@@ -245,7 +255,7 @@ export default async function RobofestLocalRoundPage() {
                 <div className="flex items-center gap-2.5 text-cyan-700 mb-3">
                   <RobofestIcon name="apartment" className="text-2xl sm:text-[1.75rem]" />
                   <span className="text-xs sm:text-sm font-bold uppercase tracking-[0.14em] text-cyan-800/80">
-                    Host
+                    {t("landing.facts.host")}
                   </span>
                 </div>
                 <p className="text-base sm:text-lg md:text-xl font-bold text-slate-900 tracking-tight leading-snug">
@@ -257,12 +267,14 @@ export default async function RobofestLocalRoundPage() {
                 <div className="flex items-center gap-2 text-cyan-700 mb-2">
                   <RobofestIcon name="call" className="text-xl" />
                   <span className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">
-                    Contact
+                    {t("landing.facts.contact")}
                   </span>
                 </div>
                 {contactEmail ? (
                   <p className="text-sm text-slate-800 mb-2">
-                    <span className="font-medium text-slate-500">E-Mail:</span>{" "}
+                    <span className="font-medium text-slate-500">
+                      {t("landing.facts.email")}
+                    </span>{" "}
                     <a
                       href={`mailto:${contactEmail}`}
                       className="font-semibold text-cyan-700 hover:text-cyan-800 break-all"
@@ -311,7 +323,7 @@ export default async function RobofestLocalRoundPage() {
                   <RobofestRegistrationCountdown
                     key={round.city}
                     closingDate={closing}
-                    label={`${round.city} Division`}
+                    label={t("divisionLabel", { city: cityName(round.city) })}
                   />
                 );
               })}
@@ -324,9 +336,9 @@ export default async function RobofestLocalRoundPage() {
           <CircuitBackdrop className="opacity-60" />
           <div className="relative max-w-7xl mx-auto">
             <SectionHeading
-              eyebrow="Protocol"
-              title="How the Local Round Works"
-              description="Compete in RoboFest Bangladesh 2026 through Robotics, Programming & Innovation Challenges with Top Performers getting closer to the World Stage."
+              eyebrow={t("landing.howItWorks.eyebrow")}
+              title={t("landing.howItWorks.title")}
+              description={t("landing.howItWorks.description")}
             />
 
             <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
@@ -362,9 +374,9 @@ export default async function RobofestLocalRoundPage() {
           <CircuitBackdrop />
           <div className="relative max-w-7xl mx-auto">
             <SectionHeading
-              eyebrow="Choose your arena"
-              title="Competition Categories"
-              description="Choose Your Challenge. Build, Code, Innovate & Compete at RoboFest Bangladesh 2026."
+              eyebrow={t("landing.categories.eyebrow")}
+              title={t("landing.categories.title")}
+              description={t("landing.categories.description")}
             />
 
             {generalRulesPdf ? (
@@ -381,7 +393,7 @@ export default async function RobofestLocalRoundPage() {
                     className="inline-flex items-center gap-2"
                   >
                     <RobofestIcon name="open_in_new" className="text-xl" />
-                    View General Rules &amp; Regulations
+                    {t("landing.categories.generalRules")}
                   </a>
                 </Button>
               </div>
@@ -399,7 +411,9 @@ export default async function RobofestLocalRoundPage() {
                     <div className="relative aspect-[4/3] overflow-hidden">
                       <Image
                         src={cover}
-                        alt={`${category.name} competition cover — Robofest Bangladesh 2026`}
+                        alt={t("landing.categories.coverAlt", {
+                          name: category.name,
+                        })}
                         fill
                         className="object-cover transition-transform duration-700 group-hover:scale-110"
                         sizes="(max-width: 640px) 100vw, (max-width: 1280px) 50vw, 25vw"
@@ -444,7 +458,7 @@ export default async function RobofestLocalRoundPage() {
                                 name="open_in_new"
                                 className="text-base"
                               />
-                              View Rulebook
+                              {t("landing.categories.viewRulebook")}
                             </a>
                           </Button>
                         ) : null}
@@ -457,7 +471,7 @@ export default async function RobofestLocalRoundPage() {
                             prefetch={false}
                             className="inline-flex items-center justify-center gap-1.5"
                           >
-                            View &amp; register
+                            {t("landing.categories.viewAndRegister")}
                             <RobofestIcon name="arrow_forward" className="text-base" />
                           </Link>
                         </Button>
@@ -478,26 +492,22 @@ export default async function RobofestLocalRoundPage() {
                 <div className="lg:col-span-3 px-6 py-8 sm:px-10 sm:py-12 bg-linear-to-br from-cyan-50/90 via-white to-white">
                   <p className="inline-flex items-center gap-2 rounded-full border border-cyan-200 bg-white/80 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-cyan-800 mb-5">
                     <RobofestIcon name="rocket_launch" className="text-sm" />
-                    Local Round
+                    {t("landing.cta.badge")}
                   </p>
                   <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-slate-900 mb-4 tracking-tight">
-                    Ready for the Local Round?
+                    {t("landing.cta.title")}
                   </h2>
                   <div className="text-slate-600 text-sm sm:text-base leading-relaxed space-y-2 max-w-xl">
                     <p>
-                      RoboFest Bangladesh 2026 is coming to{" "}
-                      <span className="font-semibold text-slate-800">
-                        Chittagong &amp; Dhaka
-                      </span>{" "}
-                      this{" "}
-                      <span className="font-semibold text-slate-800">
-                        September.
-                      </span>
+                      {t.rich("landing.cta.comingTo", {
+                        b: (chunks) => (
+                          <span className="font-semibold text-slate-800">
+                            {chunks}
+                          </span>
+                        ),
+                      })}
                     </p>
-                    <p>
-                      Choose Your Competition, Form Your Team, and Get Ready to
-                      Compete.
-                    </p>
+                    <p>{t("landing.cta.getReady")}</p>
                   </div>
                   {dateLines.length ? (
                     <ul className="mt-5 space-y-2">
@@ -531,14 +541,14 @@ export default async function RobofestLocalRoundPage() {
                           role="status"
                           className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-2.5 text-sm font-semibold text-amber-900"
                         >
-                          Registration for this round has closed.
+                          {t("landing.cta.closed")}
                         </p>
                         <Button
                           asChild
                           className="bg-cyan-600 text-white hover:bg-cyan-700 font-semibold"
                         >
                           <Link href="/gallery" prefetch={false}>
-                            See event photos
+                            {t("landing.cta.seePhotos")}
                           </Link>
                         </Button>
                       </>
@@ -547,7 +557,7 @@ export default async function RobofestLocalRoundPage() {
                         asChild
                         className="bg-cyan-600 text-white hover:bg-cyan-700 font-semibold"
                       >
-                        <a href="#categories">Register Now</a>
+                        <a href="#categories">{t("landing.cta.registerNow")}</a>
                       </Button>
                     )}
                     {instagramUrl ? (
@@ -557,7 +567,7 @@ export default async function RobofestLocalRoundPage() {
                           target="_blank"
                           rel="noopener noreferrer"
                           className="inline-flex items-center gap-2"
-                          aria-label="Robonauts Ltd on Instagram"
+                          aria-label={t("landing.cta.instagramAria")}
                         >
                           <Instagram className="h-4 w-4" aria-hidden />
                           Instagram
@@ -571,7 +581,7 @@ export default async function RobofestLocalRoundPage() {
                           target="_blank"
                           rel="noopener noreferrer"
                           className="inline-flex items-center gap-2"
-                          aria-label="Robonauts Ltd on Facebook"
+                          aria-label={t("landing.cta.facebookAria")}
                         >
                           <Facebook className="h-4 w-4" aria-hidden />
                           Facebook
@@ -590,10 +600,10 @@ export default async function RobofestLocalRoundPage() {
                     </div>
                     <div>
                       <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">
-                        Contact
+                        {t("landing.cta.contact")}
                       </p>
                       <p className="text-sm font-semibold text-slate-900">
-                        Need help registering?
+                        {t("landing.cta.needHelp")}
                       </p>
                     </div>
                   </div>
@@ -609,7 +619,7 @@ export default async function RobofestLocalRoundPage() {
                       />
                       <div className="min-w-0">
                         <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">
-                          E-Mail
+                          {t("landing.cta.email")}
                         </p>
                         <p className="text-sm font-semibold text-cyan-700 group-hover:text-cyan-800 break-all">
                           {contactEmail}

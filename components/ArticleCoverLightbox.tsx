@@ -4,6 +4,7 @@ import { useMemo, useState, useCallback } from 'react'
 import Image from 'next/image'
 import { LightboxPortal } from '@/components/ImageLightboxGallery'
 import { Button } from '@/components/ui/button'
+import { useTranslations } from 'next-intl'
 
 type Props = {
   coverUrl: string
@@ -14,6 +15,7 @@ type Props = {
 }
 
 export default function ArticleCoverLightbox({ coverUrl, extraUrls, photoCountLabel }: Props) {
+  const t = useTranslations('news.cover')
   const [openIndex, setOpenIndex] = useState<number | null>(null)
   const close = useCallback(() => setOpenIndex(null), [])
 
@@ -42,7 +44,7 @@ export default function ArticleCoverLightbox({ coverUrl, extraUrls, photoCountLa
         variant="ghost"
         onClick={() => setOpenIndex(0)}
         className="group relative mb-8 block aspect-16/10 h-auto w-full overflow-hidden rounded-2xl border border-slate-200/80 bg-slate-100 p-0 text-left shadow-sm hover:bg-slate-100 focus-visible:ring-2 focus-visible:ring-indigo-500 sm:aspect-2/1 sm:rounded-3xl md:mb-10"
-        aria-label={hasExtras ? 'Open image viewer (cover and gallery)' : 'Open full image'}
+        aria-label={hasExtras ? t('openViewer') : t('openFull')}
       >
         <Image
           src={coverUrl}
@@ -62,11 +64,11 @@ export default function ArticleCoverLightbox({ coverUrl, extraUrls, photoCountLa
           </span>
         ) : hasExtras ? (
           <span className="absolute bottom-3 right-3 rounded-full bg-slate-950/60 px-3 py-1.5 text-xs font-semibold text-white backdrop-blur-sm ring-1 ring-white/15 sm:bottom-4 sm:right-4">
-            Click to enlarge
+            {t('clickToEnlarge')}
           </span>
         ) : (
           <span className="absolute bottom-3 right-3 rounded-full bg-slate-950/60 px-3 py-1.5 text-xs font-medium text-white/95 backdrop-blur-sm ring-1 ring-white/15 sm:bottom-4 sm:right-4">
-            Click to enlarge
+            {t('clickToEnlarge')}
           </span>
         )}
       </Button>

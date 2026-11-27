@@ -1,0 +1,33 @@
+{
+  "meta": {
+    "title": "Courses & Programs",
+    "description": "Robotics, coding and STEM courses at {name} for school students in Bangladesh — from first build to competition-ready."
+  },
+  "hero": {
+    "eyebrow": "Courses & programs",
+    "title": "Find the right course for you",
+    "subtitle": "Hands-on robotics, coding and STEM — from your very first robot to competition-ready. Filter by level, then ask us anything about timing, fees or age groups."
+  },
+  "cta": {
+    "title": "Not sure which one fits?",
+    "body": "Tell us the student's class and interests — a mentor will suggest a starting point.",
+    "button": "Get a recommendation"
+  },
+  "explorer": {
+    "allLevels": "All levels",
+    "filterByLevel": "Filter by level",
+    "searchLabel": "Search courses",
+    "searchPlaceholder": "Search e.g. Arduino, coding…",
+    "clearSearch": "Clear search",
+    "shown": "{count, plural, one {# course} other {# courses}} shown",
+    "comingSoon": "New courses are being scheduled.",
+    "askNextBatch": "Ask us about the next batch",
+    "noMatch": "No courses match that yet.",
+    "showAll": "Show all courses",
+    "askAbout": "Ask about this course",
+    "whatsappAria": "Ask about {title} on WhatsApp",
+    "whatsappMessage": "Hi Robonauts! I'd like to know more about \"{title}\".",
+    "whatsapp": "WhatsApp",
+    "details": "Details"
+  }
+}

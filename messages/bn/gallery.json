@@ -1,0 +1,40 @@
+{
+  "meta": {
+    "ogAlt": "Robonauts গ্যালারি",
+    "albumFallbackTitle": "অ্যালবাম",
+    "albumTitle": "{title} | Robonauts গ্যালারি",
+    "albumDescription": "Robonauts-এর ইভেন্ট ও কার্যক্রম থেকে {title}-এর ছবি।"
+  },
+  "hero": {
+    "badge": "Robogallery",
+    "title": "গ্যালারি",
+    "subtitle": "ওয়ার্কশপ, প্রতিযোগিতা আর কমিউনিটি ইভেন্টের কিছু মুহূর্ত।",
+    "albums": "{count, plural, other {#টি অ্যালবাম}}",
+    "photos": "{count, plural, other {#টি ছবি}}"
+  },
+  "empty": {
+    "title": "এখনো কোনো গ্যালারি অ্যালবাম নেই।",
+    "body": "ল্যাব আর মঞ্চের মুহূর্তগুলো দেখতে শিগগিরই আবার আসুন।"
+  },
+  "card": {
+    "photos": "{count, plural, other {#টি ছবি}}"
+  },
+  "album": {
+    "back": "গ্যালারিতে ফিরে যান",
+    "label": "অ্যালবাম",
+    "photos": "{count, plural, other {#টি ছবি}}",
+    "empty": "এই অ্যালবামে এখনো কোনো ছবি নেই।"
+  },
+  "lightbox": {
+    "titledLabel": "{title} – {total, number}টির মধ্যে {index, number} নম্বর ছবি",
+    "label": "{total, number}টির মধ্যে {index, number} নম্বর ছবি",
+    "description": "পূর্ণ আকারের গ্যালারি ছবি। এক ছবি থেকে আরেক ছবিতে যেতে সোয়াইপ করুন বা অ্যারো কী ব্যবহার করুন।",
+    "close": "বন্ধ করুন",
+    "previous": "আগের ছবি",
+    "next": "পরের ছবি",
+    "counter": "{index, number} / {total, number}",
+    "openTitled": "{title}-এর {total, number}টির মধ্যে {index, number} নম্বর ছবি খুলুন",
+    "open": "{total, number}টির মধ্যে {index, number} নম্বর ছবি খুলুন",
+    "seeAll": "সবগুলো ({count, number}টি) ছবি দেখুন"
+  }
+}

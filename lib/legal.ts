@@ -6,11 +6,11 @@
 export const LEGAL_LAST_UPDATED = '27 November 2026'
 
 export const LEGAL_PAGES = [
-  { href: '/privacy', title: 'Privacy Policy' },
-  { href: '/terms', title: 'Terms & Conditions' },
-  { href: '/refund-policy', title: 'Refund & Cancellation' },
-  { href: '/cookies', title: 'Cookie Policy' },
-  { href: '/code-of-conduct', title: 'Code of Conduct' },
+  { key: 'privacy', href: '/privacy', title: 'Privacy Policy' },
+  { key: 'terms', href: '/terms', title: 'Terms & Conditions' },
+  { key: 'refund', href: '/refund-policy', title: 'Refund & Cancellation' },
+  { key: 'cookies', href: '/cookies', title: 'Cookie Policy' },
+  { key: 'codeOfConduct', href: '/code-of-conduct', title: 'Code of Conduct' },
 ] as const
 
 /**

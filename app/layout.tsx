@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist } from "next/font/google";
+import { Geist, Noto_Sans_Bengali } from "next/font/google";
 import "./globals.css";
 import OrganizationSchema from "@/components/OrganizationSchema";
 import ConditionalAnalytics from "@/components/ConditionalAnalytics";
@@ -9,6 +9,15 @@ import { SITE_CONFIG, getSiteOrigin } from "@/lib/site-config";
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
+});
+
+// Bangla pages (/bn). Not preloaded; the browser fetches it only when Bengali text renders.
+const notoBengali = Noto_Sans_Bengali({
+  variable: "--font-bengali",
+  subsets: ["bengali"],
+  weight: ["400", "500", "600", "700"],
+  display: "swap",
+  preload: false,
 });
 
 export const metadata: Metadata = {
@@ -89,7 +98,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" dir="ltr">
-      <body className={`${geistSans.variable} ${geistSans.className} antialiased`}>
+      <body className={`${geistSans.variable} ${notoBengali.variable} ${geistSans.className} antialiased`}>
         <ConditionalAnalytics />
         <OrganizationSchema />
         {children}

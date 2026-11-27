@@ -1,18 +1,21 @@
-import Link from 'next/link'
+import { Link } from '@/i18n/navigation'
 import Image from 'next/image'
 import { ArrowRight } from 'lucide-react'
 import type { NewsArticle } from '@/types/news'
 import { effectiveNewsDisplayRaw } from '@/lib/publicContentDates'
 import { excerptBody, formatNewsDate, newsArticleHref, newsDateTimeAttr } from '@/lib/news-ui'
 import NewsCoverFallback from '@/components/news/NewsCoverFallback'
+import { useLocale, useTranslations } from 'next-intl'
 
 type Props = {
   article: NewsArticle
 }
 
 export default function FeaturedNewsCard({ article }: Props) {
+  const t = useTranslations('news.card')
+  const locale = useLocale()
   const href = newsArticleHref(article)
-  const dateLabel = formatNewsDate(effectiveNewsDisplayRaw(article))
+  const dateLabel = formatNewsDate(effectiveNewsDisplayRaw(article), locale)
   const excerpt = excerptBody(article.body, 180)
 
   return (
@@ -43,7 +46,7 @@ export default function FeaturedNewsCard({ article }: Props) {
 
         <div className="flex flex-col justify-center p-5 sm:p-7 lg:p-9 xl:p-10">
           <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-indigo-600">
-            Featured story
+            {t('featured')}
           </p>
           {dateLabel ? (
             <time
@@ -62,7 +65,7 @@ export default function FeaturedNewsCard({ article }: Props) {
             </p>
           ) : null}
           <span className="mt-6 inline-flex items-center gap-1.5 text-sm font-semibold text-indigo-600">
-            Read story
+            {t('readStory')}
             <ArrowRight
               className="size-4 transition-transform duration-300 motion-reduce:transition-none group-hover:translate-x-1"
               aria-hidden

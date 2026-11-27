@@ -2,7 +2,7 @@ import { requireTabAccess, canEditArea, canDeleteArea, hasPermission } from '@/l
 import { getEvent } from '../../actions'
 import { getInitialBookingsWithStats } from '../bookings-actions'
 import { BOOKING_DEFAULT_PAGE_SIZE } from '../bookings-types'
-import { getPublicEnglishMediumSchools } from '@/app/(marketing)/events/public-data'
+import { getPublicEnglishMediumSchools } from '@/app/[locale]/(marketing)/events/public-data'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import EventHeaderActions from './EventHeaderActions'

@@ -1,6 +1,7 @@
 'use server'
+import { revalidateLocalizedPath } from '@/lib/revalidate-localized'
 
-import { revalidatePath, revalidateTag } from 'next/cache'
+import { revalidateTag } from 'next/cache'
 import { getServerSession } from '@/lib/auth'
 import { getDb, featureFlags } from '@/lib/db'
 import { FEATURE_FLAGS_TAG } from '@/lib/feature-flags'
@@ -37,7 +38,7 @@ async function writeFlag(key: string, enabled: boolean, value: string | null, up
 /** Flags affect every public page (layout, nav, banner), so refresh them all. */
 function invalidatePublicSite() {
   revalidateTag(FEATURE_FLAGS_TAG, 'max')
-  revalidatePath('/', 'layout')
+  revalidateLocalizedPath('/', 'layout')
 }
 
 export async function setFeatureFlag(key: string, enabled: boolean): Promise<Result> {

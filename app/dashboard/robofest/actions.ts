@@ -1,4 +1,5 @@
 'use server'
+import { revalidateLocalizedPath } from '@/lib/revalidate-localized'
 
 import { revalidatePath, revalidateTag } from 'next/cache'
 import {
@@ -80,8 +81,8 @@ import type {
 
 function revalidateRobofestPublic() {
   revalidateTag(ROBOFEST_CONTENT_CACHE_TAG, 'max')
-  revalidatePath('/robofest')
-  revalidatePath('/robofest', 'layout')
+  revalidateLocalizedPath('/robofest')
+  revalidateLocalizedPath('/robofest', 'layout')
   revalidatePath('/dashboard/robofest')
 }
 
@@ -89,8 +90,8 @@ function revalidateRobofestAmbassadors() {
   revalidateTag(PUBLIC_ROBOFEST_AMBASSADORS_TAG, 'max')
   revalidateTag(DASHBOARD_ROBOFEST_AMBASSADORS_TAG, 'max')
   revalidatePath('/dashboard/robofest')
-  revalidatePath('/robofest')
-  revalidatePath('/robofest', 'layout')
+  revalidateLocalizedPath('/robofest')
+  revalidateLocalizedPath('/robofest', 'layout')
 }
 
 export async function getRobofestDashboardContent(): Promise<RobofestContent> {
@@ -218,7 +219,7 @@ export async function updateRobofestContent(
 
     revalidateRobofestPublic()
     for (const category of synced.categories) {
-      revalidatePath(`/robofest/${category.slug}`)
+      revalidateLocalizedPath(`/robofest/${category.slug}`)
     }
 
     return { success: true, content: synced }

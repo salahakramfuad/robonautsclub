@@ -1,6 +1,7 @@
 'use server'
+import { revalidateLocalizedPath } from '@/lib/revalidate-localized'
 
-import { revalidatePath, revalidateTag } from 'next/cache'
+import { revalidateTag } from 'next/cache'
 import { requireAuth, canCreateArea, canEditResource, canDeleteResource } from '@/lib/auth'
 import {
   collectionAdd,
@@ -131,8 +132,8 @@ export async function createNewsArticle(input: {
     updatedAt: now,
     createdBy: session.uid,
   })
-  revalidatePath('/news')
-  revalidatePath('/')
+  revalidateLocalizedPath('/news')
+  revalidateLocalizedPath('/')
   revalidateTag(PUBLIC_NEWS_TAG, 'max')
 }
 
@@ -194,10 +195,10 @@ export async function updateNewsArticle(
   }
 
   await collectionSet('news', id, update, { merge: true })
-  revalidatePath('/news')
-  revalidatePath(`/news/${data.slug as string}`)
-  revalidatePath(`/news/${slug}`)
-  revalidatePath('/')
+  revalidateLocalizedPath('/news')
+  revalidateLocalizedPath(`/news/${data.slug as string}`)
+  revalidateLocalizedPath(`/news/${slug}`)
+  revalidateLocalizedPath('/')
   revalidateTag(PUBLIC_NEWS_TAG, 'max')
 }
 
@@ -213,8 +214,8 @@ export async function deleteNewsArticle(id: string) {
   }
 
   await collectionDelete('news', id)
-  revalidatePath('/news')
-  revalidatePath(`/news/${String(data.slug)}`)
-  revalidatePath('/')
+  revalidateLocalizedPath('/news')
+  revalidateLocalizedPath(`/news/${String(data.slug)}`)
+  revalidateLocalizedPath('/')
   revalidateTag(PUBLIC_NEWS_TAG, 'max')
 }

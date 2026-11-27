@@ -1,0 +1,78 @@
+{
+  "brand": {
+    "tagline": "Innovation meets curiosity in STEM education",
+    "logoAlt": "{name} Logo"
+  },
+  "nav": {
+    "primary": "Primary",
+    "skipToContent": "Skip to content",
+    "joinEvent": "Join an event",
+    "openMenu": "Open main menu",
+    "menu": "Menu",
+    "mobileNavigation": "Mobile navigation",
+    "links": {
+      "home": "Home",
+      "events": "Events",
+      "courses": "Courses",
+      "robofest": "Robofest",
+      "news": "News",
+      "gallery": "Gallery",
+      "about": "About",
+      "contact": "Contact"
+    }
+  },
+  "language": {
+    "label": "Language",
+    "switchTo": "বাংলায় দেখুন",
+    "short": "বাং",
+    "en": "English",
+    "bn": "বাংলা"
+  },
+  "footer": {
+    "explore": "Explore",
+    "footerNav": "Footer",
+    "studentsParentsNav": "For students and parents",
+    "studentsParents": "Students & parents",
+    "studentLinks": {
+      "courses": "Courses & programs",
+      "events": "Upcoming events",
+      "robofest": "Robofest",
+      "verifyBooking": "Find my registration",
+      "contact": "Contact us"
+    },
+    "contact": "Contact",
+    "chatWhatsapp": "Chat on WhatsApp",
+    "paymentMethod": "Payment method",
+    "securePayments": "Secure online payments",
+    "opensNewTab": "{label} (opens in a new tab)",
+    "rights": "© {year} {name}. All rights reserved.",
+    "legalNav": "Legal",
+    "developedBy": "Developed by"
+  },
+  "legalLinks": {
+    "privacy": "Privacy Policy",
+    "terms": "Terms & Conditions",
+    "refund": "Refund & Cancellation",
+    "cookies": "Cookie Policy",
+    "codeOfConduct": "Code of Conduct"
+  },
+  "mobileBar": {
+    "label": "Quick actions",
+    "register": "Register",
+    "joinEvent": "Join an event",
+    "whatsapp": "WhatsApp",
+    "callUs": "Call us"
+  },
+  "announcement": {
+    "label": "Announcement",
+    "learnMore": "Learn more →"
+  },
+  "notFound": {
+    "title": "Page Not Found",
+    "subtitle": "This robot needs recharging to continue.",
+    "redirectingIn": "Redirecting in",
+    "secondsShort": "s",
+    "goHome": "Go Home",
+    "exploreEvents": "Explore Events"
+  }
+}

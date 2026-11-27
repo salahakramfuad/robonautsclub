@@ -1,0 +1,78 @@
+{
+  "brand": {
+    "tagline": "STEM শিক্ষায় উদ্ভাবন আর কৌতূহলের মেলবন্ধন",
+    "logoAlt": "{name} লোগো"
+  },
+  "nav": {
+    "primary": "প্রধান",
+    "skipToContent": "মূল বিষয়বস্তুতে যান",
+    "joinEvent": "ইভেন্টে যোগ দিন",
+    "openMenu": "প্রধান মেনু খুলুন",
+    "menu": "মেনু",
+    "mobileNavigation": "মোবাইল নেভিগেশন",
+    "links": {
+      "home": "হোম",
+      "events": "ইভেন্ট",
+      "courses": "কোর্স",
+      "robofest": "Robofest",
+      "news": "খবর",
+      "gallery": "গ্যালারি",
+      "about": "আমাদের সম্পর্কে",
+      "contact": "যোগাযোগ"
+    }
+  },
+  "language": {
+    "label": "ভাষা",
+    "switchTo": "View in English",
+    "short": "EN",
+    "en": "English",
+    "bn": "বাংলা"
+  },
+  "footer": {
+    "explore": "ঘুরে দেখুন",
+    "footerNav": "ফুটার",
+    "studentsParentsNav": "শিক্ষার্থী ও অভিভাবকদের জন্য",
+    "studentsParents": "শিক্ষার্থী ও অভিভাবক",
+    "studentLinks": {
+      "courses": "কোর্স ও প্রোগ্রাম",
+      "events": "আসন্ন ইভেন্ট",
+      "robofest": "Robofest",
+      "verifyBooking": "আমার রেজিস্ট্রেশন খুঁজুন",
+      "contact": "আমাদের সাথে যোগাযোগ করুন"
+    },
+    "contact": "যোগাযোগ",
+    "chatWhatsapp": "WhatsApp-এ চ্যাট করুন",
+    "paymentMethod": "পেমেন্ট পদ্ধতি",
+    "securePayments": "নিরাপদ অনলাইন পেমেন্ট",
+    "opensNewTab": "{label} (নতুন ট্যাবে খুলবে)",
+    "rights": "© {year} {name}। সর্বস্বত্ব সংরক্ষিত।",
+    "legalNav": "আইনি তথ্য",
+    "developedBy": "ডেভেলপ করেছেন"
+  },
+  "legalLinks": {
+    "privacy": "গোপনীয়তা নীতি",
+    "terms": "শর্তাবলি",
+    "refund": "রিফান্ড ও বাতিলকরণ",
+    "cookies": "কুকি নীতি",
+    "codeOfConduct": "আচরণবিধি"
+  },
+  "mobileBar": {
+    "label": "দ্রুত অ্যাকশন",
+    "register": "রেজিস্টার",
+    "joinEvent": "ইভেন্টে যোগ দিন",
+    "whatsapp": "WhatsApp",
+    "callUs": "কল করুন"
+  },
+  "announcement": {
+    "label": "ঘোষণা",
+    "learnMore": "আরও জানুন →"
+  },
+  "notFound": {
+    "title": "পেজটি পাওয়া যায়নি",
+    "subtitle": "এই রোবটটিকে চালু রাখতে রিচার্জ করা দরকার।",
+    "redirectingIn": "রিডাইরেক্ট হচ্ছে",
+    "secondsShort": "সে.",
+    "goHome": "হোমে যান",
+    "exploreEvents": "ইভেন্ট দেখুন"
+  }
+}

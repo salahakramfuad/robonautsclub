@@ -1,4 +1,5 @@
 'use server'
+import { revalidateLocalizedPath } from '@/lib/revalidate-localized'
 
 import { revalidatePath, revalidateTag, unstable_cache } from 'next/cache'
 import { requireAuth, canCreateArea, canEditResource, canDeleteResource } from '@/lib/auth'
@@ -120,7 +121,7 @@ export async function createCourse(formData: {
       createdByEmail: session.email,
     })
 
-    revalidatePath('/')
+    revalidateLocalizedPath('/')
     revalidatePath('/dashboard/courses')
     revalidateTag(DASHBOARD_COURSES_LIST_TAG, 'max')
     revalidateTag(PUBLIC_COURSES_TAG, 'max')
@@ -183,7 +184,7 @@ export async function updateCourse(
       { merge: true },
     )
 
-    revalidatePath('/')
+    revalidateLocalizedPath('/')
     revalidatePath('/dashboard/courses')
     revalidateTag(DASHBOARD_COURSES_LIST_TAG, 'max')
     revalidateTag(PUBLIC_COURSES_TAG, 'max')
@@ -221,7 +222,7 @@ export async function archiveCourse(courseId: string): Promise<{ success: boolea
       { merge: true },
     )
 
-    revalidatePath('/')
+    revalidateLocalizedPath('/')
     revalidatePath('/dashboard/courses')
     revalidateTag(DASHBOARD_COURSES_LIST_TAG, 'max')
     revalidateTag(PUBLIC_COURSES_TAG, 'max')
@@ -254,7 +255,7 @@ export async function deleteCourse(courseId: string): Promise<{ success: boolean
 
     await collectionDelete('courses', courseId)
 
-    revalidatePath('/')
+    revalidateLocalizedPath('/')
     revalidatePath('/dashboard/courses')
     revalidateTag(DASHBOARD_COURSES_LIST_TAG, 'max')
     revalidateTag(PUBLIC_COURSES_TAG, 'max')

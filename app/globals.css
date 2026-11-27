@@ -285,3 +285,11 @@
   -webkit-font-smoothing: antialiased;
   font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
 }
+
+/* Bangla: keep Geist for Latin glyphs, fall back to Noto Sans Bengali for Bengali script.
+   `html[lang="bn"] body` also covers portals (menu sheet, popovers) rendered outside the wrapper. */
+.locale-bn,
+html[lang="bn"] body {
+  font-family: var(--font-geist-sans), var(--font-bengali), ui-sans-serif, system-ui, sans-serif;
+  line-height: 1.65;
+}

@@ -1,0 +1,54 @@
+{
+  "meta": {
+    "ogAlt": "Robonauts News",
+    "articleFallbackTitle": "Article",
+    "photosFallbackTitle": "Photos",
+    "photosTitle": "Photos — {title} | {name}",
+    "photosDescription": "Images from \"{title}\" at Robonauts."
+  },
+  "hero": {
+    "badge": "Club News",
+    "title": "News & Stories",
+    "subtitle": "Follow the latest workshops, competitions, achievements, partnerships and stories from the Robonauts community."
+  },
+  "list": {
+    "featuredHeading": "Featured story",
+    "fromCommunity": "From the community",
+    "latestStories": "Latest Stories"
+  },
+  "empty": {
+    "title": "No published stories yet",
+    "body": "News, workshops, competitions and community updates will appear here soon."
+  },
+  "card": {
+    "featured": "Featured story",
+    "readStory": "Read story",
+    "readMore": "Read more"
+  },
+  "article": {
+    "back": "Back to News",
+    "eyebrow": "Robonauts News",
+    "photoCount": "+{count, plural, one {# photo} other {# photos}}",
+    "published": "Published",
+    "sidebarBrand": "Robonauts",
+    "newsCommunity": "News & Community"
+  },
+  "cover": {
+    "openViewer": "Open image viewer (cover and gallery)",
+    "openFull": "Open full image",
+    "clickToEnlarge": "Click to enlarge"
+  },
+  "gallery": {
+    "title": "Gallery",
+    "subtitle": "Moments from the event",
+    "seeAllAria": "See all {count, number} photos",
+    "viewAllPhotos": "View all photos",
+    "seeAll": "See all {count, number} photos",
+    "openImage": "Open image {index, number} of {total, number}"
+  },
+  "photos": {
+    "back": "Back to article",
+    "label": "Photos",
+    "count": "{count, plural, one {# photo} other {# photos}}"
+  }
+}

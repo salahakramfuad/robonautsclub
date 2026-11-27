@@ -1,0 +1,45 @@
+{
+  "section": {
+    "eyebrow": "FAQ",
+    "title": "Questions?",
+    "titleAccent": "We've Got Answers.",
+    "defaultIntro": "Eligibility, ages, experience, and certificates — the essentials for families and students considering the next step.",
+    "stillCurious": "Still curious? <link>Ask us anything</link> — we're happy to help you find the right pathway."
+  },
+  "general": {
+    "eligibility": {
+      "question": "Who is eligible to join {name}?",
+      "answer": "{name} welcomes students from grades 3-12 who have an interest in robotics, STEM, and innovation. No prior experience is required for beginner courses."
+    },
+    "ageGroups": {
+      "question": "What age groups do you serve?",
+      "answer": "We serve students aged 8-18 years old, with courses tailored to different age groups and skill levels. Our programs are designed to grow with students from elementary through high school."
+    },
+    "background": {
+      "question": "Do I need any background knowledge?",
+      "answer": "No background knowledge is required for our beginner courses. We start from the basics and guide you through every step. For intermediate and advanced courses, we recommend completing prerequisite courses first."
+    },
+    "certificates": {
+      "question": "Do you provide certificates?",
+      "answer": "Yes! Students who complete our courses receive certificates of completion. We also provide certificates for participation in competitions and special workshops."
+    }
+  },
+  "events": {
+    "register": {
+      "question": "How do I register for an event?",
+      "answer": "Open the event, fill in the registration form with the student’s name, email and phone number, and submit. Free events are confirmed instantly; paid events take you to bKash to complete payment."
+    },
+    "pay": {
+      "question": "How do I pay for a paid event?",
+      "answer": "Payments are made securely through bKash. After you submit the form you are redirected to bKash checkout — stay on the page until you see the “Payment Successful” screen."
+    },
+    "lostId": {
+      "question": "I lost my registration ID. What should I do?",
+      "answer": "Your registration ID is in your confirmation email and the attached PDF — search your inbox (and spam folder) for “Robonauts”. If you still can’t find it, message us on WhatsApp at {phone} with the student’s name and the event, and we’ll resend it."
+    },
+    "refund": {
+      "question": "Can I cancel or get a refund?",
+      "answer": "Please see our Refund & Cancellation Policy, or message us on WhatsApp and we’ll help."
+    }
+  }
+}

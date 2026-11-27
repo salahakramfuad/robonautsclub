@@ -5,6 +5,7 @@ import Image from 'next/image'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { LightboxPortal } from '@/components/ImageLightboxGallery'
+import { useTranslations } from 'next-intl'
 
 type Props = {
   images: string[]
@@ -13,6 +14,7 @@ type Props = {
 
 /** Immersive full-album grid for `/news/[slug]/photos`. */
 export default function NewsPhotosGrid({ images, className }: Props) {
+  const t = useTranslations('news.gallery')
   const [openIndex, setOpenIndex] = useState<number | null>(null)
   const close = useCallback(() => setOpenIndex(null), [])
 
@@ -37,7 +39,7 @@ export default function NewsPhotosGrid({ images, className }: Props) {
                   'hover:bg-slate-100 focus-visible:ring-2 focus-visible:ring-indigo-500',
                   tall ? 'aspect-4/5 sm:aspect-3/4' : 'aspect-video sm:aspect-4/3',
                 )}
-                aria-label={`Open image ${i + 1} of ${images.length}`}
+                aria-label={t('openImage', { index: i + 1, total: images.length })}
               >
                 <Image
                   src={url}

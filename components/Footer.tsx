@@ -7,9 +7,10 @@ import {
   FaWhatsapp,
 } from "react-icons/fa";
 import Image from "next/image";
-import Link from "next/link";
+import { Link } from '@/i18n/navigation'
 import { SITE_CONFIG } from "@/lib/site-config";
 import { LEGAL_PAGES } from "@/lib/legal";
+import { getTranslations } from "next-intl/server";
 
 const SOCIAL_LINKS = [
   { icon: FaFacebookF, href: SITE_CONFIG.social.facebook, label: "Facebook" },
@@ -20,17 +21,17 @@ const SOCIAL_LINKS = [
 ];
 
 const STUDENT_LINKS = [
-  { title: "Courses & programs", href: "/courses" },
-  { title: "Upcoming events", href: "/events" },
-  { title: "Robofest", href: "/robofest" },
-  { title: "Find my registration", href: "/verify-booking" },
-  { title: "Contact us", href: "/contact" },
+  { key: "courses", href: "/courses" },
+  { key: "events", href: "/events" },
+  { key: "robofest", href: "/robofest" },
+  { key: "verifyBooking", href: "/verify-booking" },
+  { key: "contact", href: "/contact" },
 ] as const;
 
 const linkClass =
   "rounded transition hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400";
 
-export default function Footer({
+export default async function Footer({
   hiddenHrefs = [],
   reserveMobileBar = true,
 }: {
@@ -39,6 +40,7 @@ export default function Footer({
   /** Leave room at the bottom for the mobile action bar. */
   reserveMobileBar?: boolean
 } = {}) {
+  const t = await getTranslations("common");
   const navLinks = SITE_CONFIG.navLinks.filter((l) => !hiddenHrefs.includes(l.href))
   const studentLinks = STUDENT_LINKS.filter((l) => !hiddenHrefs.includes(l.href))
   return (
@@ -53,7 +55,7 @@ export default function Footer({
           <div className="flex items-start gap-3 sm:gap-4">
             <Image
               src={SITE_CONFIG.assets.logo}
-              alt={`${SITE_CONFIG.name} Logo`}
+              alt={t("brand.logoAlt", { name: SITE_CONFIG.name })}
               width={56}
               height={56}
               className="object-contain w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-white p-1"
@@ -63,7 +65,7 @@ export default function Footer({
                 {SITE_CONFIG.name}
               </h2>
               <p className="mt-1 max-w-sm text-xs sm:text-sm text-slate-400">
-                {SITE_CONFIG.tagline}
+                {t("brand.tagline")}
               </p>
             </div>
           </div>
@@ -74,7 +76,7 @@ export default function Footer({
               <a
                 key={label}
                 href={href}
-                aria-label={`${label} (opens in a new tab)`}
+                aria-label={t("footer.opensNewTab", { label })}
                 target="_blank"
                 rel="noreferrer"
                 className="flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/5 text-slate-200 transition hover:bg-indigo-500 hover:text-white hover:border-indigo-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400"
@@ -89,30 +91,30 @@ export default function Footer({
 
         {/* Main Content */}
         <div className="grid gap-8 sm:gap-10 sm:grid-cols-2 md:grid-cols-4">
-          <nav aria-label="Footer">
+          <nav aria-label={t("footer.footerNav")}>
             <h3 className="mb-3 sm:mb-4 text-xs sm:text-sm font-semibold uppercase tracking-wide text-indigo-300">
-              Explore
+              {t("footer.explore")}
             </h3>
             <ul className="space-y-2 sm:space-y-3 text-sm">
               {navLinks.map((link) => (
                 <li key={link.href}>
                   <Link href={link.href} prefetch={false} className={linkClass}>
-                    {link.title}
+                    {t(`nav.links.${link.key}`)}
                   </Link>
                 </li>
               ))}
             </ul>
           </nav>
 
-          <nav aria-label="For students and parents">
+          <nav aria-label={t("footer.studentsParentsNav")}>
             <h3 className="mb-3 sm:mb-4 text-xs sm:text-sm font-semibold uppercase tracking-wide text-indigo-300">
-              Students & parents
+              {t("footer.studentsParents")}
             </h3>
             <ul className="space-y-2 sm:space-y-3 text-sm">
               {studentLinks.map((item) => (
                 <li key={item.href}>
                   <Link href={item.href} prefetch={false} className={linkClass}>
-                    {item.title}
+                    {t(`footer.studentLinks.${item.key}`)}
                   </Link>
                 </li>
               ))}
@@ -122,7 +124,7 @@ export default function Footer({
           {/* Contact */}
           <div>
             <h3 className="mb-3 sm:mb-4 text-xs sm:text-sm font-semibold uppercase tracking-wide text-indigo-300">
-              Contact
+              {t("footer.contact")}
             </h3>
             <div className="space-y-3 text-sm">
               <a
@@ -132,7 +134,7 @@ export default function Footer({
                 className="inline-flex items-center gap-2 rounded-full bg-emerald-500 px-4 py-2 font-semibold text-white transition hover:bg-emerald-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300"
               >
                 <FaWhatsapp className="text-base" aria-hidden />
-                Chat on WhatsApp
+                {t("footer.chatWhatsapp")}
               </a>
               <a href={`tel:${SITE_CONFIG.phone}`} className={`flex items-center gap-2 ${linkClass}`}>
                 <Phone size={16} aria-hidden />
@@ -152,7 +154,7 @@ export default function Footer({
           {/* Payment */}
           <div>
             <h3 className="mb-3 sm:mb-4 text-xs sm:text-sm font-semibold uppercase tracking-wide text-indigo-300">
-              Payment method
+              {t("footer.paymentMethod")}
             </h3>
             <div
               className="inline-flex items-center gap-2.5 rounded-xl bg-white px-3 py-2.5 shadow-sm"
@@ -167,7 +169,7 @@ export default function Footer({
               />
               <div className="leading-tight">
                 <p className="text-sm font-semibold text-[#E2136E]">bKash</p>
-                <p className="text-[11px] text-slate-500">Secure online payments</p>
+                <p className="text-[11px] text-slate-500">{t("footer.securePayments")}</p>
               </div>
             </div>
           </div>
@@ -180,14 +182,14 @@ export default function Footer({
       <div className={`mx-auto max-w-7xl px-4 sm:px-6 py-4 ${reserveMobileBar ? "pb-24 md:pb-4" : ""}`}>
         <div className="flex flex-col gap-2 text-xs sm:text-sm text-slate-400 md:flex-row md:items-center md:justify-between text-center md:text-left">
           <span>
-            © {new Date().getFullYear()} {SITE_CONFIG.name}. All rights reserved.
+            {t("footer.rights", { year: new Date().getFullYear(), name: SITE_CONFIG.name })}
           </span>
 
           <div className="flex flex-col items-center gap-2 md:flex-row md:gap-4">
-            <nav aria-label="Legal" className="flex flex-wrap justify-center gap-x-4 gap-y-1">
+            <nav aria-label={t("footer.legalNav")} className="flex flex-wrap justify-center gap-x-4 gap-y-1">
               {LEGAL_PAGES.map((page) => (
                 <Link key={page.href} href={page.href} className={linkClass}>
-                  {page.title}
+                  {t(`legalLinks.${page.key}`)}
                 </Link>
               ))}
             </nav>
@@ -197,7 +199,7 @@ export default function Footer({
               rel="noopener noreferrer"
               className={linkClass}
             >
-              Developed by{" "}
+              {t("footer.developedBy")}{" "}
               <span className="font-semibold">{SITE_CONFIG.developer.name}</span>
             </a>
           </div>

@@ -2,8 +2,9 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react'
 import Image from 'next/image'
-import Link from 'next/link'
+import { Link } from '@/i18n/navigation'
 import { ChevronLeft, ChevronRight, X } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { cn } from '@/lib/utils'
 import {
   Dialog,
@@ -25,6 +26,7 @@ type LightboxPortalProps = {
 const SWIPE_THRESHOLD_PX = 50
 
 export function LightboxPortal({ images, openIndex, onClose, setOpenIndex, title }: LightboxPortalProps) {
+  const t = useTranslations('gallery.lightbox')
   const total = images.length
   const isOpen = openIndex !== null
   const touchStartX = useRef<number | null>(null)
@@ -53,8 +55,8 @@ export function LightboxPortal({ images, openIndex, onClose, setOpenIndex, title
   if (!isOpen || !images[openIndex]) return null
 
   const label = title
-    ? `${title} – photo ${openIndex + 1} of ${total}`
-    : `Image ${openIndex + 1} of ${total}`
+    ? t('titledLabel', { title, index: openIndex + 1, total })
+    : t('label', { index: openIndex + 1, total })
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => { if (!open) onClose() }}>
@@ -70,7 +72,7 @@ export function LightboxPortal({ images, openIndex, onClose, setOpenIndex, title
       >
         <DialogTitle className="sr-only">{label}</DialogTitle>
         <DialogDescription className="sr-only">
-          Full-size gallery image. Swipe or use arrow keys to move between photos.
+          {t('description')}
         </DialogDescription>
 
         <Button
@@ -79,7 +81,7 @@ export function LightboxPortal({ images, openIndex, onClose, setOpenIndex, title
           size="icon"
           onClick={onClose}
           className="absolute top-4 right-4 z-50 rounded-full bg-white/10 text-white hover:bg-white/20 hover:text-white"
-          aria-label="Close"
+          aria-label={t('close')}
         >
           <X className="w-6 h-6" />
         </Button>
@@ -95,7 +97,7 @@ export function LightboxPortal({ images, openIndex, onClose, setOpenIndex, title
                 go(-1)
               }}
               className="absolute left-2 sm:left-4 top-1/2 z-50 size-12 -translate-y-1/2 rounded-full bg-white/10 text-white hover:bg-white/20 hover:text-white"
-              aria-label="Previous image"
+              aria-label={t('previous')}
             >
               <ChevronLeft className="w-6 h-6 sm:w-8 sm:h-8" />
             </Button>
@@ -108,7 +110,7 @@ export function LightboxPortal({ images, openIndex, onClose, setOpenIndex, title
                 go(1)
               }}
               className="absolute right-2 sm:right-4 top-1/2 z-50 size-12 -translate-y-1/2 rounded-full bg-white/10 text-white hover:bg-white/20 hover:text-white"
-              aria-label="Next image"
+              aria-label={t('next')}
             >
               <ChevronRight className="w-6 h-6 sm:w-8 sm:h-8" />
             </Button>
@@ -140,7 +142,7 @@ export function LightboxPortal({ images, openIndex, onClose, setOpenIndex, title
 
         {total > 1 ? (
           <p className="pointer-events-none absolute bottom-4 left-1/2 z-50 -translate-x-1/2 text-sm text-white/80">
-            {openIndex + 1} / {total}
+            {t('counter', { index: openIndex + 1, total })}
           </p>
         ) : null}
       </DialogContent>
@@ -175,6 +177,7 @@ export default function ImageLightboxGallery({
   className,
   title,
 }: Props) {
+  const t = useTranslations('gallery.lightbox')
   const [openIndex, setOpenIndex] = useState<number | null>(null)
 
   const close = useCallback(() => {
@@ -215,8 +218,8 @@ export default function ImageLightboxGallery({
             )}
             aria-label={
               title
-                ? `Open ${title} photo ${i + 1} of ${totalShown}`
-                : `Open image ${i + 1} of ${totalShown}`
+                ? t('openTitled', { title, index: i + 1, total: totalShown })
+                : t('open', { index: i + 1, total: totalShown })
             }
           >
             <Image
@@ -240,7 +243,7 @@ export default function ImageLightboxGallery({
           className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm"
         >
           <Link href={viewAllHref!} prefetch={false}>
-            {viewAllLabel ?? `See all ${images.length} images`}
+            {viewAllLabel ?? t('seeAll', { count: images.length })}
           </Link>
         </Button>
       ) : null}

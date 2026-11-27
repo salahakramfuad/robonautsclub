@@ -59,3 +59,24 @@ export function faqPageSchema(items: FAQItem[]) {
     })),
   }
 }
+
+export type FAQGroup = 'general' | 'events'
+
+const FAQ_KEYS: Record<FAQGroup, readonly string[]> = {
+  general: ['eligibility', 'ageGroups', 'background', 'certificates'],
+  events: ['register', 'pay', 'lostId', 'refund'],
+}
+
+/**
+ * Localized FAQ items (from `messages/<locale>/faq.json`). Server-only.
+ * English output matches `GENERAL_FAQ` / `EVENTS_FAQ` above.
+ */
+export async function getFaqItems(group: FAQGroup, locale: string): Promise<FAQItem[]> {
+  const { getTranslations } = await import('next-intl/server')
+  const t = await getTranslations({ locale, namespace: 'faq' })
+  const values = { name: SITE_CONFIG.name, phone: SITE_CONFIG.phone }
+  return FAQ_KEYS[group].map((key) => ({
+    question: t(`${group}.${key}.question`, values),
+    answer: t(`${group}.${key}.answer`, values),
+  }))
+}

@@ -1,7 +1,7 @@
 import { MetadataRoute } from 'next'
-import { getPublicEvents } from './(marketing)/events/public-data'
-import { getPublishedNews } from './(marketing)/news/actions'
-import { getGalleryGroups } from './(marketing)/gallery/actions'
+import { getPublicEvents } from './[locale]/(marketing)/events/public-data'
+import { getPublishedNews } from './[locale]/(marketing)/news/actions'
+import { getGalleryGroups } from './[locale]/(marketing)/gallery/actions'
 import { eventPublicHref } from '@/lib/event-ui'
 import { newsArticleHref } from '@/lib/news-ui'
 import {
@@ -11,8 +11,27 @@ import {
 } from '@/lib/robofest-content'
 import { getSiteOrigin } from '@/lib/site-config'
 import { LEGAL_PAGES } from '@/lib/legal'
+import { localizePath, routing } from '@/i18n/routing'
 
 export const revalidate = 3600
+
+/**
+ * Every public page exists in English (unprefixed) and Bangla (`/bn`).
+ * Emit both URLs with reciprocal hreflang alternates.
+ */
+function withLocaleAlternates(baseUrl: string, entries: MetadataRoute.Sitemap): MetadataRoute.Sitemap {
+  return entries.flatMap((entry) => {
+    const path = entry.url.slice(baseUrl.length) || '/'
+    const languages = Object.fromEntries(
+      routing.locales.map((locale) => [locale, `${baseUrl}${localizePath(path, locale)}`]),
+    )
+    return routing.locales.map((locale) => ({
+      ...entry,
+      url: `${baseUrl}${localizePath(path, locale)}`,
+      alternates: { languages },
+    }))
+  })
+}
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = getSiteOrigin()
@@ -158,15 +177,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.7,
     }))
 
-    return [
+    return withLocaleAlternates(baseUrl, [
       ...staticPages,
       ...robofestPages,
       ...newsPages,
       ...galleryPages,
       ...eventPages,
-    ]
+    ])
   } catch (error) {
     console.error('Error generating sitemap:', error)
-    return [...staticPages, ...robofestPages, ...newsPages, ...galleryPages]
+    return withLocaleAlternates(baseUrl, [...staticPages, ...robofestPages, ...newsPages, ...galleryPages])
   }
 }

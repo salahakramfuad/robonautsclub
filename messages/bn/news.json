@@ -1,0 +1,54 @@
+{
+  "meta": {
+    "ogAlt": "Robonauts খবর",
+    "articleFallbackTitle": "লেখা",
+    "photosFallbackTitle": "ছবি",
+    "photosTitle": "ছবি — {title} | {name}",
+    "photosDescription": "Robonauts-এর \"{title}\"-এর ছবি।"
+  },
+  "hero": {
+    "badge": "ক্লাবের খবর",
+    "title": "খবর ও গল্প",
+    "subtitle": "Robonauts কমিউনিটির সর্বশেষ ওয়ার্কশপ, প্রতিযোগিতা, অর্জন, পার্টনারশিপ আর নানা গল্পের খোঁজ রাখুন।"
+  },
+  "list": {
+    "featuredHeading": "বিশেষ খবর",
+    "fromCommunity": "কমিউনিটি থেকে",
+    "latestStories": "সাম্প্রতিক খবর"
+  },
+  "empty": {
+    "title": "এখনো কোনো খবর প্রকাশিত হয়নি",
+    "body": "খবর, ওয়ার্কশপ, প্রতিযোগিতা আর কমিউনিটির আপডেট শিগগিরই এখানে দেখা যাবে।"
+  },
+  "card": {
+    "featured": "বিশেষ খবর",
+    "readStory": "পুরো খবর পড়ুন",
+    "readMore": "আরও পড়ুন"
+  },
+  "article": {
+    "back": "খবরে ফিরে যান",
+    "eyebrow": "Robonauts খবর",
+    "photoCount": "+{count, plural, other {#টি ছবি}}",
+    "published": "প্রকাশিত",
+    "sidebarBrand": "Robonauts",
+    "newsCommunity": "খবর ও কমিউনিটি"
+  },
+  "cover": {
+    "openViewer": "ছবি দেখার ভিউয়ার খুলুন (কভার ও গ্যালারি)",
+    "openFull": "পূর্ণ আকারে ছবি দেখুন",
+    "clickToEnlarge": "বড় করে দেখতে ক্লিক করুন"
+  },
+  "gallery": {
+    "title": "গ্যালারি",
+    "subtitle": "ইভেন্টের কিছু মুহূর্ত",
+    "seeAllAria": "সবগুলো ({count, number}টি) ছবি দেখুন",
+    "viewAllPhotos": "সব ছবি দেখুন",
+    "seeAll": "সবগুলো ({count, number}টি) ছবি দেখুন",
+    "openImage": "{total, number}টির মধ্যে {index, number} নম্বর ছবি খুলুন"
+  },
+  "photos": {
+    "back": "লেখায় ফিরে যান",
+    "label": "ছবি",
+    "count": "{count, plural, other {#টি ছবি}}"
+  }
+}

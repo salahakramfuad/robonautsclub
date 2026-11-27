@@ -1,8 +1,9 @@
 'use client'
 
-import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { Link } from '@/i18n/navigation'
+import { usePathname } from '@/i18n/navigation'
 import { useState } from 'react'
+import { useTranslations } from 'next-intl'
 import { ChevronDown, Menu } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import {
@@ -36,6 +37,7 @@ const isActive = (href?: string, current?: string) => {
 
 export default function NavbarMobileMenu({ menuItems }: { menuItems: readonly MenuItem[] }) {
   const pathname = usePathname()
+  const t = useTranslations('common.nav')
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
   const [mobileOpenIdx, setMobileOpenIdx] = useState<number | null>(null)
 
@@ -52,7 +54,7 @@ export default function NavbarMobileMenu({ menuItems }: { menuItems: readonly Me
           variant="ghost"
           size="icon"
           className="xl:hidden size-11 text-gray-700 hover:bg-indigo-50 hover:text-indigo-700"
-          aria-label="Open main menu"
+          aria-label={t('openMenu')}
         >
           <Menu className="size-5" />
         </Button>
@@ -62,11 +64,11 @@ export default function NavbarMobileMenu({ menuItems }: { menuItems: readonly Me
         className="w-4/5 max-w-sm bg-white p-0 flex flex-col gap-0"
       >
         <SheetHeader className="px-4 py-3 sticky top-0 bg-white/95 backdrop-blur border-b border-slate-200 z-10">
-          <SheetTitle className="text-gray-900">Menu</SheetTitle>
+          <SheetTitle className="text-gray-900">{t('menu')}</SheetTitle>
         </SheetHeader>
 
         <div className="flex-1 overflow-y-auto overscroll-contain px-4 py-4">
-          <nav className="grid gap-2" aria-label="Mobile navigation">
+          <nav className="grid gap-2" aria-label={t('mobileNavigation')}>
             {menuItems.map((item, idx) => (
               <div key={idx}>
                 {item.subLinks ? (
