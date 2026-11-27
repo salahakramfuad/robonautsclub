@@ -9,6 +9,7 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import { SITE_CONFIG } from "@/lib/site-config";
+import { LEGAL_PAGES } from "@/lib/legal";
 
 const SOCIAL_LINKS = [
   { icon: FaFacebookF, href: SITE_CONFIG.social.facebook, label: "Facebook" },
@@ -207,13 +208,18 @@ export default function Footer() {
             © {new Date().getFullYear()} {SITE_CONFIG.name}. All rights reserved.
           </span>
 
-          <div className="flex flex-col items-center gap-2 sm:flex-row sm:gap-4">
-            <Link
-              href="/privacy"
-              className="transition hover:text-brand-blue"
-            >
-              Privacy Policy
-            </Link>
+          <div className="flex flex-col items-center gap-2 md:flex-row md:gap-4">
+            <nav aria-label="Legal" className="flex flex-wrap justify-center gap-x-4 gap-y-1">
+              {LEGAL_PAGES.map((page) => (
+                <Link
+                  key={page.href}
+                  href={page.href}
+                  className="transition hover:text-brand-blue"
+                >
+                  {page.title}
+                </Link>
+              ))}
+            </nav>
             <a
               href={SITE_CONFIG.developer.url}
               target="_blank"

@@ -63,6 +63,26 @@ export const PAGE_SEO = {
     description:
       "How Robonauts collects, uses, and protects personal information, including cookies and advertising (Google AdSense).",
   },
+  terms: {
+    title: "Terms & Conditions | Robonauts",
+    description:
+      "Terms and conditions for using the Robonauts website and registering for workshops, events, and Robofest competitions.",
+  },
+  refund: {
+    title: "Refund & Cancellation Policy | Robonauts",
+    description:
+      "How refunds and cancellations work for Robonauts event, workshop, and Robofest registration fees paid via bKash.",
+  },
+  cookies: {
+    title: "Cookie Policy | Robonauts",
+    description:
+      "The cookies and similar technologies Robonauts uses, including Google Analytics and Google AdSense, and how to control them.",
+  },
+  codeOfConduct: {
+    title: "Code of Conduct & Child Safety | Robonauts",
+    description:
+      "Expected behaviour, safety, and safeguarding rules for students, parents, mentors, and volunteers at Robonauts programs and events.",
+  },
 } as const;
 
 const DEFAULT_OG_IMAGE: OgImage = {

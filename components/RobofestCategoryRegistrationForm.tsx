@@ -31,6 +31,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { ConsentCheckbox } from "@/components/legal/ConsentCheckbox";
 
 type TeamMemberForm = {
   name: string;
@@ -162,6 +163,7 @@ export default function RobofestCategoryRegistrationForm({
   const [error, setError] = useState("");
   const [understood, setUnderstood] = useState(false);
   const [rulesUnderstood, setRulesUnderstood] = useState(false);
+  const [agreedToPolicies, setAgreedToPolicies] = useState(false);
 
   const selectedDivisionClosed = form.division
     ? isRobofestDivisionRegistrationClosed(deadlineContent, form.division)
@@ -236,7 +238,14 @@ export default function RobofestCategoryRegistrationForm({
       return;
     }
 
-    if (isPaid && amount > 0 && !understood) {
+    if (!agreedToPolicies) {
+      setError(
+        "Please agree to the Terms & Conditions and Privacy Policy to continue.",
+      );
+      return;
+    }
+
+        if (isPaid && amount > 0 && !understood) {
       setError(
         "Please confirm that you understand the fee and payment instructions.",
       );
@@ -698,6 +707,14 @@ export default function RobofestCategoryRegistrationForm({
             </span>
           </label>
         ) : null}
+
+        <ConsentCheckbox
+          id={fieldId("policies-agreed")}
+          checked={agreedToPolicies}
+          onCheckedChange={setAgreedToPolicies}
+          disabled={isSubmitting}
+          showRefund={isPaid && amount > 0}
+        />
       </div>
 
       <Button
@@ -705,6 +722,7 @@ export default function RobofestCategoryRegistrationForm({
         disabled={
           isSubmitting ||
           !rulesUnderstood ||
+          !agreedToPolicies ||
           (isPaid && amount > 0 && !understood)
         }
         className="w-full bg-indigo-500 text-white hover:bg-indigo-600"

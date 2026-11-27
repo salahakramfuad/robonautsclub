@@ -25,11 +25,13 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 import { cn } from '@/lib/utils'
+import { ConsentCheckbox } from '@/components/legal/ConsentCheckbox'
 
 export default function BookingForm({ event, schools }: { event: Event; schools: string[] }) {
   const [isSubmitted, setIsSubmitted] = useState(false)
   const [submissionWarning, setSubmissionWarning] = useState<string | null>(null)
   const [submitError, setSubmitError] = useState('')
+  const [agreedToPolicies, setAgreedToPolicies] = useState(false)
 
   const defaultRegistrationFields = getEventRegistrationFields(event)
   const customFormFields = Array.isArray(event.customFormFields) ? event.customFormFields : []
@@ -75,6 +77,10 @@ export default function BookingForm({ event, schools }: { event: Event; schools:
 
   const onSubmit = async (values: EventBookingFormValues) => {
     setSubmitError('')
+    if (!agreedToPolicies) {
+      setSubmitError('Please agree to the Terms & Conditions and Privacy Policy to continue.')
+      return
+    }
     try {
       const { createBooking, initiatePaidEventCheckout } = await import('../actions')
       const eventId = event.id
@@ -532,9 +538,17 @@ export default function BookingForm({ event, schools }: { event: Event; schools:
               </div>
             )}
 
+            <ConsentCheckbox
+              id={`consent-${event.id}`}
+              checked={agreedToPolicies}
+              onCheckedChange={setAgreedToPolicies}
+              disabled={isLoading}
+              showRefund={Boolean(event.isPaid)}
+            />
+
             <Button
               type="submit"
-              disabled={isLoading || (event.isPaid && !hasSelectedCategory)}
+              disabled={isLoading || !agreedToPolicies || (event.isPaid && !hasSelectedCategory)}
               className="w-full bg-indigo-500 hover:bg-indigo-600 text-white shadow-md hover:shadow-lg py-6 text-sm sm:text-base"
             >
               {isLoading ? 'Submitting...' : event.isPaid ? 'Proceed to bKash' : 'Submit'}

@@ -10,6 +10,7 @@ import {
   getRobofestContent,
 } from '@/lib/robofest-content'
 import { getSiteOrigin } from '@/lib/site-config'
+import { LEGAL_PAGES } from '@/lib/legal'
 
 export const revalidate = 3600
 
@@ -53,12 +54,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: 'monthly',
       priority: 0.8,
     },
-    {
-      url: `${baseUrl}/privacy`,
+    ...LEGAL_PAGES.map((page) => ({
+      url: `${baseUrl}${page.href}`,
       lastModified: new Date(),
-      changeFrequency: 'yearly',
+      changeFrequency: 'yearly' as const,
       priority: 0.3,
-    },
+    })),
   ]
 
   let robofestPages: MetadataRoute.Sitemap = []

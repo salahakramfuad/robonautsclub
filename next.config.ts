@@ -69,12 +69,18 @@ const nextConfig: NextConfig = {
             value: 'nosniff',
           },
           {
+            // Legacy XSS auditor is deprecated and can introduce leaks; disable explicitly.
             key: 'X-XSS-Protection',
-            value: '1; mode=block',
+            value: '0',
           },
           {
             key: 'Referrer-Policy',
-            value: 'origin-when-cross-origin',
+            value: 'strict-origin-when-cross-origin',
+          },
+          {
+            // Isolate browsing context; allow popups so bKash / Google flows keep working.
+            key: 'Cross-Origin-Opener-Policy',
+            value: 'same-origin-allow-popups',
           },
           {
             key: 'Permissions-Policy',
