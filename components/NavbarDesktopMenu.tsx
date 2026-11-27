@@ -1,5 +1,6 @@
 'use client'
 
+import { useEffect, useRef, useState } from 'react'
 import { Link } from '@/i18n/navigation'
 import { usePathname } from '@/i18n/navigation'
 import { ChevronDown } from 'lucide-react'
@@ -38,51 +39,8 @@ export default function NavbarDesktopMenu({ menuItems }: { menuItems: readonly M
           if (item.subLinks) {
             return (
               <li key={idx} className="relative">
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <button
-                      type="button"
-                      className={cn(
-                        'flex items-center gap-2 py-2 px-3 rounded-lg transition-colors font-medium',
-                        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-200',
-                        '[&[data-state=open]>svg]:rotate-180',
-                        sectionActive
-                          ? 'text-indigo-700 bg-indigo-50'
-                          : 'text-slate-700 hover:text-indigo-700 hover:bg-indigo-50',
-                      )}
-                    >
-                      <span>{item.title}</span>
-                      <ChevronDown className="size-4 transition-transform" />
-                    </button>
-                  </PopoverTrigger>
-                  <PopoverContent
-                    align="start"
-                    sideOffset={8}
-                    className="w-56 p-2 rounded-xl bg-white shadow-lg ring-1 ring-indigo-100/70 border-0"
-                  >
-                    <ul className="text-gray-800">
-                      {item.subLinks.map((sub, sIdx) => {
-                        const subActive = isActive(sub.href, pathname)
-                        return (
-                          <li key={sIdx}>
-                            <Link
-                              href={sub.href}
-                              prefetch={false}
-                              className={cn(
-                                'block px-3 py-2 rounded-md text-sm transition-colors no-underline hover:no-underline focus:no-underline',
-                                subActive
-                                  ? 'text-indigo-700 bg-sky-100'
-                                  : 'hover:bg-sky-100 hover:text-indigo-700',
-                              )}
-                            >
-                              {sub.title}
-                            </Link>
-                          </li>
-                        )
-                      })}
-                    </ul>
-                  </PopoverContent>
-                </Popover>
+                {/* key: remount (and so close) after every navigation */}
+                <NavDropdown key={pathname} item={item} subLinks={item.subLinks} pathname={pathname} active={!!sectionActive} />
               </li>
             )
           }
@@ -108,5 +66,88 @@ export default function NavbarDesktopMenu({ menuItems }: { menuItems: readonly M
         })}
       </ul>
     </div>
+  )
+}
+
+/** Delay before closing when the mouse leaves, so it can cross the gap between button and panel. */
+const CLOSE_DELAY_MS = 150
+
+function NavDropdown({
+  item,
+  subLinks,
+  pathname,
+  active,
+}: {
+  item: MenuItem
+  subLinks: SubLink[]
+  pathname: string
+  active: boolean
+}) {
+  const [open, setOpen] = useState(false)
+  const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  const cancelClose = () => {
+    if (closeTimer.current) clearTimeout(closeTimer.current)
+    closeTimer.current = null
+  }
+  const scheduleClose = () => {
+    cancelClose()
+    closeTimer.current = setTimeout(() => setOpen(false), CLOSE_DELAY_MS)
+  }
+
+  useEffect(() => cancelClose, [])
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <button
+          type="button"
+          onMouseEnter={cancelClose}
+          onMouseLeave={scheduleClose}
+          className={cn(
+            'flex items-center gap-2 py-2 px-3 rounded-lg transition-colors font-medium',
+            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-200',
+            '[&[data-state=open]>svg]:rotate-180',
+            active
+              ? 'text-indigo-700 bg-indigo-50'
+              : 'text-slate-700 hover:text-indigo-700 hover:bg-indigo-50',
+          )}
+        >
+          <span>{item.title}</span>
+          <ChevronDown className="size-4 transition-transform" />
+        </button>
+      </PopoverTrigger>
+      <PopoverContent
+        align="start"
+        sideOffset={8}
+        onMouseEnter={cancelClose}
+        onMouseLeave={scheduleClose}
+        className="w-56 p-2 rounded-xl bg-white shadow-lg ring-1 ring-indigo-100/70 border-0"
+      >
+        <ul className="text-gray-800">
+          {subLinks.map((sub, sIdx) => {
+            const subActive = isActive(sub.href, pathname)
+            return (
+              <li key={sIdx}>
+                <Link
+                  href={sub.href}
+                  prefetch={false}
+                  onClick={() => setOpen(false)}
+                  aria-current={subActive ? 'page' : undefined}
+                  className={cn(
+                    'block px-3 py-2 rounded-md text-sm transition-colors no-underline hover:no-underline focus:no-underline',
+                    subActive
+                      ? 'text-indigo-700 bg-sky-100'
+                      : 'hover:bg-sky-100 hover:text-indigo-700',
+                  )}
+                >
+                  {sub.title}
+                </Link>
+              </li>
+            )
+          })}
+        </ul>
+      </PopoverContent>
+    </Popover>
   )
 }
