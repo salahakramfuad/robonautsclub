@@ -1,7 +1,8 @@
-import Link from 'next/link'
+import { Link } from '@/i18n/navigation'
 import { ArrowRight, BookOpen } from 'lucide-react'
 import CourseCard from '@/components/CourseCard'
 import Reveal from '@/components/Reveal'
+import { useTranslations } from 'next-intl'
 
 type ShowcaseCourse = {
   id: string
@@ -45,6 +46,7 @@ export default function CourseShowcase({
   courses: ShowcaseCourse[]
   showExploreAll?: boolean
 }) {
+  const t = useTranslations('home.courses')
   if (courses.length === 0) {
     return (
       <div id="programs">
@@ -52,7 +54,7 @@ export default function CourseShowcase({
         <div className="py-12 text-center">
           <BookOpen className="mx-auto mb-3 size-12 text-slate-300" />
           <p className="text-gray-600">
-            No courses available at the moment. Check back soon!
+            {t('empty')}
           </p>
         </div>
       </div>
@@ -101,17 +103,18 @@ export default function CourseShowcase({
 }
 
 function SectionHeader({ showExplore = false }: { showExplore?: boolean }) {
+  const t = useTranslations('home.courses')
   return (
     <div className="mb-8 flex flex-col gap-4 sm:mb-10 md:mb-12 md:flex-row md:items-end md:justify-between">
       <Reveal className="max-w-2xl">
         <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-indigo-600 sm:text-xs">
-          Programs
+          {t('eyebrow')}
         </p>
         <h2 className="mt-3 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl md:text-5xl">
-          Learn with Robonauts
+          {t('title')}
         </h2>
         <p className="mt-3 max-w-xl text-sm leading-relaxed text-gray-600 sm:text-base">
-          Discover pathways designed for every stage — from first build to competition-ready.
+          {t('description')}
         </p>
       </Reveal>
       {showExplore ? (
@@ -120,7 +123,7 @@ function SectionHeader({ showExplore = false }: { showExplore?: boolean }) {
           prefetch={false}
           className="group inline-flex items-center gap-1.5 text-sm font-semibold text-indigo-600 transition-colors hover:text-indigo-800"
         >
-          Explore all courses
+          {t('exploreAll')}
           <ArrowRight className="size-4 transition-transform duration-300 group-hover:translate-x-0.5" />
         </Link>
       ) : null}

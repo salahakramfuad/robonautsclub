@@ -1,6 +1,5 @@
 import {
   parseEventDates,
-  formatEventDates,
   isEventUpcoming,
   hasEventPassed,
   getFirstEventDate,
@@ -9,10 +8,11 @@ import {
   bdWallTimeToUtcDate,
   isRegistrationOpen,
 } from '@/lib/dateUtils'
-import Link from 'next/link'
+import { Link } from '@/i18n/navigation'
 import { Calendar, Clock, MapPin, ArrowRight } from 'lucide-react'
 import { Event } from '@/types/event'
-import { eventPublicHref } from '@/lib/event-ui'
+import { eventPublicHref, formatEventDatesForLocale } from '@/lib/event-ui'
+import { useLocale, useTranslations } from 'next-intl'
 import { differenceInDays, differenceInHours } from 'date-fns'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -111,12 +111,16 @@ function isEventGoingOn(event: Event): boolean {
   return true
 }
 
-function getTimeDisplay(event: Event, isUpcoming: boolean): string | null {
+type TimeDisplay =
+  | { key: 'goingOn' | 'startingSoon' | 'tomorrow' }
+  | { key: 'daysAway'; count: number }
+
+function getTimeDisplay(event: Event, isUpcoming: boolean): TimeDisplay | null {
   const firstDate = getFirstEventDate(event.date)
   if (!firstDate || !isUpcoming) return null
 
   if (isEventGoingOn(event)) {
-    return 'Event going on'
+    return { key: 'goingOn' }
   }
 
   const bstNow = getBangladeshNow()
@@ -133,20 +137,27 @@ function getTimeDisplay(event: Event, isUpcoming: boolean): string | null {
   const daysUntil = differenceInDays(eventDateBST, bstNow)
 
   if (daysUntil === 0) {
-    if (hoursUntil >= 0) return 'Starting soon'
-    return 'Event going on'
+    if (hoursUntil >= 0) return { key: 'startingSoon' }
+    return { key: 'goingOn' }
   }
-  if (hoursUntil < 24 && hoursUntil >= 0) return 'Starting soon'
-  if (hoursUntil >= 24 && hoursUntil < 48) return 'Tomorrow'
-  if (daysUntil > 0) return `${daysUntil} days away`
+  if (hoursUntil < 24 && hoursUntil >= 0) return { key: 'startingSoon' }
+  if (hoursUntil >= 24 && hoursUntil < 48) return { key: 'tomorrow' }
+  if (daysUntil > 0) return { key: 'daysAway', count: daysUntil }
   return null
 }
 
 function EventCard({ event, priority = false }: { event: Event; priority?: boolean }) {
+  const t = useTranslations('events.card')
+  const locale = useLocale()
   const eventDates = parseEventDates(event.date)
   const isUpcoming = isEventUpcoming(event.date)
-  const status = isUpcoming ? 'Upcoming' : 'Completed'
-  const timeDisplay = getTimeDisplay(event, isUpcoming)
+  const status = isUpcoming ? t('upcoming') : t('completed')
+  const time = getTimeDisplay(event, isUpcoming)
+  const timeDisplay = time
+    ? time.key === 'daysAway'
+      ? t('daysAway', { count: time.count })
+      : t(time.key)
+    : null
   // Robofest card links to its own landing page, which handles its own registration state.
   const canRegister = isUpcoming && !event.href && isRegistrationOpen(event)
 
@@ -183,7 +194,7 @@ function EventCard({ event, priority = false }: { event: Event; priority?: boole
           <div className="space-y-1.5 sm:space-y-2 mb-3 sm:mb-4">
             <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-600">
               <Calendar className="w-3 h-3 sm:w-4 sm:h-4 text-indigo-500 shrink-0" />
-              <span className="font-medium">{formatEventDates(eventDates)}</span>
+              <span className="font-medium">{formatEventDatesForLocale(eventDates, locale)}</span>
             </div>
             {event.time && (
               <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-600">
@@ -224,7 +235,7 @@ function EventCard({ event, priority = false }: { event: Event; priority?: boole
                 canRegister ? 'text-[#d4163f] group-hover:text-[#e8335a]' : 'text-indigo-500 group-hover:text-indigo-700'
               }`}
             >
-              <span>{canRegister ? 'View & register' : 'View details'}</span>
+              <span>{canRegister ? t('viewRegister') : t('viewDetails')}</span>
               <ArrowRight className="w-3 h-3 sm:w-4 sm:h-4 group-hover:translate-x-1 transition-transform" />
             </div>
           </div>
@@ -240,7 +251,8 @@ interface PublicEventsListProps {
 
 /** Server-rendered public events list (legacy name RealtimeEventsList). */
 export default function RealtimeEventsList({ initialEvents = [] }: PublicEventsListProps) {
-  const robofestCard = getRobofestEventsListCard()
+  const locale = useLocale()
+  const robofestCard = getRobofestEventsListCard(locale)
   const withoutDuplicate = initialEvents.filter((event) => event.id !== ROBOFEST_EVENTS_LIST_CARD_ID)
   const displayEvents = [...withoutDuplicate, robofestCard]
 

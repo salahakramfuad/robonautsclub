@@ -1,0 +1,368 @@
+{
+  "page": {
+    "eyebrow": "Legal",
+    "lastUpdated": "Last updated: {date}",
+    "navLabel": "Legal pages",
+    "related": "Related policies",
+    "englishPrevails": "This page is a translation of the English version. If there is any discrepancy, the <link>English version</link> prevails."
+  },
+  "consent": {
+    "withRefund": "I agree to the <terms>Terms & Conditions</terms>, <privacy>Privacy Policy</privacy> and <refund>Refund & Cancellation Policy</refund>, and to follow the <conduct>Code of Conduct</conduct>. If the participant is under 18, I am their parent/guardian or have their parent/guardian's consent to register.",
+    "withoutRefund": "I agree to the <terms>Terms & Conditions</terms> and <privacy>Privacy Policy</privacy>, and to follow the <conduct>Code of Conduct</conduct>. If the participant is under 18, I am their parent/guardian or have their parent/guardian's consent to register."
+  },
+  "privacy": {
+    "intro": "This policy explains what personal information {name} collects, why we collect it, who we share it with, and the choices you have. It applies to our website, event and Robofest registrations, payments, and certificates.",
+    "whoWeAre": {
+      "title": "Who we are",
+      "body": "{name} (\"we\", \"us\", \"our\") operates <site>{siteUrl}</site> and related sites. We are based at {address}, Bangladesh. You can contact us at <mail>{email}</mail> or <tel>{phone}</tel>."
+    },
+    "collect": {
+      "title": "Information we collect",
+      "given": "<strong>Information you give us</strong> when you register for an event, workshop, or Robofest competition, or when you contact us:",
+      "items": {
+        "participant": "Participant name, school or institution, class/grade, and age category",
+        "contact": "Contact details: email address and phone number (often a parent or guardian's)",
+        "team": "Team details and members' names, for team competitions",
+        "extra": "Any extra information you add in registration forms",
+        "messages": "Messages you send us by email, phone, WhatsApp, or social media"
+      },
+      "payment": "<strong>Payment information.</strong> Payments go through bKash. We receive the transaction ID, the amount, the payment status, and the bKash account number used. We do not receive or store your bKash PIN or OTP.",
+      "automatic": "<strong>Information collected automatically</strong>, such as IP address, browser and device type, pages visited, and referring pages. Cookies and similar tools collect this for security, analytics, and advertising (see our <cookies>Cookie Policy</cookies>).",
+      "photos": "<strong>Photos and video</strong> taken at our events, which may show participants."
+    },
+    "use": {
+      "title": "How we use information",
+      "items": {
+        "registrations": "To process registrations and run workshops, events, and competitions",
+        "payments": "To take payments and send confirmations, receipts, and reminders by email",
+        "certificates": "To issue certificates and let them be verified",
+        "support": "To answer your questions and give support",
+        "news": "To share program news and achievements, including event photos (see below)",
+        "improve": "To understand how the site is used and improve it",
+        "ads": "To show advertising (see the Advertising section below)",
+        "protect": "To protect the site, prevent fraud, and meet legal obligations"
+      }
+    },
+    "legalBasis": {
+      "title": "Legal basis and consent",
+      "body": "We use your information because you consented to it (for example, by ticking the agreement box when you register), because we need it to provide a service you asked for (such as a competition entry), because of our legitimate interests in running and protecting our programs, or because the law requires it."
+    },
+    "verification": {
+      "title": "Registration and certificate verification",
+      "body": "Each registration and certificate has a unique ID with a verification link or QR code. Anyone who has that link can see the participant's name, the event, and the registration or certificate details, so event staff, schools, and others can check that it is genuine. Keep your registration ID private. If you don't want a record to be publicly verifiable, contact us."
+    },
+    "media": {
+      "title": "Event photos and media",
+      "body": "We may take photos and videos at our events and show them on our website, gallery, news pages, and social media. A parent or guardian, or a participant aged 18 or over, can ask us to remove a photo or to keep a participant out of published media by emailing <mail>{email}</mail>."
+    },
+    "children": {
+      "title": "Children's privacy",
+      "body": "Many of our participants are under 18. We expect a parent or guardian to register a minor, or to agree to the registration. We collect only what we need to run our programs, and we don't use children's data for personalised advertising. If you think we have collected a child's information without proper consent, contact us and we will review it and delete it where appropriate."
+    },
+    "sharing": {
+      "title": "Who we share information with",
+      "intro": "We do not sell your personal information. We share it only with:",
+      "items": {
+        "providers": "<strong>Service providers</strong> who process data for us: Cloudflare (website hosting and database), Cloudinary (image hosting), Brevo (sending email), bKash (payments), and Google (Analytics and AdSense)",
+        "partners": "<strong>Event partners</strong>, such as host schools or competition organisers, but only what they need to run a specific event",
+        "authorities": "<strong>Authorities</strong>, when the law requires it or to protect people's rights and safety"
+      },
+      "outside": "Some of these providers process data outside Bangladesh. When they do, we rely on their own security and privacy commitments."
+    },
+    "advertising": {
+      "title": "Advertising (Google AdSense)",
+      "p1": "We use Google AdSense to show ads. Google and its partners may use cookies, including the DoubleClick cookie, to show ads based on your visits to this site and other sites.",
+      "p2": "To learn how Google uses data when you use our partners' sites, see <partnerSites>policies.google.com/technologies/partner-sites</partnerSites>. You can turn off personalised ads in <adsSettings>Google Ads Settings</adsSettings>, or opt out of interest-based ads at <naiOptout>optout.networkadvertising.org</naiOptout>."
+    },
+    "retention": {
+      "title": "Data retention",
+      "items": {
+        "registrations": "We keep registration and payment records for as long as we need them to run the event, issue certificates, and meet accounting and legal requirements (normally up to 5 years).",
+        "certificates": "We keep certificate records so the certificates can still be verified.",
+        "messages": "We keep messages and support emails for as long as we need them to deal with your request.",
+        "analytics": "Analytics data is kept according to Google's retention settings."
+      }
+    },
+    "security": {
+      "title": "How we protect information",
+      "body": "We use encrypted connections (HTTPS), restrict access to admin tools, use secure session cookies for staff accounts, and give access to personal data only to staff who need it. No system is completely secure. If you think your data has been put at risk, contact us right away."
+    },
+    "rights": {
+      "title": "Your rights and choices",
+      "items": {
+        "copy": "Ask for a copy of the personal data we hold about you or your child",
+        "correct": "Ask us to correct information that is wrong",
+        "delete": "Ask us to delete your data, unless we have to keep it for legal or accounting reasons",
+        "withdraw": "Withdraw consent to marketing emails or to the use of photos",
+        "cookies": "Block or delete cookies in your browser settings"
+      },
+      "request": "To make a request, email <mail>{email}</mail>. We may need to confirm your identity first, and we aim to reply within 30 days."
+    },
+    "changes": {
+      "title": "Changes to this policy",
+      "body": "We may update this policy from time to time. When we do, we change the \"Last updated\" date at the top of this page. If the changes are significant, we may also tell you by email or with a notice on the site."
+    },
+    "contact": {
+      "title": "Contact",
+      "body": "For questions about this policy, email <mail>{email}</mail> or visit our <contact>Contact</contact> page."
+    }
+  },
+  "terms": {
+    "intro": "These terms apply when you use the {name} website or register for any of our workshops, courses, events, or Robofest competitions. Please read them carefully.",
+    "accepting": {
+      "title": "1. Accepting these terms",
+      "body": "By using this website or submitting a registration, you agree to these Terms, our <privacy>Privacy Policy</privacy>, our <refund>Refund & Cancellation Policy</refund>, and our <conduct>Code of Conduct</conduct>. If you do not agree, please do not use the site or register."
+    },
+    "eligibility": {
+      "title": "2. Who can register",
+      "items": {
+        "guardian": "A parent or legal guardian must register participants under 18, or agree to their registration. Whoever submits a registration confirms they have the authority to do so.",
+        "requirements": "Each event or competition may have its own requirements for age, grade, or team size. These are shown on the event page or in the rulebook."
+      }
+    },
+    "registrations": {
+      "title": "3. Registrations and accuracy",
+      "items": {
+        "accurate": "Give accurate, complete, and up-to-date information. We may cancel registrations that use false details.",
+        "confirmed": "A registration is confirmed only when you receive a confirmation and, for paid events, payment has gone through.",
+        "personal": "Booking IDs, team numbers, and registration links are personal to you. Do not share them publicly.",
+        "limited": "Spots are limited and may be filled on a first-come, first-served basis."
+      }
+    },
+    "fees": {
+      "title": "4. Fees and payments",
+      "body": "Fees are shown in Bangladeshi Taka (BDT) and are paid through bKash. bKash's own terms also apply to your payment. Refunds follow our <refund>Refund & Cancellation Policy</refund>. Do not close your browser during checkout until you see the confirmation message."
+    },
+    "eventChanges": {
+      "title": "5. Events, schedules, and changes",
+      "body": "We may change event dates, venues, formats, rules, or categories, or cancel an event, if there is a good reason, such as safety, low enrolment, venue problems, or circumstances outside our control. When that happens, we will tell registered participants using the contact details they gave us."
+    },
+    "competitions": {
+      "title": "6. Competitions and judging",
+      "items": {
+        "rulebook": "Participants must follow the rulebook for their category. Organisers may update rulebooks before the event.",
+        "judges": "The judges' decisions are final. You can raise a concern through the process the organisers announce at the event.",
+        "cheating": "Cheating, tampering with another team's robot, or breaking the rules can lead to disqualification."
+      }
+    },
+    "certificates": {
+      "title": "7. Certificates",
+      "body": "Certificates are issued based on participation or results, as recorded by {name}. Each one has a verification link. Changing a certificate or presenting a fake one is prohibited, and we may revoke certificates that were issued in error or obtained through fraud."
+    },
+    "accounts": {
+      "title": "8. Accounts",
+      "body": "Dashboard accounts are only for authorised {name} staff and partners. Keep your login details private, and tell us right away if you think someone has used your account without permission. We may suspend accounts that are misused."
+    },
+    "acceptableUse": {
+      "title": "9. Acceptable use",
+      "intro": "You must not:",
+      "items": {
+        "law": "Break any law or anyone else's rights while using the site",
+        "access": "Try to get into accounts, systems, or data you are not authorised to access",
+        "disrupt": "Disrupt the site, overload it, or scrape it at scale",
+        "malicious": "Upload or send malicious code, spam, or harmful content",
+        "impersonate": "Pretend to be another person, school, or organisation"
+      }
+    },
+    "intellectualProperty": {
+      "title": "10. Intellectual property",
+      "body": "The website content, the {name} and Robofest names and logos, our designs, graphics, rulebooks, and course materials belong to {name} or its licensors. You may view and share them for personal, non-commercial use. Any other use needs our written permission. Teams keep the rights to their own project designs."
+    },
+    "media": {
+      "title": "11. Photos and media",
+      "body": "Events may be photographed or filmed. When you attend, you agree that we may use these images to promote our programs, as described in our <privacy>Privacy Policy</privacy>. You can opt out at any time by emailing us."
+    },
+    "liability": {
+      "title": "12. Safety and liability",
+      "p1": "Robotics activities can involve tools, electronics, and batteries. Participants must follow safety instructions from staff. Parents and guardians remain responsible for their children travelling to and from our events.",
+      "p2": "The site and our services are provided \"as is\". To the extent the law allows, {name} is not liable for indirect or consequential losses, or for lost or damaged personal belongings or equipment at events. Our total liability for any claim is limited to the fees you paid for the event in question. Nothing in these terms limits liability that cannot be limited under Bangladeshi law."
+    },
+    "thirdParty": {
+      "title": "13. Third-party links and services",
+      "body": "The site may link to or use third-party services, such as bKash, Google, and social media. We are not responsible for their content or practices, and their own terms apply."
+    },
+    "disclosure": {
+      "title": "14. Responsible disclosure (security)",
+      "body": "If you find a security vulnerability on our website, please report it privately to <mail>{email}</mail> with the subject line \"Security\". Include enough detail for us to reproduce it. Please do not access, change, or delete other people's data, disrupt the service, or share the issue publicly before we have fixed it. We will not take action against good-faith research that follows these guidelines."
+    },
+    "governingLaw": {
+      "title": "15. Governing law",
+      "body": "These terms are governed by the laws of the People's Republic of Bangladesh. Disputes will be handled by the courts of Dhaka. We encourage you to contact us first, as most issues can be resolved quickly."
+    },
+    "updates": {
+      "title": "16. Changes to these terms",
+      "body": "We may update these terms. When we do, we change the \"Last updated\" date above. If you keep using the site or register after a change, you accept the updated terms."
+    },
+    "contact": {
+      "title": "17. Contact",
+      "body": "For questions about these terms, email <mail>{email}</mail> or call <tel>{phone}</tel>."
+    }
+  },
+  "refund": {
+    "intro": "This policy covers fees paid to {name} for workshops, courses, events, and Robofest competitions, including payments made through bKash.",
+    "weCancel": {
+      "title": "If we cancel or reschedule",
+      "items": {
+        "cancelled": "<strong>Cancelled by us:</strong> you get a full refund of the registration fee.",
+        "rescheduled": "<strong>Rescheduled by us:</strong> your registration moves to the new date. If you can't attend the new date, you can ask for a full refund within 7 days of our announcement."
+      }
+    },
+    "youCancel": {
+      "title": "If you cancel",
+      "items": {
+        "full": "<strong>{fullDays, number} or more days before the event:</strong> full refund, minus any non-refundable payment-gateway charges.",
+        "partial": "<strong>{partialDays, number}–{partialMaxDays, number} days before the event:</strong> {percent, number}% refund.",
+        "none": "<strong>Less than {partialDays, number} days before, on the day, or if you don't show up:</strong> no refund.",
+        "kits": "If kits, materials, or certificates have already been issued for you, their cost may not be refunded.",
+        "special": "Some events, such as special competitions, may have a different policy. If so, it is stated on the event page, and that policy applies instead."
+      }
+    },
+    "transfers": {
+      "title": "Transfers",
+      "body": "Instead of a refund, you may ask to move your registration to another participant (with the same eligibility) or to a later session of the same program, if seats are available. Send the request at least {partialDays, number} days before the event."
+    },
+    "paymentIssues": {
+      "title": "Duplicate or failed payments",
+      "body": "If you were charged twice, or money left your account but your registration was not confirmed, email us within {reportDays, number} days with your bKash transaction ID. Once we have confirmed it, we refund duplicate charges in full."
+    },
+    "disqualification": {
+      "title": "Disqualification",
+      "body": "If a participant is disqualified or removed for breaking the competition rules or our <conduct>Code of Conduct</conduct>, their fees are not refunded."
+    },
+    "request": {
+      "title": "How to request a refund",
+      "intro": "Email <mail>{email}</mail> with the subject \"Refund request\" and include:",
+      "items": {
+        "participant": "The participant's name and the event",
+        "booking": "Your booking ID or registration ID",
+        "transaction": "The bKash transaction ID and the number you paid from",
+        "reason": "The reason for your request"
+      },
+      "processing": "We process approved refunds within {processingDays, number} business days, and the money goes back to the bKash account it came from. Depending on bKash, it may take a little longer to appear in your account."
+    },
+    "contact": {
+      "title": "Contact",
+      "body": "For questions about refunds, email <mail>{email}</mail> or call <tel>{phone}</tel>."
+    }
+  },
+  "cookies": {
+    "intro": "Cookies are small text files stored on your device. This page explains the cookies and similar technologies (such as local storage) that {name} uses, and how you can control them. Read it together with our <privacy>Privacy Policy</privacy>.",
+    "table": {
+      "cookie": "Cookie",
+      "provider": "Provider",
+      "purpose": "Purpose",
+      "duration": "Duration"
+    },
+    "groups": {
+      "necessary": {
+        "title": "Strictly necessary",
+        "description": "Needed for secure sign-in to the staff dashboard and for completing a bKash payment. The dashboard cookies are set only when an authorised user logs in; the payment cookie is set only when you start a payment. The site needs them to work.",
+        "rows": {
+          "authToken": {
+            "purpose": "Secure (HttpOnly) session token for signed-in staff",
+            "duration": "30 minutes"
+          },
+          "sessionStart": {
+            "purpose": "Enforces the session time-out",
+            "duration": "30 minutes"
+          },
+          "userInfo": {
+            "purpose": "Display-only copy of the signed-in user’s name and role",
+            "duration": "30 minutes"
+          },
+          "paymentLocale": {
+            "purpose": "Remembers your site language during a bKash payment so you return to the result page in the same language",
+            "duration": "1 hour"
+          }
+        }
+      },
+      "analytics": {
+        "title": "Analytics",
+        "description": "Help us understand how visitors use the site so we can improve it. These are not loaded on the staff dashboard.",
+        "rows": {
+          "ga": {
+            "purpose": "Tell visitors apart and measure page views and sessions",
+            "duration": "Up to 2 years"
+          }
+        }
+      },
+      "advertising": {
+        "title": "Advertising",
+        "description": "Used by Google AdSense to show ads, limit how often an ad repeats, and measure ad performance. Google may personalise ads based on your activity on other sites.",
+        "rows": {
+          "ads": {
+            "purpose": "Show ads and measure them; personalised ads where allowed",
+            "duration": "Up to 13 months"
+          }
+        }
+      }
+    },
+    "payment": {
+      "title": "Payment pages",
+      "body": "When you pay, you are sent to bKash's secure checkout. bKash may set its own cookies, which are covered by bKash's privacy policy."
+    },
+    "control": {
+      "title": "How to control cookies",
+      "items": {
+        "browser": "<strong>Browser settings:</strong> most browsers let you block or delete cookies. If you block strictly necessary cookies, dashboard sign-in will stop working.",
+        "analytics": "<strong>Google Analytics:</strong> install the <gaOptout>Google Analytics opt-out add-on</gaOptout>.",
+        "ads": "<strong>Personalised ads:</strong> change your choices in <adsSettings>Google Ads Settings</adsSettings> or at <naiOptout>optout.networkadvertising.org</naiOptout>.",
+        "google": "For more about how Google uses data, see <googleCookies>policies.google.com/technologies/cookies</googleCookies>."
+      }
+    },
+    "contact": {
+      "title": "Contact",
+      "body": "For questions about cookies, email <mail>{email}</mail>."
+    }
+  },
+  "codeOfConduct": {
+    "intro": "{name} wants every workshop, class, and competition to be safe, welcoming, and fair. This code applies to students, parents and guardians, mentors, coaches, volunteers, staff, and visitors, both at our events and online.",
+    "respect": {
+      "title": "Respect and inclusion",
+      "items": {
+        "courtesy": "Treat everyone with courtesy, whatever their age, gender, religion, ethnicity, disability, school, or skill level.",
+        "harassment": "Harassment, bullying, threats, and discrimination are not allowed, whether in person, online, or in group chats.",
+        "language": "Use appropriate language and behaviour. Many participants are children."
+      }
+    },
+    "safety": {
+      "title": "Safety in labs and arenas",
+      "items": {
+        "tools": "Follow staff instructions when using tools, soldering irons, motors, and batteries (especially LiPo batteries).",
+        "gear": "Wear safety gear whenever it is required, and keep your work area tidy.",
+        "report": "Report damaged equipment, injuries, or hazards to staff straight away.",
+        "dangerous": "Do not bring dangerous items, and do not change venue equipment without permission."
+      }
+    },
+    "fairPlay": {
+      "title": "Fair play",
+      "items": {
+        "rulebook": "Follow the rulebook for your category, as well as the judges' and referees' decisions.",
+        "ownWork": "Students should do their own work. Mentors may guide them but should not build or program for them in the competition.",
+        "tamper": "Never tamper with or damage another team's robot or equipment."
+      }
+    },
+    "safeguarding": {
+      "title": "Child safety and safeguarding",
+      "items": {
+        "alone": "Adults should not be alone with a child out of sight of others. Work in open, visible spaces.",
+        "contact": "Staff and volunteers must not contact participants privately for non-program reasons. Messages to minors should include a parent or guardian, or go through official channels.",
+        "pickup": "Parents and guardians are responsible for dropping off and picking up their children on time and for supervising them outside session hours.",
+        "photos": "Do not photograph or film other people's children without permission, except for normal photos of your own child's team."
+      },
+      "report": "<strong>Reporting a concern:</strong> if a child may be at risk, tell the nearest staff member right away, or email <mail>{email}</mail> or call <tel>{phone}</tel>. We treat every report seriously and confidentially. If someone is in immediate danger, call the Bangladesh emergency number <strong>999</strong>. The child helpline is <strong>1098</strong>."
+    },
+    "media": {
+      "title": "Photos and media",
+      "body": "Official photographers may take photos and videos at events, as described in our <privacy>Privacy Policy</privacy>. If you don't want your child to appear in published media, tell staff at check-in or email us."
+    },
+    "online": {
+      "title": "Online conduct",
+      "body": "The same standards apply in online classes, WhatsApp or Facebook groups, and on our social media. Do not share other people's personal information, spam, or post inappropriate content."
+    },
+    "consequences": {
+      "title": "Consequences",
+      "body": "Depending on how serious the breach is, we may give a warning, remove someone from a session or event, disqualify a team, ban someone from future programs, or report the matter to the authorities. Fees are not refunded in these cases (see our <refund>Refund Policy</refund>)."
+    }
+  }
+}

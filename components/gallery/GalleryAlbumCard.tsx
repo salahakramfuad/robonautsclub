@@ -1,8 +1,9 @@
-import Link from 'next/link'
+import { Link } from '@/i18n/navigation'
 import Image from 'next/image'
 import { Calendar, Images, MapPin } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { GalleryGroup } from '@/types/gallery'
+import { useTranslations } from 'next-intl'
 
 type Props = {
   group: GalleryGroup
@@ -11,6 +12,7 @@ type Props = {
 }
 
 export default function GalleryAlbumCard({ group, dateLine = '', featured = false }: Props) {
+  const t = useTranslations('gallery.card')
   const cover = group.images[0]?.url
   const stack = group.images.slice(1, 4).map((img) => img.url)
   const photoCount = group.imageCount ?? group.images.length
@@ -76,7 +78,7 @@ export default function GalleryAlbumCard({ group, dateLine = '', featured = fals
 
         <div className="absolute bottom-3 left-3 inline-flex items-center gap-1.5 rounded-full border border-cyan-300/30 bg-slate-950/55 px-2.5 py-1 text-[11px] font-semibold text-cyan-50 backdrop-blur-sm sm:bottom-4 sm:left-4 sm:text-xs">
           <Images className="size-3.5 shrink-0 text-cyan-200" aria-hidden />
-          {photoCount} photo{photoCount === 1 ? '' : 's'}
+          {t('photos', { count: photoCount })}
         </div>
       </div>
 

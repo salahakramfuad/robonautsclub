@@ -1,12 +1,17 @@
-import Link from 'next/link'
+import { Link } from '@/i18n/navigation'
 import Image from 'next/image'
 import { SITE_CONFIG } from '@/lib/site-config'
 import NavbarScrollShell from '@/components/NavbarScrollShell'
 import NavbarDesktopMenu from '@/components/NavbarDesktopMenu'
 import NavbarMobileMenu from '@/components/NavbarMobileMenu'
+import LanguageSwitcher from '@/components/LanguageSwitcher'
+import { getTranslations } from 'next-intl/server'
 
-export default function Nav({ hiddenHrefs = [] }: { hiddenHrefs?: string[] }) {
-  const menuItems = SITE_CONFIG.navLinks.filter((link) => !hiddenHrefs.includes(link.href))
+export default async function Nav({ hiddenHrefs = [] }: { hiddenHrefs?: string[] }) {
+  const t = await getTranslations('common.nav')
+  const menuItems = SITE_CONFIG.navLinks
+    .filter((link) => !hiddenHrefs.includes(link.href))
+    .map((link) => ({ title: t(`links.${link.key}`), href: link.href }))
 
   return (
     <NavbarScrollShell>
@@ -14,10 +19,10 @@ export default function Nav({ hiddenHrefs = [] }: { hiddenHrefs?: string[] }) {
         href="#main"
         className="sr-only focus:not-sr-only focus:absolute focus:inset-x-0 focus:top-2 mx-auto w-max rounded-lg bg-indigo-500 px-3 py-2 text-white"
       >
-        Skip to content
+        {t('skipToContent')}
       </a>
 
-      <nav aria-label="Primary" className="mx-auto max-w-7xl">
+      <nav aria-label={t('primary')} className="mx-auto max-w-7xl">
         <div className="flex items-center justify-between px-4 py-3">
           <Link
             href="/"
@@ -44,8 +49,9 @@ export default function Nav({ hiddenHrefs = [] }: { hiddenHrefs?: string[] }) {
               prefetch={false}
               className="inline-flex items-center gap-1.5 rounded-full bg-[#d4163f] px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-[#e8335a] no-underline hover:no-underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1f3a6f] focus-visible:ring-offset-2"
             >
-              Join an event
+              {t('joinEvent')}
             </Link>
+            <LanguageSwitcher />
             <NavbarMobileMenu menuItems={menuItems} />
           </div>
         </div>

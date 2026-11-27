@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import { useFormatter, useTranslations } from 'next-intl'
 import { cn } from '@/lib/utils'
 
 type Stat = {
@@ -9,11 +10,12 @@ type Stat = {
   label: string
 }
 
-const DEFAULT_STATS: Stat[] = [
-  { end: 50, suffix: '+', label: 'Participants' },
-  { end: 15, suffix: '+', label: 'Awards' },
-  { end: 100, suffix: '%', label: 'Satisfaction' },
-]
+/** Labels are `home.stats` message keys. */
+const DEFAULT_STATS = [
+  { end: 50, suffix: '+', labelKey: 'participants' },
+  { end: 15, suffix: '+', labelKey: 'awards' },
+  { end: 100, suffix: '%', labelKey: 'satisfaction' },
+] as const
 
 function useInView<T extends HTMLElement>() {
   const ref = useRef<T | null>(null)
@@ -47,6 +49,7 @@ function AnimatedValue({
   suffix: string
   active: boolean
 }) {
+  const format = useFormatter()
   const [value, setValue] = useState(0)
 
   useEffect(() => {
@@ -74,19 +77,23 @@ function AnimatedValue({
 
   return (
     <>
-      {value}
+      {format.number(value)}
       {suffix}
     </>
   )
 }
 
 export default function StatsStrip({
-  stats = DEFAULT_STATS,
+  stats: customStats,
   tone = 'dark',
 }: {
   stats?: Stat[]
   tone?: 'dark' | 'light'
 }) {
+  const t = useTranslations('home.stats')
+  const stats: Stat[] =
+    customStats ??
+    DEFAULT_STATS.map(({ labelKey, ...stat }) => ({ ...stat, label: t(labelKey) }))
   const { ref, inView } = useInView<HTMLDivElement>()
   const dark = tone === 'dark'
 

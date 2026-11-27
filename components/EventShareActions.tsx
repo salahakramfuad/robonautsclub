@@ -6,6 +6,7 @@ import { FaWhatsapp } from 'react-icons/fa'
 import type { Event } from '@/types/event'
 import { buildIcs, googleCalendarUrl, whatsappShareUrl } from '@/lib/event-calendar'
 import { cn } from '@/lib/utils'
+import { useTranslations } from 'next-intl'
 
 type Props = {
   event: Pick<Event, 'title' | 'date' | 'time' | 'location' | 'venue' | 'description'>
@@ -31,6 +32,7 @@ export default function EventShareActions({
   tone = 'light',
   showCalendar = true,
 }: Props) {
+  const t = useTranslations('events.share')
   const [copied, setCopied] = useState(false)
   const gcal = showCalendar ? googleCalendarUrl(event, pageUrl) : null
   const ics = showCalendar ? buildIcs(event, pageUrl) : null
@@ -70,27 +72,27 @@ export default function EventShareActions({
       {gcal ? (
         <a href={gcal} target="_blank" rel="noreferrer" className={chip}>
           <CalendarPlus className="size-4" aria-hidden />
-          Google Calendar
+          {t('googleCalendar')}
         </a>
       ) : null}
       {ics ? (
         <button type="button" onClick={downloadIcs} className={chip}>
           <Download className="size-4" aria-hidden />
-          Apple / Outlook (.ics)
+          {t('ics')}
         </button>
       ) : null}
       <a
-        href={whatsappShareUrl(`${shareText ?? `Join me at ${event.title}!`} ${pageUrl}`)}
+        href={whatsappShareUrl(`${shareText ?? t('defaultShareText', { title: event.title })} ${pageUrl}`)}
         target="_blank"
         rel="noreferrer"
         className={chip}
       >
         <FaWhatsapp className="size-4 text-emerald-500" aria-hidden />
-        Share on WhatsApp
+        {t('whatsapp')}
       </a>
       <button type="button" onClick={copyLink} className={chip} aria-live="polite">
         {copied ? <Check className="size-4 text-emerald-600" aria-hidden /> : <Link2 className="size-4" aria-hidden />}
-        {copied ? 'Link copied' : 'Copy link'}
+        {copied ? t('copied') : t('copyLink')}
       </button>
     </div>
   )

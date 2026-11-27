@@ -1,4 +1,5 @@
 'use server'
+import { revalidateLocalizedPath } from '@/lib/revalidate-localized'
 
 import { revalidatePath, revalidateTag, unstable_cache } from 'next/cache'
 import { requireAuth, canCreateArea, canEditOthersArea, canDeleteArea } from '@/lib/auth'
@@ -167,8 +168,8 @@ export async function createSchoolDirectoryEntry(input: SchoolDirectoryWriteInpu
   })
 
   revalidatePath('/dashboard/schools')
-  revalidatePath('/events')
-  revalidatePath('/robofest')
+  revalidateLocalizedPath('/events')
+  revalidateLocalizedPath('/robofest')
   revalidateTag(PUBLIC_SCHOOLS_TAG, 'max')
   revalidateTag(DASHBOARD_SCHOOLS_TAG, 'max')
   return { success: true }
@@ -207,8 +208,8 @@ export async function updateSchoolDirectoryEntry(
     updatedAt: new Date().toISOString(),
   }, { merge: true })
   revalidatePath('/dashboard/schools')
-  revalidatePath('/events')
-  revalidatePath('/robofest')
+  revalidateLocalizedPath('/events')
+  revalidateLocalizedPath('/robofest')
   revalidateTag(PUBLIC_SCHOOLS_TAG, 'max')
   revalidateTag(DASHBOARD_SCHOOLS_TAG, 'max')
   return { success: true }
@@ -266,8 +267,8 @@ export async function confirmPendingSchool(
   )
 
   revalidatePath('/dashboard/schools')
-  revalidatePath('/events')
-  revalidatePath('/robofest')
+  revalidateLocalizedPath('/events')
+  revalidateLocalizedPath('/robofest')
   revalidateTag(PUBLIC_SCHOOLS_TAG, 'max')
   revalidateTag(DASHBOARD_SCHOOLS_TAG, 'max')
   return { success: true }
@@ -350,8 +351,8 @@ export async function seedEnglishMediumSchools(): Promise<{ success: boolean; me
     await Promise.all(writes)
   }
   revalidatePath('/dashboard/schools')
-  revalidatePath('/events')
-  revalidatePath('/robofest')
+  revalidateLocalizedPath('/events')
+  revalidateLocalizedPath('/robofest')
   revalidateTag(PUBLIC_SCHOOLS_TAG, 'max')
   revalidateTag(DASHBOARD_SCHOOLS_TAG, 'max')
   return { success: true, message: created > 0 ? `Added ${created} schools.` : 'Directory already up to date.' }

@@ -1,0 +1,121 @@
+{
+  "hero": {
+    "eyebrow": "Robonauts – STEM, Robotics & Olympiad Education in Bangladesh",
+    "titleLine1": "Build Skills.",
+    "titleLine2": "Break Barriers.",
+    "titleLine3": "Go Global.",
+    "intro": "Hands-on robotics, competition pathways, and international stages for students ready to build what comes next.",
+    "joinEvent": "Join an event",
+    "seeCourses": "See our courses",
+    "aboutRobonauts": "About Robonauts",
+    "askWhatsapp": "Ask us on WhatsApp",
+    "news": "Robonauts News",
+    "gallery": "Event Gallery",
+    "robofest": "RoboFest",
+    "unmuteVideo": "Unmute video",
+    "muteVideo": "Mute video",
+    "tags": {
+      "stem": "STEM",
+      "robotics": "Robotics",
+      "olympiad": "Olympiad",
+      "innovation": "Innovation"
+    }
+  },
+  "eventsRail": {
+    "heading": "Upcoming opportunities",
+    "pauseSlideshow": "Pause event slideshow",
+    "playSlideshow": "Play event slideshow",
+    "allEvents": "All events",
+    "soon": "Soon",
+    "eventFallback": "Event",
+    "view": "View {title}"
+  },
+  "features": {
+    "eyebrow": "Why {name}",
+    "title": "More Than Learning.",
+    "titleAccent": "A Launchpad for What Comes Next.",
+    "mentorsCaption": "Coaches & alumni mentors",
+    "items": {
+      "handsOn": {
+        "title": "Hands-on STEM",
+        "description": "Build and program real robots and projects that turn theory into something you can hold, test, and improve.",
+        "extra": "Circuits, code, mechanical design — practiced in the lab, not just on a slide."
+      },
+      "mentors": {
+        "title": "Expert Mentors",
+        "description": "Learn beside instructors who have walked the competition floor and know how to coach the next step.",
+        "extra": "Guidance that scales from first build to international briefings."
+      },
+      "olympiad": {
+        "title": "Olympiad & Competition Focus",
+        "description": "Specialized pathways for national and international robotics, STEM, and academic contests.",
+        "extra": "Strategy, teamwork, and stage-ready confidence."
+      },
+      "ecosystem": {
+        "title": "One Stop ECA Solution",
+        "description": "Workshops, competitions, mentorship, and community — one ecosystem for young innovators.",
+        "extra": "From first curiosity to a portfolio that travels."
+      }
+    },
+    "ecosystemTags": {
+      "workshops": "Workshops",
+      "competitions": "Competitions",
+      "mentorship": "Mentorship",
+      "community": "Community"
+    }
+  },
+  "courses": {
+    "eyebrow": "Programs",
+    "title": "Learn with Robonauts",
+    "description": "Discover pathways designed for every stage — from first build to competition-ready.",
+    "exploreAll": "Explore all courses",
+    "empty": "No courses available at the moment. Check back soon!",
+    "featuredLabel": "Featured program",
+    "featuredCta": "Explore this program",
+    "learnMore": "Learn more"
+  },
+  "olympiads": {
+    "eyebrow": "Beyond the classroom",
+    "title": "Students from {name} participate on the world stage.",
+    "description": "Our teams train for leading national and international olympiads — experience that shapes how we coach every member, every season.",
+    "countriesHeading": "Countries our teams have reached",
+    "countries": {
+      "bd": "Bangladesh",
+      "th": "Thailand",
+      "my": "Malaysia",
+      "sg": "Singapore",
+      "cn": "China",
+      "jp": "Japan",
+      "kr": "South Korea",
+      "qa": "Qatar",
+      "tr": "Turkey",
+      "us": "USA",
+      "ca": "Canada",
+      "au": "Australia",
+      "england": "England",
+      "in": "India",
+      "id": "Indonesia",
+      "ph": "Philippines",
+      "vn": "Vietnam",
+      "ae": "UAE",
+      "sa": "Saudi Arabia"
+    }
+  },
+  "stats": {
+    "participants": "Participants",
+    "awards": "Awards",
+    "satisfaction": "Satisfaction"
+  },
+  "partners": {
+    "eyebrow": "Partners",
+    "title": "Our Strategic Partners",
+    "description": "Trusted by organizations who believe in the future of learning.",
+    "logoAlt": "{name} logo"
+  },
+  "schools": {
+    "eyebrow": "Schools",
+    "title": "Taking Innovation Beyond Our Walls",
+    "description": "Through seminars, workshops, and hands-on experiences, we bring future-ready learning to schools across our community.",
+    "logoAlt": "{name} logo"
+  }
+}

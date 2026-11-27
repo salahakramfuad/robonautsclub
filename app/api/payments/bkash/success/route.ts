@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { finalizePaidEventBooking } from '@/app/(marketing)/events/actions'
-import { finalizeRobofestPaidRegistration } from '@/app/(marketing)/robofest/actions'
+import { finalizePaidEventBooking } from '@/app/[locale]/(marketing)/events/actions'
+import { finalizeRobofestPaidRegistration } from '@/app/[locale]/(marketing)/robofest/actions'
 import { collectionGet } from '@/lib/db/collections'
+import { PAYMENT_LOCALE_COOKIE, localizePaymentPath } from '@/lib/payment-locale'
 
 function normalizeStatus(raw: string): string {
   const value = raw.toLowerCase()
@@ -22,7 +23,10 @@ async function handleCallback(
 ) {
   const status = normalizeStatus(payload.status || '')
   const paymentId = payload.paymentID || payload.paymentId || ''
-  const baseUrl = request.nextUrl.origin
+  const origin = request.nextUrl.origin
+  const localePrefix = localizePaymentPath('/', request.cookies.get(PAYMENT_LOCALE_COOKIE)?.value).replace(/\/$/, '')
+  // Result pages in the payer's language: `/payments/...` or `/bn/payments/...`.
+  const baseUrl = `${origin}${localePrefix}`
   console.info('[bkash-callback] received', {
     method: request.method,
     status,

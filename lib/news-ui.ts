@@ -16,11 +16,11 @@ export function newsDateTimeAttr(iso: string | Date | null | undefined): string 
   return d ? d.toISOString() : undefined
 }
 
-/** Understated public date: `18 Aug 2026` */
-export function formatNewsDate(iso: string | Date | null | undefined): string {
+/** Understated public date: `18 Aug 2026` (Bangla digits/month names when `locale` is `bn`). */
+export function formatNewsDate(iso: string | Date | null | undefined, locale = 'en'): string {
   const d = toValidDate(iso)
   if (!d) return ''
-  return new Intl.DateTimeFormat('en-GB', {
+  return new Intl.DateTimeFormat(locale === 'bn' ? 'bn-BD' : 'en-GB', {
     day: 'numeric',
     month: 'short',
     year: 'numeric',

@@ -1,0 +1,122 @@
+{
+  "meta": {
+    "ogAlt": "Robonauts - About Us"
+  },
+  "hero": {
+    "badge": "About {name}",
+    "title": "Where Innovation Meets Curiosity",
+    "subtitle": "Empowering young minds through hands-on STEM education in Dhaka. Join us in exploring the exciting world of robotics, automation, and innovation."
+  },
+  "whoWeAre": {
+    "title": "Who We Are",
+    "p1": "Founded in 2022, <strong>{name}</strong> delivers engaging STEM education through real-world projects.",
+    "p2": "We help students turn curiosity into confidence, providing hands-on learning experiences that prepare them for future challenges in technology and engineering.",
+    "imageAlt": "Robonauts Workshop"
+  },
+  "achievements": {
+    "title": "Our Achievements & Impact",
+    "subtitle": "Celebrating milestones and student success",
+    "stats": {
+      "members": "Active Members",
+      "events": "Events Hosted",
+      "awards": "Competition Awards",
+      "projects": "Projects Completed"
+    },
+    "impactTitle": "Making a Difference",
+    "successTitle": "Student Success Stories",
+    "successBody": "Our students have gone on to win national robotics competitions, secure scholarships, and pursue careers in engineering and technology. Many have represented Bangladesh in international robotics olympiads.",
+    "communityTitle": "Community Impact",
+    "communityBody": "We've partnered with schools across Dhaka to bring robotics education to underserved communities, organizing free workshops and providing resources to students who might not otherwise have access to STEM education."
+  },
+  "values": {
+    "title": "Our Core Values",
+    "subtitle": "The principles that guide everything we do",
+    "innovation": {
+      "title": "Innovation",
+      "description": "Creative problem solving and cutting-edge thinking"
+    },
+    "collaboration": {
+      "title": "Collaboration",
+      "description": "Learning together and building strong communities"
+    },
+    "empowerment": {
+      "title": "Empowerment",
+      "description": "Building confidence and unlocking potential"
+    }
+  },
+  "whatWeDo": {
+    "title": "What We Do",
+    "subtitle": "Comprehensive robotics and STEM education programs",
+    "workshops": {
+      "title": "Robotics Workshops",
+      "description": "Hands-on workshops covering robot assembly, programming, and troubleshooting."
+    },
+    "competition": {
+      "title": "Competition Training",
+      "description": "Specialized programs preparing students for national and international robotics competitions."
+    },
+    "stem": {
+      "title": "STEM Education",
+      "description": "Comprehensive STEM curriculum integrating science, technology, engineering, and mathematics."
+    },
+    "projects": {
+      "title": "Project-Based Learning",
+      "description": "Students work on real-world projects that develop problem-solving and critical thinking skills."
+    },
+    "mentorship": {
+      "title": "Mentorship Programs",
+      "description": "One-on-one and group mentorship from experienced robotics educators and engineers."
+    },
+    "community": {
+      "title": "Community Events",
+      "description": "Regular community events, exhibitions, and showcases celebrating student achievements."
+    }
+  },
+  "team": {
+    "title": "Our Team & Mentors",
+    "subtitle": "Meet the passionate educators guiding our students",
+    "shakib": {
+      "role": "Robotics Instructor",
+      "expertise": "Robotics Engineering, Competition Strategy"
+    },
+    "naziur": {
+      "role": "Robotics Instructor",
+      "expertise": "Curriculum Development, Student Mentorship"
+    },
+    "fuad": {
+      "role": "Programming & Web Development Instructor",
+      "expertise": "Python, Machine Learning, Arduino"
+    },
+    "ayesha": {
+      "role": "Competition Coordinator",
+      "expertise": "Event Management, Team Building"
+    },
+    "rashid": {
+      "role": "Hardware & Electronics Expert",
+      "expertise": "Circuit Design, Sensor Integration"
+    },
+    "sara": {
+      "role": "Youth Program Director",
+      "expertise": "Educational Psychology, Student Engagement"
+    }
+  },
+  "contact": {
+    "title": "Contact Information",
+    "subtitle": "Get in touch with us",
+    "details": "Contact Details",
+    "address": "Address",
+    "addressValue": "5B, House #4, Road #7, Sector #3, Uttara",
+    "viewOnMaps": "View on Google Maps",
+    "serviceArea": "Service Area",
+    "serviceAreaValue": "Dhaka, Dhaka Division, Bangladesh",
+    "mobile": "Mobile",
+    "whatsapp": "WhatsApp",
+    "email": "Email"
+  },
+  "map": {
+    "loading": "Loading map",
+    "addressLine1": "5B, House #4, Road #7, Sector #3, Uttara",
+    "addressLine2": "Dhaka, Bangladesh",
+    "viewOnMaps": "View on Google Maps"
+  }
+}

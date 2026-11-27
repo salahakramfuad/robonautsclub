@@ -2,11 +2,18 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import enCommon from "@/messages/en/common.json";
+import bnCommon from "@/messages/bn/common.json";
 import { Home, ArrowRight, Plug } from "lucide-react";
 
+// Rendered outside the [locale] layout (unmatched URLs), so pick strings from the URL.
 export default function NotFound() {
   const router = useRouter();
+  const pathname = usePathname() ?? "";
+  const isBangla = pathname === "/bn" || pathname.startsWith("/bn/");
+  const t = (isBangla ? bnCommon : enCommon).notFound;
+  const homeHref = isBangla ? "/bn" : "/";
   const [countdown, setCountdown] = useState(3);
 
   // Countdown timer
@@ -21,12 +28,12 @@ export default function NotFound() {
   // Redirect when countdown reaches 0
   useEffect(() => {
     if (countdown === 0) {
-      router.push('/');
+      router.push(homeHref);
     }
-  }, [countdown, router]);
+  }, [countdown, router, homeHref]);
 
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center px-4 bg-gray-50">
+    <main lang={isBangla ? "bn" : "en"} className="min-h-screen flex flex-col items-center justify-center px-4 bg-gray-50">
       <div className="max-w-md w-full text-center space-y-8">
         {/* Robot with no battery/charger disconnected */}
         <div className="flex justify-center mb-4">
@@ -79,38 +86,38 @@ export default function NotFound() {
             404
           </div>
           <h1 className="text-xl md:text-2xl font-semibold text-gray-700 mb-2">
-            Page Not Found
+            {t.title}
           </h1>
           <p className="text-gray-600 text-sm">
-            This robot needs recharging to continue.
+            {t.subtitle}
           </p>
         </div>
 
         {/* Countdown */}
         <div className="inline-flex items-center gap-2 px-4 py-2 bg-white rounded-lg border border-gray-200 shadow-sm">
-          <span className="text-sm text-gray-600">Redirecting in</span>
+          <span className="text-sm text-gray-600">{t.redirectingIn}</span>
           <span className="text-lg font-semibold text-indigo-500 tabular-nums min-w-6 text-center">
             {countdown}
           </span>
-          <span className="text-sm text-gray-600">s</span>
+          <span className="text-sm text-gray-600">{t.secondsShort}</span>
         </div>
 
         {/* Action buttons */}
         <div className="flex flex-col sm:flex-row gap-3 justify-center pt-4">
           <Link
-            href="/"
+            href={homeHref}
             prefetch={false}
             className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-indigo-500 text-white rounded-lg font-medium hover:bg-indigo-600 transition-colors no-underline"
           >
             <Home className="w-4 h-4" />
-            Go Home
+            {t.goHome}
           </Link>
           <Link
-            href="/events"
+            href={isBangla ? "/bn/events" : "/events"}
             prefetch={false}
             className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-white text-gray-700 rounded-lg font-medium border border-gray-200 hover:bg-gray-50 transition-colors no-underline"
           >
-            Explore Events
+            {t.exploreEvents}
             <ArrowRight className="w-4 h-4" />
           </Link>
         </div>

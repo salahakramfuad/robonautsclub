@@ -1,6 +1,6 @@
 'use client'
 
-import Link from 'next/link'
+import { Link } from '@/i18n/navigation'
 import { ArrowRight, Pause, Play } from 'lucide-react'
 import type { Event } from '@/types/event'
 import { eventPublicHref } from '@/lib/event-ui'
@@ -15,27 +15,26 @@ import {
 } from '@/components/ui/carousel'
 import Autoplay from 'embla-carousel-autoplay'
 import { useEffect, useRef, useState } from 'react'
+import { useLocale, useTranslations } from 'next-intl'
 
-function eventDateParts(date: Event['date']) {
+function eventDateParts(date: Event['date'], locale: string) {
   const dates = parseEventDates(date)
   const raw = dates[0] ?? ''
   const match = raw.match(/^(\d{4})-(\d{2})-(\d{2})/)
   if (match) {
-    const month = new Date(Number(match[1]), Number(match[2]) - 1, 1).toLocaleString(
-      'en-US',
-      { month: 'short' },
-    )
-    return { month, day: String(Number(match[3])) }
+    const tag = locale === 'bn' ? 'bn-BD' : 'en-US'
+    const day = new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]))
+    return {
+      month: day.toLocaleString(tag, { month: 'short' }),
+      day: day.toLocaleString(tag, { day: 'numeric' }),
+    }
   }
-  return { month: 'Soon', day: '—' }
-}
-
-function categoryLabel(event: Event) {
-  if (event.tags && event.tags.length > 0) return event.tags[0]
-  return 'Event'
+  return null
 }
 
 export default function UpcomingEventsRail({ events }: { events: Event[] }) {
+  const t = useTranslations('home.eventsRail')
+  const locale = useLocale()
   const autoplay = useRef(
     Autoplay({ delay: 5200, stopOnInteraction: true, stopOnMouseEnter: true }),
   )
@@ -70,7 +69,7 @@ export default function UpcomingEventsRail({ events }: { events: Event[] }) {
     <div className="w-full">
       <div className="mb-3 flex items-end justify-between gap-3">
         <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-sky-200/90">
-          Upcoming opportunities
+          {t('heading')}
         </p>
         <div className="flex items-center gap-3">
           {canAutoplay ? (
@@ -78,7 +77,7 @@ export default function UpcomingEventsRail({ events }: { events: Event[] }) {
               type="button"
               onClick={togglePlay}
               className="inline-flex size-7 items-center justify-center rounded-full border border-white/20 bg-black/30 text-white/80 transition hover:bg-black/50 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-300"
-              aria-label={playing ? 'Pause event slideshow' : 'Play event slideshow'}
+              aria-label={playing ? t('pauseSlideshow') : t('playSlideshow')}
             >
               {playing ? <Pause className="size-3.5" /> : <Play className="size-3.5" />}
             </button>
@@ -88,7 +87,7 @@ export default function UpcomingEventsRail({ events }: { events: Event[] }) {
             prefetch={false}
             className="group inline-flex items-center gap-1 text-xs font-medium text-white/70 transition-colors hover:text-white"
           >
-            All events
+            {t('allEvents')}
             <ArrowRight className="size-3.5 transition-transform duration-300 group-hover:translate-x-0.5" />
           </Link>
         </div>
@@ -113,8 +112,8 @@ export default function UpcomingEventsRail({ events }: { events: Event[] }) {
 
         <CarouselContent className="-ml-3">
           {events.map((event) => {
-            const parts = eventDateParts(event.date)
-            const category = categoryLabel(event)
+            const parts = eventDateParts(event.date, locale) ?? { month: t('soon'), day: '—' }
+            const category = event.tags?.[0] || t('eventFallback')
             return (
               <CarouselItem
                 key={event.id}
@@ -141,7 +140,7 @@ export default function UpcomingEventsRail({ events }: { events: Event[] }) {
                   </div>
                   <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-white/10 text-white/80 transition-all duration-300 group-hover:bg-indigo-500 group-hover:text-white">
                     <ArrowRight className="size-3.5 transition-transform duration-300 group-hover:translate-x-0.5" />
-                    <span className="sr-only">View {event.title}</span>
+                    <span className="sr-only">{t('view', { title: event.title })}</span>
                   </span>
                 </Link>
               </CarouselItem>

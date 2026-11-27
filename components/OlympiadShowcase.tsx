@@ -5,6 +5,8 @@ import { SITE_CONFIG } from '@/lib/site-config'
 import InfiniteMarquee from '@/components/InfiniteMarquee'
 import StatsStrip from '@/components/StatsStrip'
 import Reveal from '@/components/Reveal'
+import { Link } from '@/i18n/navigation'
+import { useTranslations } from 'next-intl'
 
 const OLYMPIADS = [
   {
@@ -45,51 +47,51 @@ const OLYMPIADS = [
 ] as const
 
 const COUNTRIES_A = [
-  { name: 'Bangladesh', flag: '🇧🇩' },
-  { name: 'Thailand', flag: '🇹🇭' },
-  { name: 'Malaysia', flag: '🇲🇾' },
-  { name: 'Singapore', flag: '🇸🇬' },
-  { name: 'China', flag: '🇨🇳' },
-  { name: 'Japan', flag: '🇯🇵' },
-  { name: 'South Korea', flag: '🇰🇷' },
-  { name: 'Qatar', flag: '🇶🇦' },
-  { name: 'Turkey', flag: '🇹🇷' },
-  { name: 'USA', flag: '🇺🇸' },
-  { name: 'Canada', flag: '🇨🇦' },
-  { name: 'Australia', flag: '🇦🇺' },
-  { name: 'England', flag: '🇬🇧' },
+  { code: 'bd', flag: '🇧🇩' },
+  { code: 'th', flag: '🇹🇭' },
+  { code: 'my', flag: '🇲🇾' },
+  { code: 'sg', flag: '🇸🇬' },
+  { code: 'cn', flag: '🇨🇳' },
+  { code: 'jp', flag: '🇯🇵' },
+  { code: 'kr', flag: '🇰🇷' },
+  { code: 'qa', flag: '🇶🇦' },
+  { code: 'tr', flag: '🇹🇷' },
+  { code: 'us', flag: '🇺🇸' },
+  { code: 'ca', flag: '🇨🇦' },
+  { code: 'au', flag: '🇦🇺' },
+  { code: 'england', flag: '🇬🇧' },
 ] as const
 
 const COUNTRIES_B = [
-  { name: 'India', flag: '🇮🇳' },
-  { name: 'Indonesia', flag: '🇮🇩' },
-  { name: 'Philippines', flag: '🇵🇭' },
-  { name: 'Vietnam', flag: '🇻🇳' },
-  { name: 'UAE', flag: '🇦🇪' },
-  { name: 'Saudi Arabia', flag: '🇸🇦' },
-  { name: 'Bangladesh', flag: '🇧🇩' },
-  { name: 'Thailand', flag: '🇹🇭' },
-  { name: 'Malaysia', flag: '🇲🇾' },
-  { name: 'Singapore', flag: '🇸🇬' },
-  { name: 'China', flag: '🇨🇳' },
-  { name: 'Japan', flag: '🇯🇵' },
-  { name: 'South Korea', flag: '🇰🇷' },
-  { name: 'Qatar', flag: '🇶🇦' },
+  { code: 'in', flag: '🇮🇳' },
+  { code: 'id', flag: '🇮🇩' },
+  { code: 'ph', flag: '🇵🇭' },
+  { code: 'vn', flag: '🇻🇳' },
+  { code: 'ae', flag: '🇦🇪' },
+  { code: 'sa', flag: '🇸🇦' },
+  { code: 'bd', flag: '🇧🇩' },
+  { code: 'th', flag: '🇹🇭' },
+  { code: 'my', flag: '🇲🇾' },
+  { code: 'sg', flag: '🇸🇬' },
+  { code: 'cn', flag: '🇨🇳' },
+  { code: 'jp', flag: '🇯🇵' },
+  { code: 'kr', flag: '🇰🇷' },
+  { code: 'qa', flag: '🇶🇦' },
 ] as const
 
 export default function OlympiadShowcase() {
+  const t = useTranslations('home.olympiads')
   return (
     <div className="relative">
       <Reveal className="mx-auto mb-10 max-w-3xl text-center sm:mb-14">
         <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-sky-300 sm:text-xs">
-          Beyond the classroom
+          {t('eyebrow')}
         </p>
         <h2 className="mt-3 text-3xl font-bold tracking-tight text-white sm:text-4xl md:text-5xl">
-          Students from {SITE_CONFIG.name} participate on the world stage.
+          {t('title', { name: SITE_CONFIG.name })}
         </h2>
         <p className="mx-auto mt-4 max-w-2xl text-sm leading-relaxed text-slate-300 sm:text-base">
-          Our teams train for leading national and international olympiads — experience that
-          shapes how we coach every member, every season.
+          {t('description')}
         </p>
       </Reveal>
 
@@ -97,27 +99,37 @@ export default function OlympiadShowcase() {
         <InfiniteMarquee duration={42} fadeClassName="from-slate-950">
           {OLYMPIADS.map((olympiad) => {
             const isExternal = olympiad.url.startsWith('http')
-            return (
-            <a
-              key={olympiad.name}
-              href={olympiad.url}
-              {...(isExternal
-                ? { target: '_blank', rel: 'noopener noreferrer' }
-                : {})}
-              className="group flex h-24 w-46 shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-5 transition-all duration-300 hover:border-sky-300/40 hover:bg-white/10 sm:h-28 sm:w-52"
-            >
-              <div className="relative h-14 w-full sm:h-16">
-                <Image
-                  src={olympiad.logo}
-                  alt={olympiad.name}
-                  fill
-                  className="object-contain opacity-80 transition-all duration-300 group-hover:opacity-100"
-                  quality={90}
-                  sizes="180px"
-                />
-              </div>
-              <span className="sr-only">{olympiad.name}</span>
-            </a>
+            const className =
+              'group flex h-24 w-46 shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-5 transition-all duration-300 hover:border-sky-300/40 hover:bg-white/10 sm:h-28 sm:w-52'
+            const content = (
+              <>
+                <div className="relative h-14 w-full sm:h-16">
+                  <Image
+                    src={olympiad.logo}
+                    alt={olympiad.name}
+                    fill
+                    className="object-contain opacity-80 transition-all duration-300 group-hover:opacity-100"
+                    quality={90}
+                    sizes="180px"
+                  />
+                </div>
+                <span className="sr-only">{olympiad.name}</span>
+              </>
+            )
+            return isExternal ? (
+              <a
+                key={olympiad.name}
+                href={olympiad.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={className}
+              >
+                {content}
+              </a>
+            ) : (
+              <Link key={olympiad.name} href={olympiad.url} prefetch={false} className={className}>
+                {content}
+              </Link>
             )
           })}
         </InfiniteMarquee>
@@ -129,16 +141,16 @@ export default function OlympiadShowcase() {
 
       <div className="mt-10 space-y-3 sm:mt-14">
         <p className="mb-4 text-center text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-400 sm:text-xs">
-          Countries our teams have reached
+          {t('countriesHeading')}
         </p>
         <InfiniteMarquee duration={38} fadeClassName="from-slate-950">
           {COUNTRIES_A.map((country) => (
-            <CountryChip key={country.name} {...country} />
+            <CountryChip key={country.code} name={t(`countries.${country.code}`)} flag={country.flag} />
           ))}
         </InfiniteMarquee>
         <InfiniteMarquee reverse duration={46} fadeClassName="from-slate-950">
           {COUNTRIES_B.map((country) => (
-            <CountryChip key={country.name} {...country} />
+            <CountryChip key={country.code} name={t(`countries.${country.code}`)} flag={country.flag} />
           ))}
         </InfiniteMarquee>
       </div>

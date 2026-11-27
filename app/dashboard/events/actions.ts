@@ -1,6 +1,7 @@
 'use server'
+import { revalidateLocalizedPath } from '@/lib/revalidate-localized'
 
-import { revalidatePath, revalidateTag, unstable_cache } from 'next/cache'
+import { revalidateTag, unstable_cache } from 'next/cache'
 import {
   requireAuth,
   canCreateArea,
@@ -189,8 +190,8 @@ export async function createEvent(formData: {
     })
 
     // Revalidate ISR pages to show new event immediately
-    revalidatePath('/events')
-    revalidatePath(`/events/${slug}`)
+    revalidateLocalizedPath('/events')
+    revalidateLocalizedPath(`/events/${slug}`)
     revalidateTag(DASHBOARD_EVENTS_LIST_TAG, 'max')
     revalidateTag(DASHBOARD_EVENTS_SUMMARY_TAG, 'max')
     revalidateTag(PUBLIC_EVENTS_TAG, 'max')
@@ -340,12 +341,12 @@ export async function updateEvent(
     }, { merge: true })
 
     // Revalidate ISR pages to show updated event immediately
-    revalidatePath('/events')
-    revalidatePath(`/events/${slug}`)
+    revalidateLocalizedPath('/events')
+    revalidateLocalizedPath(`/events/${slug}`)
     if (previousSlug && previousSlug !== slug) {
-      revalidatePath(`/events/${previousSlug}`)
+      revalidateLocalizedPath(`/events/${previousSlug}`)
     }
-    revalidatePath(`/events/${eventId}`)
+    revalidateLocalizedPath(`/events/${eventId}`)
     revalidateTag(DASHBOARD_EVENTS_LIST_TAG, 'max')
     revalidateTag(DASHBOARD_EVENTS_SUMMARY_TAG, 'max')
     revalidateTag(getEventDetailTag(eventId), 'max')
@@ -406,11 +407,11 @@ export async function deleteEvent(eventId: string): Promise<{ success: boolean; 
     // Revalidate ISR pages to remove deleted event immediately
     const deletedSlug =
       typeof eventData.slug === 'string' && eventData.slug.trim() ? eventData.slug.trim() : ''
-    revalidatePath('/events')
+    revalidateLocalizedPath('/events')
     if (deletedSlug) {
-      revalidatePath(`/events/${deletedSlug}`)
+      revalidateLocalizedPath(`/events/${deletedSlug}`)
     }
-    revalidatePath(`/events/${eventId}`)
+    revalidateLocalizedPath(`/events/${eventId}`)
     revalidateTag(DASHBOARD_EVENTS_LIST_TAG, 'max')
     revalidateTag(DASHBOARD_EVENTS_SUMMARY_TAG, 'max')
     revalidateTag(getEventDetailTag(eventId), 'max')

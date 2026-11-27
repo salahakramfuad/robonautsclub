@@ -2,12 +2,13 @@
 
 import { useState, useEffect } from 'react'
 import dynamic from 'next/dynamic'
-import Link from 'next/link'
+import { Link } from '@/i18n/navigation'
 import Image from 'next/image'
 import { ArrowRight, Volume2, VolumeX } from 'lucide-react'
 import type { Event } from '@/types/event'
 import { Button } from '@/components/ui/button'
 import { SITE_CONFIG } from '@/lib/site-config'
+import { useTranslations } from 'next-intl'
 
 const UpcomingEventsRail = dynamic(() => import('@/components/UpcomingEventsRail'), {
   ssr: true,
@@ -20,7 +21,7 @@ const HERO_VIDEO =
 const HERO_VIDEO_POSTER =
   'https://res.cloudinary.com/digkc0xsk/video/upload/f_jpg,q_80,so_0/v1771270419/ROBOFESTnew_lj6ak1.jpg'
 
-const TRACK_TAGS = ['STEM', 'Robotics', 'Olympiad', 'Innovation'] as const
+const TRACK_TAGS = ['stem', 'robotics', 'olympiad', 'innovation'] as const
 
 export default function Hero({
   upcomingEvents = [],
@@ -32,6 +33,7 @@ export default function Hero({
   videoEnabled?: boolean
   coursesPageEnabled?: boolean
 }) {
+  const t = useTranslations('home.hero')
   const [muted, setMuted] = useState(true)
   /** Avoid Cloudinary video bytes on small viewports / reduced motion — fewer network requests. */
   const [useVideoBg, setUseVideoBg] = useState(false)
@@ -97,20 +99,19 @@ export default function Hero({
           <div className="w-full max-w-[28rem] space-y-6 text-left sm:max-w-md md:max-w-lg lg:max-w-xl lg:space-y-7">
             <h1 className="space-y-6 lg:space-y-7">
               <span className="block text-sm font-semibold uppercase tracking-[0.2em] text-sky-200/95 sm:text-base md:text-lg">
-                Robonauts – STEM, Robotics &amp; Olympiad Education in Bangladesh
+                {t('eyebrow')}
               </span>
               <span className="block text-4xl font-bold tracking-tight text-white drop-shadow-[0_2px_12px_rgba(0,0,0,0.55)] sm:text-5xl md:text-6xl lg:text-[4.25rem] lg:leading-[0.95]">
-              <span className="block">Build Skills.</span>
-              <span className="block">Break Barriers.</span>
+              <span className="block">{t('titleLine1')}</span>
+              <span className="block">{t('titleLine2')}</span>
               <span className="mt-1 block bg-linear-to-r from-rose-200 via-sky-200 to-indigo-200 bg-clip-text text-transparent">
-                Go Global.
+                {t('titleLine3')}
               </span>
               </span>
             </h1>
 
             <p className="max-w-md text-base leading-relaxed text-slate-100/90 sm:text-lg">
-              Hands-on robotics, competition pathways, and international stages for students
-              ready to build what comes next.
+              {t('intro')}
             </p>
 
             <div className="flex flex-col gap-3 pt-1 sm:flex-row sm:items-center">
@@ -120,7 +121,7 @@ export default function Hero({
                 className="h-12 rounded-xl bg-[#d4163f] px-7 text-base font-semibold text-white shadow-[0_16px_40px_-16px_rgba(212,22,63,0.9)] hover:bg-[#e8335a]"
               >
                 <Link href="/events" prefetch={false}>
-                  Join an event
+                  {t('joinEvent')}
                   <ArrowRight className="size-5" />
                 </Link>
               </Button>
@@ -131,7 +132,7 @@ export default function Hero({
                 className="h-12 rounded-xl border-white/30 bg-transparent px-7 text-base font-medium text-white/90 hover:border-white/50 hover:bg-white/10 hover:text-white"
               >
                 <Link href={coursesPageEnabled ? '/courses' : '/about'} prefetch={false}>
-                  {coursesPageEnabled ? 'See our courses' : 'About Robonauts'}
+                  {coursesPageEnabled ? t('seeCourses') : t('aboutRobonauts')}
                 </Link>
               </Button>
             </div>
@@ -143,19 +144,19 @@ export default function Hero({
                 rel="noreferrer"
                 className="font-semibold text-emerald-300 underline-offset-4 hover:text-emerald-200 hover:underline"
               >
-                Ask us on WhatsApp
+                {t('askWhatsapp')}
               </a>
               <span aria-hidden="true">·</span>
               <Link href="/news" prefetch={false} className="font-medium underline-offset-4 hover:text-white hover:underline">
-                Robonauts News
+                {t('news')}
               </Link>
               <span aria-hidden="true">·</span>
               <Link href="/gallery" prefetch={false} className="font-medium underline-offset-4 hover:text-white hover:underline">
-                Event Gallery
+                {t('gallery')}
               </Link>
               <span aria-hidden="true">·</span>
               <Link href="/robofest" prefetch={false} className="font-medium underline-offset-4 hover:text-white hover:underline">
-                RoboFest
+                {t('robofest')}
               </Link>
             </p>
 
@@ -165,7 +166,7 @@ export default function Hero({
                   key={tag}
                   className="rounded-full border border-white/15 bg-white/5 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-white/80"
                 >
-                  {tag}
+                  {t(`tags.${tag}`)}
                 </li>
               ))}
             </ul>
@@ -188,7 +189,7 @@ export default function Hero({
           size="icon"
           onClick={() => setMuted((m) => !m)}
           className="absolute right-5 bottom-8 z-30 rounded-full border border-white/20 bg-black/50 text-white hover:bg-black/70 hover:text-white"
-          aria-label={muted ? 'Unmute video' : 'Mute video'}
+          aria-label={muted ? t('unmuteVideo') : t('muteVideo')}
         >
           {muted ? <VolumeX className="size-5" /> : <Volume2 className="size-5" />}
         </Button>

@@ -25,7 +25,8 @@
     "cf:copy-firebase": "node scripts/dump-firebase.mjs && node scripts/import-d1.mjs --remote",
     "cf:set-admin-password": "node scripts/set-admin-password.mjs",
     "cf-typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts --include-runtime=false",
-    "analyze": "ANALYZE=true next build --webpack"
+    "analyze": "ANALYZE=true next build --webpack",
+    "check:i18n": "node scripts/check-i18n-keys.mjs"
   },
   "dependencies": {
     "@getbrevo/brevo": "^3.0.1",
@@ -48,6 +49,7 @@
     "leaflet": "^1.9.4",
     "lucide-react": "^0.562.0",
     "next": "16.2.4",
+    "next-intl": "^4.16.2",
     "next-themes": "^0.4.6",
     "pdfkit": "^0.17.2",
     "qrcode": "^1.5.4",

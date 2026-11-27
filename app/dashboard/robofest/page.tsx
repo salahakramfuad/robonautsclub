@@ -1,5 +1,5 @@
 import { requireTabAccess, canCreateArea, canEditOthersArea, canDeleteArea, hasPermission } from '@/lib/auth'
-import { getPublicEnglishMediumSchools } from '@/app/(marketing)/events/public-data'
+import { getPublicEnglishMediumSchools } from '@/app/[locale]/(marketing)/events/public-data'
 import {
   getRobofestCampusAmbassadorReferralCounts,
   getRobofestCampusAmbassadors,

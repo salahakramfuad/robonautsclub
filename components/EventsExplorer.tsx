@@ -1,9 +1,10 @@
 'use client'
 
 import { useMemo, useState, type ReactNode } from 'react'
-import Link from 'next/link'
+import { Link } from '@/i18n/navigation'
 import { Calendar, Search, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { useTranslations } from 'next-intl'
 
 export type ExplorerEventItem = {
   key: string
@@ -45,6 +46,7 @@ function Chip({
 }
 
 function SectionHeader({ title, subtitle, count }: { title: string; subtitle: string; count: number }) {
+  const t = useTranslations('events.explorer')
   return (
     <div className="mb-6 flex flex-col gap-2 sm:mb-8 sm:flex-row sm:items-end sm:justify-between">
       <div>
@@ -52,13 +54,14 @@ function SectionHeader({ title, subtitle, count }: { title: string; subtitle: st
         <p className="mt-1 text-sm text-gray-600 sm:text-base">{subtitle}</p>
       </div>
       <span className="self-start rounded-full bg-indigo-100 px-3 py-1 text-sm font-semibold text-indigo-700 sm:self-auto">
-        {count} event{count === 1 ? '' : 's'}
+        {t('eventCount', { count })}
       </span>
     </div>
   )
 }
 
 export default function EventsExplorer({ items }: { items: ExplorerEventItem[] }) {
+  const t = useTranslations('events.explorer')
   const [when, setWhen] = useState<When>('all')
   const [price, setPrice] = useState<Price>('any')
   const [tag, setTag] = useState<string | null>(null)
@@ -67,11 +70,11 @@ export default function EventsExplorer({ items }: { items: ExplorerEventItem[] }
   // Most-used organiser tags become quick filters.
   const topTags = useMemo(() => {
     const counts = new Map<string, number>()
-    for (const item of items) for (const t of item.tags) counts.set(t, (counts.get(t) ?? 0) + 1)
+    for (const item of items) for (const name of item.tags) counts.set(name, (counts.get(name) ?? 0) + 1)
     return [...counts.entries()]
       .sort((a, b) => b[1] - a[1])
       .slice(0, MAX_TAG_CHIPS)
-      .map(([t]) => t)
+      .map(([name]) => name)
   }, [items])
 
   const hasPaid = items.some((i) => !i.free)
@@ -105,24 +108,24 @@ export default function EventsExplorer({ items }: { items: ExplorerEventItem[] }
     <>
       <div className="mb-10 space-y-4 rounded-3xl bg-white p-4 shadow-sm ring-1 ring-slate-200 sm:p-5">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-          <div role="group" aria-label="When" className="flex flex-wrap gap-2">
+          <div role="group" aria-label={t('whenLabel')} className="flex flex-wrap gap-2">
             <Chip active={when === 'upcoming'} onClick={() => setWhen('upcoming')}>
-              Upcoming
+              {t('upcoming')}
             </Chip>
             <Chip active={when === 'past'} onClick={() => setWhen('past')}>
-              Past
+              {t('past')}
             </Chip>
             <Chip active={when === 'all'} onClick={() => setWhen('all')}>
-              All
+              {t('all')}
             </Chip>
             {hasFree && hasPaid ? (
               <>
                 <span className="mx-1 hidden w-px self-stretch bg-slate-200 sm:block" aria-hidden />
                 <Chip active={price === 'free'} onClick={() => setPrice(price === 'free' ? 'any' : 'free')}>
-                  Free
+                  {t('free')}
                 </Chip>
                 <Chip active={price === 'paid'} onClick={() => setPrice(price === 'paid' ? 'any' : 'paid')}>
-                  Paid
+                  {t('paid')}
                 </Chip>
               </>
             ) : null}
@@ -130,21 +133,21 @@ export default function EventsExplorer({ items }: { items: ExplorerEventItem[] }
           <div className="relative w-full lg:w-72">
             <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" aria-hidden />
             <label htmlFor="event-search" className="sr-only">
-              Search events
+              {t('searchLabel')}
             </label>
             <input
               id="event-search"
               type="search"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search events…"
+              placeholder={t('searchPlaceholder')}
               className="h-10 w-full rounded-xl border-2 border-slate-200 bg-white pl-9 pr-9 text-sm focus:border-[#1f3a6f] focus:outline-none focus:ring-2 focus:ring-[#1f3a6f]/20"
             />
             {query ? (
               <button
                 type="button"
                 onClick={() => setQuery('')}
-                aria-label="Clear search"
+                aria-label={t('clearSearch')}
                 className="absolute right-2 top-1/2 -translate-y-1/2 rounded p-1 text-slate-400 hover:text-slate-700"
               >
                 <X className="size-4" />
@@ -153,20 +156,20 @@ export default function EventsExplorer({ items }: { items: ExplorerEventItem[] }
           </div>
         </div>
         {topTags.length > 0 ? (
-          <div role="group" aria-label="Topic" className="flex flex-wrap items-center gap-2">
-            <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">Topics:</span>
-            {topTags.map((t) => (
+          <div role="group" aria-label={t('topicLabel')} className="flex flex-wrap items-center gap-2">
+            <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">{t('topics')}</span>
+            {topTags.map((name) => (
               <button
-                key={t}
+                key={name}
                 type="button"
-                onClick={() => setTag(tag === t ? null : t)}
-                aria-pressed={tag === t}
+                onClick={() => setTag(tag === name ? null : name)}
+                aria-pressed={tag === name}
                 className={cn(
                   'rounded-full px-3 py-1 text-xs font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1f3a6f]',
-                  tag === t ? 'bg-[#d4163f] text-white' : 'bg-indigo-50 text-indigo-700 hover:bg-indigo-100',
+                  tag === name ? 'bg-[#d4163f] text-white' : 'bg-indigo-50 text-indigo-700 hover:bg-indigo-100',
                 )}
               >
-                {t}
+                {name}
               </button>
             ))}
             {filtersActive ? (
@@ -175,19 +178,19 @@ export default function EventsExplorer({ items }: { items: ExplorerEventItem[] }
                 onClick={reset}
                 className="ml-auto text-xs font-semibold text-slate-600 underline-offset-4 hover:underline"
               >
-                Clear filters
+                {t('clearFilters')}
               </button>
             ) : null}
           </div>
         ) : null}
         <p className="sr-only" aria-live="polite">
-          {shown} event{shown === 1 ? '' : 's'} shown
+          {t('shown', { count: shown })}
         </p>
       </div>
 
       {showUpcoming ? (
         <section className="mb-12 sm:mb-16 md:mb-20">
-          <SectionHeader title="Upcoming Events" subtitle="Tap an event for details and registration" count={upcoming.length} />
+          <SectionHeader title={t('upcomingTitle')} subtitle={t('upcomingSubtitle')} count={upcoming.length} />
           {upcoming.length > 0 ? (
             <div className="grid gap-4 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3">
               {upcoming.map((i) => (
@@ -198,12 +201,10 @@ export default function EventsExplorer({ items }: { items: ExplorerEventItem[] }
             <div className="rounded-3xl border-2 border-dashed border-slate-300 bg-white p-8 text-center sm:p-12">
               <Calendar className="mx-auto mb-4 size-12 text-slate-400" aria-hidden />
               <h3 className="text-xl font-bold text-slate-900">
-                {filtersActive ? 'No upcoming events match these filters' : 'No upcoming events right now'}
+                {filtersActive ? t('noMatchTitle') : t('noneTitle')}
               </h3>
               <p className="mt-2 text-sm text-slate-600">
-                {filtersActive
-                  ? 'Try clearing a filter.'
-                  : 'New workshops are announced often — ask us to tell you about the next one.'}
+                {filtersActive ? t('noMatchText') : t('noneText')}
               </p>
               <div className="mt-5 flex flex-col justify-center gap-3 sm:flex-row">
                 {filtersActive ? (
@@ -212,7 +213,7 @@ export default function EventsExplorer({ items }: { items: ExplorerEventItem[] }
                     onClick={reset}
                     className="rounded-xl bg-[#1f3a6f] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#14264a]"
                   >
-                    Clear filters
+                    {t('clearFilters')}
                   </button>
                 ) : (
                   <Link
@@ -220,7 +221,7 @@ export default function EventsExplorer({ items }: { items: ExplorerEventItem[] }
                     prefetch={false}
                     className="rounded-xl bg-[#1f3a6f] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#14264a]"
                   >
-                    Notify me about new events
+                    {t('notifyMe')}
                   </Link>
                 )}
               </div>
@@ -231,7 +232,7 @@ export default function EventsExplorer({ items }: { items: ExplorerEventItem[] }
 
       {showPast && past.length > 0 ? (
         <section>
-          <SectionHeader title="Past Events" subtitle="See what students built and won before" count={past.length} />
+          <SectionHeader title={t('pastTitle')} subtitle={t('pastSubtitle')} count={past.length} />
           <div className="grid gap-4 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3">
             {past.map((i) => (
               <div key={i.key}>{i.card}</div>

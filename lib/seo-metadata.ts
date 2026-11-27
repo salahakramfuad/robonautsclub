@@ -25,7 +25,26 @@ type PageMetadataOptions = {
   keywords?: string[];
   noindex?: boolean;
   twitterCard?: "summary" | "summary_large_image";
+  /** Active locale; adds hreflang alternates and a locale-prefixed canonical. */
+  locale?: string;
 };
+
+const LOCALES = ["en", "bn"] as const;
+const DEFAULT_LOCALE = "en";
+const OG_LOCALE: Record<string, string> = { en: "en_US", bn: "bn_BD" };
+
+function prefixPath(path: string, locale: string): string {
+  if (locale === DEFAULT_LOCALE) return path;
+  return path === "/" ? `/${locale}` : `/${locale}${path}`;
+}
+
+/** hreflang map for an unprefixed path. */
+export function languageAlternates(path: string): Record<string, string> {
+  const languages: Record<string, string> = {};
+  for (const l of LOCALES) languages[l] = prefixPath(path, l);
+  languages["x-default"] = path;
+  return languages;
+}
 
 export const PAGE_SEO = {
   home: {
@@ -102,7 +121,9 @@ export function buildPageMetadata({
   keywords,
   noindex = false,
   twitterCard = "summary_large_image",
+  locale,
 }: PageMetadataOptions): Metadata {
+  const url = locale ? prefixPath(path, locale) : path;
   const resolvedTitle = absoluteTitle ? { absolute: title } : title;
   const ogTitle = absoluteTitle ? title : title.includes("|") ? title : `${title} | ${SITE_CONFIG.name}`;
 
@@ -114,9 +135,15 @@ export function buildPageMetadata({
       type: ogType,
       title: ogTitle,
       description,
-      url: path,
+      url,
       siteName: SITE_CONFIG.name,
       images: [ogImage],
+      ...(locale
+        ? {
+            locale: OG_LOCALE[locale] ?? locale,
+            alternateLocale: LOCALES.filter((l) => l !== locale).map((l) => OG_LOCALE[l]),
+          }
+        : {}),
     },
     twitter: {
       card: twitterCard,
@@ -126,8 +153,30 @@ export function buildPageMetadata({
       creator: SITE_CONFIG.metadata.twitterCreator,
     },
     alternates: {
-      canonical: path,
+      canonical: url,
+      ...(locale ? { languages: languageAlternates(path) } : {}),
     },
     ...(noindex ? { robots: NOINDEX_ROBOTS } : {}),
   };
+}
+
+export type PageSeoKey = keyof typeof PAGE_SEO;
+
+/**
+ * Localized title/description for a static page (from `messages/<locale>/seo.json`)
+ * plus hreflang alternates. Server-only.
+ */
+export async function buildLocalizedPageMetadata(
+  key: PageSeoKey,
+  locale: string,
+  options: Omit<PageMetadataOptions, "title" | "description" | "locale">,
+): Promise<Metadata> {
+  const { getTranslations } = await import("next-intl/server");
+  const t = await getTranslations({ locale, namespace: "seo" });
+  return buildPageMetadata({
+    ...options,
+    title: t(`${key}.title`),
+    description: t(`${key}.description`),
+    locale,
+  });
 }

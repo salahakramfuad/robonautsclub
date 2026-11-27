@@ -1,0 +1,46 @@
+{
+  "home": {
+    "title": "Robonauts | বাংলাদেশে STEM, রোবোটিক্স ও অলিম্পিয়াড শিক্ষা",
+    "description": "Robonauts বাংলাদেশের তরুণদের রোবোটিক্স ক্লাব — শিক্ষার্থীদের জন্য STEM শিক্ষা, প্রোগ্রামিং, রোবোটিক্স ওয়ার্কশপ ও অলিম্পিয়াড প্রশিক্ষণ।"
+  },
+  "about": {
+    "title": "Robonauts সম্পর্কে | বাংলাদেশে STEM ও রোবোটিক্স শিক্ষা",
+    "description": "বাংলাদেশের তরুণদের রোবোটিক্স ক্লাব Robonauts সম্পর্কে জানুন। আমাদের লক্ষ্য, মূল্যবোধ এবং কীভাবে আমরা শিক্ষার্থীদের Robofest ও বৈশ্বিক STEM প্রতিযোগিতার জন্য প্রস্তুত করি তা দেখুন।"
+  },
+  "events": {
+    "title": "বাংলাদেশে রোবোটিক্স ও STEM ইভেন্ট | Robonauts",
+    "description": "Robonauts-এর সাথে সারা বাংলাদেশে আসন্ন রোবোটিক্স ওয়ার্কশপ, প্রতিযোগিতা, বুটক্যাম্প ও STEM ইভেন্ট খুঁজে নিন।"
+  },
+  "robofest": {
+    "title": "Robofest বাংলাদেশ ২০২৬ | Robonauts",
+    "description": "চট্টগ্রাম (১১ সেপ্টেম্বর) ও ঢাকা (১৮ সেপ্টেম্বর) Robofest বাংলাদেশ ২০২৬ লোকাল রাউন্ডে রেজিস্ট্রেশন করুন। BottleSumo, BuildAthon, Line Following Bot অথবা Robo Exhibition-এ অংশ নিন।"
+  },
+  "news": {
+    "title": "Robonauts খবর | রোবোটিক্স, STEM ও শিক্ষার্থীদের অর্জন",
+    "description": "Robonauts-এর হালনাগাদ, গল্প ও ঘোষণা — ওয়ার্কশপ, প্রতিযোগিতা, অংশীদারিত্ব এবং রোবোটিক্স ও STEM-এ শিক্ষার্থীদের অর্জন।"
+  },
+  "gallery": {
+    "title": "Robonauts গ্যালারি | রোবোটিক্স, STEM ও ইভেন্ট",
+    "description": "সারা বাংলাদেশে Robonauts-এর ওয়ার্কশপ, রোবোটিক্স প্রতিযোগিতা, Robofest ও কমিউনিটি STEM ইভেন্টের ছবি।"
+  },
+  "privacy": {
+    "title": "গোপনীয়তা নীতি | Robonauts",
+    "description": "Robonauts কীভাবে ব্যক্তিগত তথ্য সংগ্রহ, ব্যবহার ও সুরক্ষা করে — কুকি ও বিজ্ঞাপন (Google AdSense) সহ।"
+  },
+  "terms": {
+    "title": "শর্তাবলি | Robonauts",
+    "description": "Robonauts ওয়েবসাইট ব্যবহার এবং ওয়ার্কশপ, ইভেন্ট ও Robofest প্রতিযোগিতায় রেজিস্ট্রেশনের শর্তাবলি।"
+  },
+  "refund": {
+    "title": "রিফান্ড ও বাতিলকরণ নীতি | Robonauts",
+    "description": "bKash-এ পরিশোধ করা Robonauts ইভেন্ট, ওয়ার্কশপ ও Robofest রেজিস্ট্রেশন ফির রিফান্ড ও বাতিলকরণ কীভাবে কাজ করে।"
+  },
+  "cookies": {
+    "title": "কুকি নীতি | Robonauts",
+    "description": "Robonauts যে কুকি ও অনুরূপ প্রযুক্তি ব্যবহার করে — Google Analytics ও Google AdSense সহ — এবং কীভাবে সেগুলো নিয়ন্ত্রণ করবেন।"
+  },
+  "codeOfConduct": {
+    "title": "আচরণবিধি ও শিশু সুরক্ষা | Robonauts",
+    "description": "Robonauts-এর প্রোগ্রাম ও ইভেন্টে শিক্ষার্থী, অভিভাবক, মেন্টর ও স্বেচ্ছাসেবকদের প্রত্যাশিত আচরণ, নিরাপত্তা ও সুরক্ষা নিয়ম।"
+  }
+}

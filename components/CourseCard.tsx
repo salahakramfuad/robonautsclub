@@ -1,9 +1,10 @@
-import Link from 'next/link'
+import { Link } from '@/i18n/navigation'
 import Image from 'next/image'
 import { ArrowRight } from 'lucide-react'
 import { resolveCourseHref } from '@/lib/course-ui'
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
+import { useTranslations } from 'next-intl'
 
 type CourseCardProps = {
   title: string
@@ -39,8 +40,9 @@ export default function CourseCard({
   const featured = variant === 'featured'
   const shortBlurb = !blurb || blurb.trim().length < 80
   const targetHref = resolveCourseHref(href)
-  const featuredCta = 'Explore this program'
-  const defaultCta = 'Learn more'
+  const t = useTranslations('home.courses')
+  const featuredCta = t('featuredCta')
+  const defaultCta = t('learnMore')
 
   if (featured) {
     return (
@@ -73,7 +75,7 @@ export default function CourseCard({
 
           <div className="flex flex-col justify-center p-5 sm:p-7 lg:p-8">
             <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-indigo-600">
-              Featured program
+              {t('featuredLabel')}
             </p>
             <h3 className="mt-2 text-2xl font-semibold leading-snug text-gray-900 transition-colors duration-300 group-hover:text-indigo-700 sm:text-3xl">
               {title}

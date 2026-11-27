@@ -1,8 +1,10 @@
 "use client";
 
 import { useMemo, useSyncExternalStore } from "react";
+import { useLocale, useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import {
+  BANGLADESH_TZ,
   formatRegistrationClosingLabel,
   parseRegistrationClosingInstant,
 } from "@/lib/dateUtils";
@@ -36,6 +38,27 @@ function pad(n: number) {
   return String(n).padStart(2, "0");
 }
 
+/** Bangla variant of `formatRegistrationClosingLabel` (same BD wall time). */
+function formatClosingLabelBn(closingDate: string, bstLabel: string): string {
+  const raw = closingDate.trim();
+  const instant = parseRegistrationClosingInstant(raw);
+  if (!instant) return raw;
+  const datePart = new Intl.DateTimeFormat("bn-BD", {
+    timeZone: BANGLADESH_TZ,
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+  }).format(instant);
+  if (!raw.includes("T")) return datePart;
+  const timePart = new Intl.DateTimeFormat("bn-BD", {
+    timeZone: BANGLADESH_TZ,
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  }).format(instant);
+  return `${datePart} · ${timePart} ${bstLabel}`;
+}
+
 function subscribeToSecondTicks(onStoreChange: () => void) {
   const id = window.setInterval(onStoreChange, 1000);
   return () => window.clearInterval(id);
@@ -63,6 +86,9 @@ export default function RobofestRegistrationCountdown({
   /** Optional division label, e.g. "Chittagong Division". */
   label?: string;
 }) {
+  const t = useTranslations("robofest.countdown");
+  const locale = useLocale();
+  const bstLabel = t("bst");
   const nowSeconds = useSyncExternalStore(
     subscribeToSecondTicks,
     getClientNowSeconds,
@@ -70,8 +96,11 @@ export default function RobofestRegistrationCountdown({
   );
 
   const dateLabel = useMemo(
-    () => formatRegistrationClosingLabel(closingDate) || closingDate,
-    [closingDate],
+    () =>
+      (locale === "bn"
+        ? formatClosingLabelBn(closingDate, bstLabel)
+        : formatRegistrationClosingLabel(closingDate)) || closingDate,
+    [closingDate, locale, bstLabel],
   );
 
   const remaining = useMemo(
@@ -83,8 +112,8 @@ export default function RobofestRegistrationCountdown({
   );
 
   const closesLabel = label
-    ? `Registration closes · ${label}`
-    : "Registration closes";
+    ? t("closesWithLabel", { label })
+    : t("closes");
 
   if (remaining?.expired) {
     return (
@@ -94,27 +123,20 @@ export default function RobofestRegistrationCountdown({
           className,
         )}
       >
-        {label ? `${label} registration closed` : "Registration closed"}
+        {label ? t("closedWithLabel", { label }) : t("closed")}
         <span className="ml-2 font-normal text-rose-700/80">
-          (deadline was {dateLabel})
+          {t("deadlineWas", { date: dateLabel })}
         </span>
       </div>
     );
   }
 
-  const units = remaining
-    ? ([
-        { label: "Days", value: String(remaining.days) },
-        { label: "Hours", value: pad(remaining.hours) },
-        { label: "Mins", value: pad(remaining.minutes) },
-        { label: "Secs", value: pad(remaining.seconds) },
-      ] as const)
-    : ([
-        { label: "Days", value: "—" },
-        { label: "Hours", value: "—" },
-        { label: "Mins", value: "—" },
-        { label: "Secs", value: "—" },
-      ] as const);
+  const units = [
+    { label: t("days"), value: remaining ? String(remaining.days) : "—" },
+    { label: t("hours"), value: remaining ? pad(remaining.hours) : "—" },
+    { label: t("mins"), value: remaining ? pad(remaining.minutes) : "—" },
+    { label: t("secs"), value: remaining ? pad(remaining.seconds) : "—" },
+  ];
 
   return (
     <div

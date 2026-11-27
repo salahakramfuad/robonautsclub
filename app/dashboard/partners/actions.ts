@@ -1,4 +1,5 @@
 'use server'
+import { revalidateLocalizedPath } from '@/lib/revalidate-localized'
 
 import { revalidatePath, revalidateTag, unstable_cache } from 'next/cache'
 import {
@@ -26,7 +27,7 @@ import type { HomepageOrgWriteInput } from '@/types/homepage-org'
 const DASHBOARD_HOMEPAGE_ORGS_TAG = 'dashboard-homepage-orgs'
 
 function revalidateHomepageOrgs() {
-  revalidatePath('/')
+  revalidateLocalizedPath('/')
   revalidatePath('/dashboard/partners')
   revalidateTag(PUBLIC_HOMEPAGE_ORGS_TAG, 'max')
   revalidateTag(DASHBOARD_HOMEPAGE_ORGS_TAG, 'max')

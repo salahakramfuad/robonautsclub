@@ -1,6 +1,7 @@
-import Link from "next/link";
+import { Link } from '@/i18n/navigation'
 import Image from "next/image";
 import dynamic from "next/dynamic";
+import { getTranslations } from "next-intl/server";
 import type {
   RobofestCategoryContent,
   RobofestContent,
@@ -23,11 +24,11 @@ const RobofestCategoryRegistrationForm = dynamic(
 
 function RulesViewButton({
   href,
-  label = "View rules (PDF)",
+  label,
   className = "",
 }: {
   href: string;
-  label?: string;
+  label: string;
   className?: string;
 }) {
   return (
@@ -48,7 +49,15 @@ function RulesViewButton({
   );
 }
 
-export default function RobofestCategoryPage({
+/** Message keys for the on-page rules summaries (by category slug). */
+const RULE_SUMMARY_KEYS: Record<string, string> = {
+  bottlesumo: "bottlesumo",
+  buildathon: "buildathon",
+  "line-following-bot": "lineFollowingBot",
+  "robo-exhibition": "roboExhibition",
+};
+
+export default async function RobofestCategoryPage({
   category,
   content,
   fee,
@@ -68,6 +77,16 @@ export default function RobofestCategoryPage({
 }) {
   const rulesPdf = getRobofestCategoryRulesPdf(category);
   const rules = getRobofestCategoryRules(category.slug);
+  const t = await getTranslations("robofest");
+  const cityName = (city: string) => {
+    const key = `cities.${city.trim().toLowerCase()}`;
+    return t.has(key) ? t(key) : city;
+  };
+  const summaryKey = RULE_SUMMARY_KEYS[category.slug];
+  const rulesSummary =
+    (summaryKey && t(`categoryPage.ruleSummaries.${summaryKey}`)) ||
+    rules?.summary?.trim() ||
+    t("categoryPage.rulesFallback");
   const heroImage = getRobofestCategoryImage(category);
   const showPdf = Boolean(rulesPdf);
   const contactEmail = content.contactEmail?.trim() || "";
@@ -82,7 +101,7 @@ export default function RobofestCategoryPage({
       <header className="relative isolate overflow-hidden text-white min-h-[18rem] sm:min-h-[20rem]">
         <Image
           src={heroImage}
-          alt={`${category.name} — Robofest Bangladesh 2026 local round`}
+          alt={t("categoryPage.heroAlt", { name: category.name })}
           fill
           priority
           sizes="100vw"
@@ -115,7 +134,7 @@ export default function RobofestCategoryPage({
             className="inline-flex items-center gap-1.5 text-sm text-white/80 hover:text-white mb-5 sm:mb-7 transition-colors"
           >
             <RobofestIcon name="arrow_back" className="text-base" />
-            All competitions
+            {t("categoryPage.allCompetitions")}
           </Link>
 
           <div className="flex items-start gap-4">
@@ -127,7 +146,7 @@ export default function RobofestCategoryPage({
             </div>
             <div className="min-w-0">
               <p className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.2em] text-cyan-100/90 mb-2">
-                Robofest Local Round · Bangladesh
+                {t("categoryPage.eyebrow")}
               </p>
               <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight drop-shadow-sm">
                 {category.name}
@@ -157,7 +176,7 @@ export default function RobofestCategoryPage({
           <div className="lg:col-span-3 space-y-8 sm:space-y-10">
             <section>
               <h2 className="text-lg sm:text-xl font-bold text-slate-900 mb-3 tracking-tight">
-                About this competition
+                {t("categoryPage.about")}
               </h2>
               <p className="text-sm sm:text-base text-slate-600 leading-relaxed">
                 {category.about}
@@ -169,7 +188,7 @@ export default function RobofestCategoryPage({
                 <div className="flex items-center gap-2 text-cyan-700 mb-1">
                   <RobofestIcon name="signal_cellular_alt" className="text-xl" />
                   <span className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">
-                    Skill level
+                    {t("categoryPage.skillLevel")}
                   </span>
                 </div>
                 <p className="text-sm font-semibold text-slate-900">
@@ -180,7 +199,7 @@ export default function RobofestCategoryPage({
                 <div className="flex items-center gap-2 text-cyan-700 mb-1">
                   <RobofestIcon name="sports_esports" className="text-xl" />
                   <span className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">
-                    Format
+                    {t("categoryPage.format")}
                   </span>
                 </div>
                 <p className="text-sm font-semibold text-slate-900">
@@ -191,7 +210,7 @@ export default function RobofestCategoryPage({
 
             <section>
               <h2 className="text-lg sm:text-xl font-bold text-slate-900 mb-4 tracking-tight">
-                What to expect
+                {t("categoryPage.whatToExpect")}
               </h2>
               <ul className="space-y-3">
                 {category.highlights.map((item) => (
@@ -209,7 +228,7 @@ export default function RobofestCategoryPage({
 
             <section className="rounded-2xl border border-slate-200 bg-white px-5 py-5 sm:px-6 sm:py-6">
               <h2 className="text-lg font-bold text-slate-900 mb-2 tracking-tight">
-                Who should join
+                {t("categoryPage.whoShouldJoin")}
               </h2>
               <p className="text-sm text-slate-600 leading-relaxed mb-4">
                 {category.whoShouldJoin}
@@ -248,19 +267,18 @@ export default function RobofestCategoryPage({
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                   <div className="min-w-0">
                     <h2 className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">
-                      Official rules
+                      {t("categoryPage.officialRules")}
                     </h2>
                     <p className="text-sm text-slate-600 mt-1 leading-relaxed">
-                      {rules?.summary?.trim() ||
-                        "Full competition rules, specs, and scoring are in the official PDF."}
+                      {rulesSummary}
                     </p>
                     <p className="text-xs text-slate-500 mt-2">
-                      On-page highlights only—open the PDF for complete details.
+                      {t("categoryPage.rulesNote")}
                     </p>
                   </div>
                   <RulesViewButton
                     href={rulesPdf}
-                    label={`View ${category.name} rules`}
+                    label={t("categoryPage.viewRules", { name: category.name })}
                     className="shrink-0"
                   />
                 </div>
@@ -275,57 +293,62 @@ export default function RobofestCategoryPage({
             >
               <div className="border-b border-slate-100 bg-linear-to-b from-cyan-50/80 to-white px-5 sm:px-6 py-4 sm:py-5">
                 <h2 className="text-lg font-bold text-slate-900 tracking-tight">
-                  Register for {category.name}
+                  {t("categoryPage.registerFor", { name: category.name })}
                 </h2>
                 <ul className="mt-3 list-disc space-y-1.5 pl-5 text-sm text-slate-700 leading-relaxed marker:text-cyan-600">
                   {fee.isPaid ? (
                     <li>
-                      Registration fee: BDT {fee.amount} per member (e.g. 3
-                      members = BDT {fee.amount * 3}). Pay via bKash to confirm.{" "}
-                      <strong className="font-semibold text-amber-800">
-                        After payment, don&apos;t close this page until you see
-                        the &ldquo;registration successful&rdquo; message.
-                      </strong>
+                      {t.rich("categoryPage.feeInfo", {
+                        amount: fee.amount,
+                        example: fee.amount * 3,
+                        strong: (chunks) => (
+                          <strong className="font-semibold text-amber-800">
+                            {chunks}
+                          </strong>
+                        ),
+                      })}
                     </li>
                   ) : (
-                    <li>Enter team details for the local round.</li>
+                    <li>{t("categoryPage.freeInfo")}</li>
                   )}
+                  <li>{t("categoryPage.confirmationEmail")}</li>
+                  <li>{t("categoryPage.bringPdf")}</li>
                   <li>
-                    After you complete registration and payment, you will
-                    receive a confirmation email with your registration PDF.
-                  </li>
-                  <li>Bring this PDF for entry at the event.</li>
-                  <li>
-                    If you registered and paid but did not receive the email or
-                    PDF, check your junk/spam folder. If it is still missing,
-                    contact us
-                    {contactEmail ? (
-                      <>
-                        {" "}
-                        at{" "}
-                        <a
-                          href={`mailto:${contactEmail}`}
-                          className="font-semibold text-cyan-800 underline underline-offset-2 hover:text-cyan-900"
-                        >
-                          {contactEmail}
-                        </a>
-                      </>
-                    ) : null}
-                    {registrationContact?.phone ? (
-                      <>
-                        {contactEmail ? " or " : " at "}
-                        <a
-                          href={`tel:${registrationContact.phone.replace(/\s/g, "")}`}
-                          className="font-semibold text-cyan-800 underline underline-offset-2 hover:text-cyan-900"
-                        >
-                          {registrationContact.phone}
-                        </a>
-                        {registrationContact.note
-                          ? ` (${registrationContact.note})`
-                          : null}
-                      </>
-                    ) : null}
-                    .
+                    {t.rich(
+                      `categoryPage.missingEmail.${
+                        contactEmail
+                          ? registrationContact?.phone
+                            ? "both"
+                            : "emailOnly"
+                          : registrationContact?.phone
+                            ? "phoneOnly"
+                            : "none"
+                      }`,
+                      {
+                        email: () => (
+                          <a
+                            href={`mailto:${contactEmail}`}
+                            className="font-semibold text-cyan-800 underline underline-offset-2 hover:text-cyan-900"
+                          >
+                            {contactEmail}
+                          </a>
+                        ),
+                        phone: () =>
+                          registrationContact?.phone ? (
+                            <>
+                              <a
+                                href={`tel:${registrationContact.phone.replace(/\s/g, "")}`}
+                                className="font-semibold text-cyan-800 underline underline-offset-2 hover:text-cyan-900"
+                              >
+                                {registrationContact.phone}
+                              </a>
+                              {registrationContact.note
+                                ? ` (${registrationContact.note})`
+                                : null}
+                            </>
+                          ) : null,
+                      },
+                    )}
                   </li>
                 </ul>
                 {content.rounds.some((round) =>
@@ -342,7 +365,9 @@ export default function RobofestCategoryPage({
                         <RobofestRegistrationCountdown
                           key={round.city}
                           closingDate={closing}
-                          label={`${round.city} Division`}
+                          label={t("divisionLabel", {
+                            city: cityName(round.city),
+                          })}
                           compact
                         />
                       );
@@ -356,7 +381,7 @@ export default function RobofestCategoryPage({
                     role="status"
                     className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-900"
                   >
-                    Robofest registration is temporarily paused. Please check back soon or contact us.
+                    {t("categoryPage.paused")}
                   </p>
                 ) : (
                 <RobofestCategoryRegistrationForm
@@ -382,10 +407,10 @@ export default function RobofestCategoryPage({
         <section className="border-t border-slate-200 bg-white py-10 sm:py-12 px-4 sm:px-6">
           <div className="max-w-7xl mx-auto">
             <h2 className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight mb-2">
-              Other competitions
+              {t("categoryPage.otherCompetitions")}
             </h2>
             <p className="text-sm text-slate-600 mb-5 max-w-2xl">
-              Explore more Robofest Bangladesh 2026 local-round categories.
+              {t("categoryPage.otherDescription")}
             </p>
             <ul className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
               {siblingCategories.map((sibling) => (
@@ -403,7 +428,9 @@ export default function RobofestCategoryPage({
                         {sibling.name}
                       </span>
                       <span className="block text-xs text-slate-500 truncate">
-                        {sibling.format || sibling.skillLevel || "View details"}
+                        {sibling.format ||
+                          sibling.skillLevel ||
+                          t("categoryPage.viewDetails")}
                       </span>
                     </span>
                   </Link>

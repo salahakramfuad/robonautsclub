@@ -1,6 +1,7 @@
 'use server'
+import { revalidateLocalizedPath } from '@/lib/revalidate-localized'
 
-import { revalidatePath, revalidateTag } from 'next/cache'
+import { revalidateTag } from 'next/cache'
 import { requireAuth, canCreateArea, canEditResource, canDeleteResource } from '@/lib/auth'
 import {
   collectionAdd,
@@ -116,8 +117,8 @@ export async function createGalleryGroup(input: {
     createdBy: session.uid,
   })
 
-  revalidatePath('/gallery')
-  revalidatePath('/')
+  revalidateLocalizedPath('/gallery')
+  revalidateLocalizedPath('/')
   revalidateTag(PUBLIC_GALLERY_TAG, 'max')
 }
 
@@ -163,8 +164,8 @@ export async function updateGalleryGroup(
     { merge: true },
   )
 
-  revalidatePath('/gallery')
-  revalidatePath('/')
+  revalidateLocalizedPath('/gallery')
+  revalidateLocalizedPath('/')
   revalidateTag(PUBLIC_GALLERY_TAG, 'max')
 }
 
@@ -180,7 +181,7 @@ export async function deleteGalleryGroup(id: string) {
   }
 
   await collectionDelete('galleryGroups', id)
-  revalidatePath('/gallery')
-  revalidatePath('/')
+  revalidateLocalizedPath('/gallery')
+  revalidateLocalizedPath('/')
   revalidateTag(PUBLIC_GALLERY_TAG, 'max')
 }

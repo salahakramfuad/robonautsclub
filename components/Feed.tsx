@@ -1,5 +1,5 @@
 import dynamic from 'next/dynamic'
-import { GENERAL_FAQ, faqPageSchema } from '@/lib/faq'
+import { GENERAL_FAQ, faqPageSchema, type FAQItem } from '@/lib/faq'
 import JsonLdScript from './JsonLdScript'
 import { resolveCourseHref } from '@/lib/course-ui'
 import Hero from './Hero'
@@ -34,6 +34,8 @@ interface FeedProps {
   heroVideoEnabled?: boolean
   /** `pages.courses` flag: when off, course links go to the contact page. */
   coursesPageEnabled?: boolean
+  /** Localized FAQ items; defaults to the English `GENERAL_FAQ`. */
+  faqItems?: FAQItem[]
 }
 
 export default function Feed({
@@ -43,6 +45,7 @@ export default function Feed({
   initialWorkshopSchools = [],
   heroVideoEnabled = true,
   coursesPageEnabled = true,
+  faqItems = GENERAL_FAQ,
 }: FeedProps) {
   const courses = initialCourses
     .filter((course) => !course.isArchived)
@@ -56,8 +59,6 @@ export default function Feed({
         : `/contact?interest=${encodeURIComponent(course.title)}`,
       img: course.image,
     }))
-
-  const faqItems = GENERAL_FAQ
 
   return (
     <div className="w-full min-w-full">

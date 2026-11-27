@@ -1,0 +1,40 @@
+{
+  "meta": {
+    "ogAlt": "Robonauts Gallery",
+    "albumFallbackTitle": "Album",
+    "albumTitle": "{title} | Robonauts Gallery",
+    "albumDescription": "Photos from {title} at Robonauts events and activities."
+  },
+  "hero": {
+    "badge": "Robogallery",
+    "title": "Gallery",
+    "subtitle": "Snapshots from workshops, competitions, and community events.",
+    "albums": "{count, plural, one {# album} other {# albums}}",
+    "photos": "{count, plural, one {# photo} other {# photos}}"
+  },
+  "empty": {
+    "title": "No gallery albums yet.",
+    "body": "Check back soon for moments from the lab and stage."
+  },
+  "card": {
+    "photos": "{count, plural, one {# photo} other {# photos}}"
+  },
+  "album": {
+    "back": "Back to gallery",
+    "label": "Album",
+    "photos": "{count, plural, one {# photo} other {# photos}}",
+    "empty": "No images in this album yet."
+  },
+  "lightbox": {
+    "titledLabel": "{title} – photo {index, number} of {total, number}",
+    "label": "Image {index, number} of {total, number}",
+    "description": "Full-size gallery image. Swipe or use arrow keys to move between photos.",
+    "close": "Close",
+    "previous": "Previous image",
+    "next": "Next image",
+    "counter": "{index, number} / {total, number}",
+    "openTitled": "Open {title} photo {index, number} of {total, number}",
+    "open": "Open image {index, number} of {total, number}",
+    "seeAll": "See all {count, number} images"
+  }
+}

@@ -1,19 +1,22 @@
-import Link from 'next/link'
+import { Link } from '@/i18n/navigation'
 import Image from 'next/image'
 import { ArrowRight } from 'lucide-react'
 import type { NewsArticle } from '@/types/news'
 import { effectiveNewsDisplayRaw } from '@/lib/publicContentDates'
 import { excerptBody, formatNewsDate, newsArticleHref, newsDateTimeAttr } from '@/lib/news-ui'
 import NewsCoverFallback from '@/components/news/NewsCoverFallback'
+import { useLocale, useTranslations } from 'next-intl'
 
 type Props = {
   article: NewsArticle
 }
 
 export default function NewsCard({ article }: Props) {
+  const t = useTranslations('news.card')
+  const locale = useLocale()
   const href = newsArticleHref(article)
   const dateRaw = effectiveNewsDisplayRaw(article)
-  const dateLabel = formatNewsDate(dateRaw)
+  const dateLabel = formatNewsDate(dateRaw, locale)
   const excerpt = excerptBody(article.body, 110)
 
   return (
@@ -52,7 +55,7 @@ export default function NewsCard({ article }: Props) {
             <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-gray-600">{excerpt}</p>
           ) : null}
           <span className="mt-auto inline-flex items-center gap-1.5 pt-4 text-sm font-semibold text-indigo-600">
-            Read more
+            {t('readMore')}
             <ArrowRight
               className="size-4 transition-transform duration-300 motion-reduce:transition-none group-hover:translate-x-1"
               aria-hidden
