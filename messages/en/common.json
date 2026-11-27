@@ -20,6 +20,11 @@
       "gallery": "Gallery",
       "about": "About",
       "contact": "Contact"
+    },
+    "groups": {
+      "media": "Media",
+      "about": "About",
+      "aboutUs": "About us"
     }
   },
   "language": {
