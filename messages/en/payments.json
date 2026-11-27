@@ -30,5 +30,21 @@
     "registrationId": "Registration ID",
     "bookingReference": "Booking reference: {id}",
     "viewPass": "View my pass"
+  },
+  "backToResearchHub": "Back to Research Hub",
+  "researchHub": {
+    "confirmedTitle": "Seat booked",
+    "confirmed": "Your payment is complete and your Research Hub slot is confirmed. A confirmation email with your pass has been sent.",
+    "confirmedNoEmail": "Your payment is complete and your Research Hub slot is confirmed. We could not send the confirmation email, so please save your booking code below.",
+    "codeLabel": "Your booking code — show this at the front desk",
+    "code": "Booking code",
+    "viewPass": "View my pass",
+    "failTitle": "Booking not completed",
+    "cancelled": "You cancelled the payment, so no seats were booked and you were not charged.",
+    "slotTaken": "Your seat hold expired and someone else booked the last seats before payment finished. You were not charged. Please pick another time.",
+    "refunded": "We could not confirm your seats, so your payment has been refunded to your bKash account. Details: {error}",
+    "paymentFailed": "The payment did not go through, so no seats were booked. {error}",
+    "error": "{error}",
+    "tryAgain": "Pick a slot again"
   }
 }

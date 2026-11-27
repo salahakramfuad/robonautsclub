@@ -11,6 +11,7 @@ import {
   Trophy,
   Award,
   ToggleRight,
+  FlaskConical,
   type LucideIcon,
 } from 'lucide-react'
 import type {
@@ -53,6 +54,12 @@ const AREA_ITEMS: Array<{
     icon: Award,
     label: 'Certificates',
     area: 'certificates',
+  },
+  {
+    href: '/dashboard/research-hub',
+    icon: FlaskConical,
+    label: 'Research Hub',
+    area: 'researchHub',
   },
   { href: '/dashboard/members', icon: Users, label: 'Members', area: 'members' },
 ]

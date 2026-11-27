@@ -20,6 +20,9 @@ const CLIENT_MESSAGE_PATHS = [
   'news',
   'robofest',
   'verify',
+  'researchHub.widget',
+  'researchHub.closed',
+  'researchHub.errors',
   'about.map',
   'legal.consent',
 ] as const

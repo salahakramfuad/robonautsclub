@@ -1,0 +1,166 @@
+{
+  "meta": {
+    "title": "Research Hub — Book a Seat by the Hour | Robonauts",
+    "description": "Book a seat at the Robonauts Research Hub in Uttara, Dhaka. Work on your robotics and electronics projects with our kits, components and tools. Pay per person per hour with bKash."
+  },
+  "hero": {
+    "where": "Uttara, Dhaka",
+    "title": "A space to build, test and research",
+    "subtitle": "Come alone or bring your team. Sit for as long as you need and use our robotics kits, electronic components and tools. Book your hours online and pay with bKash.",
+    "cta": "Book a seat",
+    "seeInventory": "See what's in the hub",
+    "perPersonHour": "per person, per hour",
+    "groupNote": "A group of 3 for 2 hours is ৳{example}."
+  },
+  "board": {
+    "today": "Seats today",
+    "onDate": "Seats on {date}",
+    "free": "{count, plural, =0 {Full} other {# free}}",
+    "notBookable": "Closed for booking",
+    "closedToday": "The hub is closed today.",
+    "note": "Live from bookings. Pick a time to book it.",
+    "of": "of {capacity}"
+  },
+  "photos": {
+    "title": "Inside the hub"
+  },
+  "inventory": {
+    "title": "What's in the hub",
+    "subtitle": "Everything here is included in your booking. Tell us what you plan to use and we'll have it ready.",
+    "categories": {
+      "boards": "Boards and microcontrollers",
+      "kits": "Robotics kits",
+      "sensors": "Sensors and modules",
+      "components": "Electronic components",
+      "tools": "Tools",
+      "equipment": "Equipment and machines"
+    }
+  },
+  "features": {
+    "title": "What's included",
+    "seating": {
+      "title": "Seating and workbenches",
+      "text": "Comfortable desks for long sessions, discussions and group work."
+    },
+    "kits": {
+      "title": "Robotics kits",
+      "text": "Arduino, ESP32, sensor kits, motors, drivers and chassis kits."
+    },
+    "components": {
+      "title": "Electronic components",
+      "text": "Resistors, LEDs, ICs, breadboards, jumper wires, batteries and more."
+    },
+    "tools": {
+      "title": "Tools and equipment",
+      "text": "Soldering stations, multimeters, power supplies and hand tools."
+    },
+    "wifi": {
+      "title": "Wi-Fi and power",
+      "text": "Fast internet and charging points at every seat."
+    },
+    "help": {
+      "title": "Friendly staff",
+      "text": "Our team is around to help you find parts and use equipment safely."
+    }
+  },
+  "rules": {
+    "title": "House rules",
+    "r1": "Arrive on time. Your slot ends at the booked time.",
+    "r2": "Kits and components are for use inside the hub only. Return them before you leave.",
+    "r3": "Handle tools safely. Ask staff before using soldering or power equipment.",
+    "r4": "Participants under 18 need permission from a parent or guardian.",
+    "r5": "Keep the space clean and respect other researchers."
+  },
+  "visit": {
+    "title": "Plan your visit",
+    "hours": "Opening hours",
+    "closed": "Closed",
+    "address": "Address",
+    "questions": "Questions before you book?",
+    "whatsapp": "Message us on WhatsApp"
+  },
+  "widget": {
+    "title": "Book your slot",
+    "date": "Date",
+    "pickDate": "Pick a date",
+    "loading": "Checking availability…",
+    "startTime": "Start time",
+    "seatsLeft": "{count, plural, =0 {Full} one {# seat left} other {# seats left}}",
+    "duration": "Duration",
+    "hoursValue": "{count, plural, one {# hour} other {# hours}}",
+    "persons": "Number of people",
+    "personsHint": "Up to {max} people for this time",
+    "pickStart": "Pick a start time to continue.",
+    "details": "Your details",
+    "name": "Full name",
+    "email": "Email",
+    "phone": "Phone (bKash number preferred)",
+    "institution": "School / university / organization (optional)",
+    "institutionPlaceholder": "Start typing to see suggestions",
+    "institutionNoMatch": "Not in our list. Type the full name and continue.",
+    "institutionMatched": "Found in our list",
+    "institutionSuggestions": "Matching schools and universities",
+    "purpose": "What will you work on? (optional)",
+    "plannedComponents": "Kits or components you plan to use (optional)",
+    "plannedComponentsHint": "Helps our team keep them ready for you.",
+    "groupMembers": "Names of other people in your group (optional)",
+    "acceptRules": "I have read the house rules. Participants under 18 have permission from a parent or guardian.",
+    "summary": "Summary",
+    "summaryLine": "{persons} × {hours} × ৳{rate}",
+    "total": "Total",
+    "pay": "Pay ৳{amount} with bKash",
+    "redirecting": "Redirecting to bKash…",
+    "holdNote": "Your seats are held for 15 minutes while you pay.",
+    "step1": "Pick a time",
+    "step2": "Your details"
+  },
+  "closed": {
+    "notConfigured": "Online booking is not open yet. Please check back soon.",
+    "paused": "Online booking is paused right now. Please contact us on WhatsApp to book.",
+    "closedDay": "The Research Hub is closed on this day.",
+    "closure": "The Research Hub is closed on this day.",
+    "closureReason": "Closed: {reason}",
+    "outOfRange": "This date can't be booked. Please pick a date within the next {days} days.",
+    "invalidDate": "Please pick a valid date.",
+    "noSlots": "No more slots can be booked on this day. Try another date."
+  },
+  "errors": {
+    "invalid": "Please check the form and try again.",
+    "field": {
+      "name": "Please enter your full name.",
+      "email": "Please enter a valid email address.",
+      "phone": "Enter an 11-digit phone number starting with 01.",
+      "acceptRules": "Please accept the house rules to continue."
+    },
+    "closed": "This day is not open for booking.",
+    "duration": "Please choose a duration between {min} and {max} hours.",
+    "persons": "Please choose between 1 and {max} people.",
+    "unavailable": "Some of the hours you picked are not available. Please pick another time.",
+    "notEnoughSeats": "Not enough seats are left for that time. Someone may have just booked. Please pick another time or fewer people.",
+    "tooManyHolds": "You already have unpaid bookings waiting. Finish or cancel them on bKash, or wait 15 minutes and try again.",
+    "paymentInit": "We couldn't start the bKash payment. Please try again in a moment."
+  },
+  "pass": {
+    "metaTitle": "Research Hub pass",
+    "title": "Research Hub pass",
+    "notFound": "We couldn't find this booking. Please check the link in your email.",
+    "code": "Booking code",
+    "date": "Date",
+    "time": "Time",
+    "persons": "People",
+    "name": "Name",
+    "amount": "Amount paid",
+    "trxId": "bKash TrxID",
+    "location": "Location",
+    "showAtDesk": "Show this QR code or booking code at the front desk.",
+    "status": {
+      "held": "Waiting for payment",
+      "confirmed": "Confirmed",
+      "checked_in": "Checked in",
+      "completed": "Completed",
+      "no_show": "Missed",
+      "cancelled": "Cancelled",
+      "expired": "Expired"
+    }
+  }
+}

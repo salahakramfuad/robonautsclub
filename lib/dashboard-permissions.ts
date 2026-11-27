@@ -29,6 +29,7 @@ export const DASHBOARD_AREAS = [
   'partners',
   'robofest',
   'certificates',
+  'researchHub',
   'members',
 ] as const
 
@@ -43,6 +44,7 @@ export const DASHBOARD_AREA_LABELS: Record<DashboardArea, string> = {
   partners: 'Partners & Schools',
   robofest: 'Robofest',
   certificates: 'Certificates',
+  researchHub: 'Research Hub',
   members: 'Members',
 }
 
