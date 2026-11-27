@@ -55,6 +55,7 @@ export default function RobofestCategoryPage({
   schools,
   campusAmbassadors,
   siblingCategories = [],
+  registrationPaused = false,
 }: {
   category: RobofestCategoryContent;
   content: RobofestContent;
@@ -62,6 +63,8 @@ export default function RobofestCategoryPage({
   schools: string[];
   campusAmbassadors: RobofestCampusAmbassador[];
   siblingCategories?: RobofestCategoryContent[];
+  /** `registration.robofest` feature flag is off. */
+  registrationPaused?: boolean;
 }) {
   const rulesPdf = getRobofestCategoryRulesPdf(category);
   const rules = getRobofestCategoryRules(category.slug);
@@ -348,6 +351,14 @@ export default function RobofestCategoryPage({
                 ) : null}
               </div>
               <div className="px-5 sm:px-6 py-5">
+                {registrationPaused ? (
+                  <p
+                    role="status"
+                    className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-900"
+                  >
+                    Robofest registration is temporarily paused. Please check back soon or contact us.
+                  </p>
+                ) : (
                 <RobofestCategoryRegistrationForm
                   category={category.name}
                   rounds={content.rounds}
@@ -360,6 +371,7 @@ export default function RobofestCategoryPage({
                     content.registrationClosingDate
                   }
                 />
+                )}
               </div>
             </div>
           </div>

@@ -1,9 +1,6 @@
 import { requireTabAccess, canEditArea, canDeleteArea, hasPermission } from '@/lib/auth'
-import {
-  getEvent,
-  getBookingsPage,
-  getEventBookingStats,
-} from '../../actions'
+import { getEvent } from '../../actions'
+import { getInitialBookingsWithStats } from '../bookings-actions'
 import { BOOKING_DEFAULT_PAGE_SIZE } from '../bookings-types'
 import { getPublicEnglishMediumSchools } from '@/app/(marketing)/events/public-data'
 import { notFound } from 'next/navigation'
@@ -21,12 +18,13 @@ export default async function EventDetailsPage({
 }) {
   const session = await requireTabAccess('events')
   const { id } = await params
-  const [event, initialPage, initialStats, schools] = await Promise.all([
+  const [event, initialBookings, schools] = await Promise.all([
     getEvent(id),
-    getBookingsPage(id, { pageSize: BOOKING_DEFAULT_PAGE_SIZE }),
-    getEventBookingStats(id),
+    getInitialBookingsWithStats(id, BOOKING_DEFAULT_PAGE_SIZE),
     getPublicEnglishMediumSchools(),
   ])
+  const initialPage = initialBookings.page
+  const initialStats = initialBookings.stats
 
   if (!event) {
     notFound()

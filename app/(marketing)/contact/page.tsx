@@ -5,6 +5,7 @@ import { SITE_CONFIG } from '@/lib/site-config'
 import { buildPageMetadata } from '@/lib/seo-metadata'
 import AboutMap from '../about/AboutMap'
 import ContactForm from './ContactForm'
+import { isFeatureEnabled } from '@/lib/feature-flags'
 
 export const metadata: Metadata = buildPageMetadata({
   title: 'Contact Us',
@@ -17,6 +18,7 @@ type Props = { searchParams: Promise<{ interest?: string }> }
 export default async function ContactPage({ searchParams }: Props) {
   const { interest } = await searchParams
   const defaultInterest = typeof interest === 'string' ? interest.slice(0, 80) : ''
+  const showForm = await isFeatureEnabled('pages.contactForm')
 
   return (
     <main id="main" className="min-h-screen bg-slate-50">
@@ -51,11 +53,20 @@ export default async function ContactPage({ searchParams }: Props) {
       </section>
 
       <div className="mx-auto grid max-w-7xl gap-8 px-4 py-12 sm:px-6 lg:grid-cols-[1.2fr_0.8fr] lg:py-16">
-        <section aria-labelledby="form-heading" className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
-          <h2 id="form-heading" className="text-2xl font-bold text-slate-900">Send us a message</h2>
-          <p className="mt-1 mb-6 text-sm text-slate-600">We reply within 1–2 working days.</p>
-          <ContactForm defaultInterest={defaultInterest} />
-        </section>
+        {showForm ? (
+          <section aria-labelledby="form-heading" className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
+            <h2 id="form-heading" className="text-2xl font-bold text-slate-900">Send us a message</h2>
+            <p className="mt-1 mb-6 text-sm text-slate-600">We reply within 1–2 working days.</p>
+            <ContactForm defaultInterest={defaultInterest} />
+          </section>
+        ) : (
+          <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
+            <h2 className="text-2xl font-bold text-slate-900">Message us on WhatsApp</h2>
+            <p className="mt-2 text-slate-600">
+              The fastest way to reach a mentor is WhatsApp — tap the green button above, or call us during office hours.
+            </p>
+          </section>
+        )}
 
         <aside className="space-y-6">
           <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">

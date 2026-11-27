@@ -8,6 +8,7 @@ import {
 } from "./events/public-data";
 import { isEventUpcoming } from "@/lib/dateUtils";
 import { SITE_CONFIG } from "@/lib/site-config";
+import { getFeatureFlags } from "@/lib/feature-flags";
 
 export const metadata: Metadata = buildPageMetadata({
   title: PAGE_SEO.home.title,
@@ -26,10 +27,11 @@ export const metadata: Metadata = buildPageMetadata({
 export const revalidate = 1800;
 
 export default async function Home() {
-  const [courses, events, homepageOrgs] = await Promise.all([
+  const [courses, events, homepageOrgs, flags] = await Promise.all([
     getPublicCourses(),
     getPublicEventsForHome(),
     getPublicHomepageOrgs(),
+    getFeatureFlags(),
   ])
   const initialUpcomingEvents = events.filter((e) => isEventUpcoming(e.date))
 
@@ -40,6 +42,8 @@ export default async function Home() {
         initialUpcomingEvents={initialUpcomingEvents}
         initialPartners={homepageOrgs.partners}
         initialWorkshopSchools={homepageOrgs.schools}
+        heroVideoEnabled={flags["ui.heroVideo"].enabled}
+        coursesPageEnabled={flags["pages.courses"].enabled}
       />
     </main>
   );

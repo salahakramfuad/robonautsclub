@@ -3,6 +3,8 @@ import Link from 'next/link'
 import { buildPageMetadata } from '@/lib/seo-metadata'
 import { SITE_CONFIG } from '@/lib/site-config'
 import { COURSE_FALLBACK_HREF, courseAnchorId, resolveCourseHref } from '@/lib/course-ui'
+import { notFound } from 'next/navigation'
+import { isFeatureEnabled } from '@/lib/feature-flags'
 import { getPublicCourses } from '../events/public-data'
 import CoursesExplorer, { type ExplorerCourse } from './CoursesExplorer'
 
@@ -15,6 +17,7 @@ export const metadata: Metadata = buildPageMetadata({
 export const revalidate = 1800
 
 export default async function CoursesPage() {
+  if (!(await isFeatureEnabled('pages.courses'))) notFound()
   const courses = await getPublicCourses()
 
   const items: ExplorerCourse[] = courses

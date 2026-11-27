@@ -12,7 +12,7 @@
     "verify:pdf": "node scripts/verify-pdf-generation.mjs",
     "verify:event-fee": "node scripts/verify-event-suggested-fee.mjs",
     "preview:certificate": "npx --yes tsx scripts/preview-certificate.ts",
-    "cf:build": "NEXT_PUBLIC_BASE_URL=https://www.robonautsltd.com NEXT_PUBLIC_SITE_URL=https://www.robonautsltd.com opennextjs-cloudflare build",
+    "cf:build": "NEXT_PUBLIC_BASE_URL=https://www.robonautsltd.com NEXT_PUBLIC_SITE_URL=https://robonautsltd.com opennextjs-cloudflare build",
     "cf:preview": "npm run cf:build && opennextjs-cloudflare preview",
     "cf:deploy": "npm run cf:build && opennextjs-cloudflare deploy",
     "preview": "npm run cf:preview",

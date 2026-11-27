@@ -10,6 +10,7 @@ import {
   Handshake,
   Trophy,
   Award,
+  ToggleRight,
   type LucideIcon,
 } from 'lucide-react'
 import type {
@@ -73,6 +74,10 @@ export function getDashboardNavItems(
     if (canViewTab(session, item.area)) {
       items.push(item)
     }
+  }
+
+  if (session.role === 'superAdmin') {
+    items.push({ href: '/dashboard/feature-flags', icon: ToggleRight, label: 'Feature flags' })
   }
 
   items.push({ href: '/dashboard/profile', icon: User, label: 'Profile' })

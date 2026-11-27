@@ -16,6 +16,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import EventShareActions from '@/components/EventShareActions'
+import { isFeatureEnabled } from '@/lib/feature-flags'
 import { SITE_CONFIG } from '@/lib/site-config'
 import { FaWhatsapp } from 'react-icons/fa'
 
@@ -73,7 +74,7 @@ const EventPassedMessage = () => {
 }
 
 // Registration Closed Component
-const RegistrationClosedMessage = () => {
+const RegistrationClosedMessage = ({ paused = false }: { paused?: boolean }) => {
   return (
     <Card className="shadow-sm">
       <CardContent className="p-6 sm:p-8 text-center">
@@ -81,11 +82,12 @@ const RegistrationClosedMessage = () => {
           <Users className="w-6 h-6 sm:w-8 sm:h-8 text-amber-600" />
         </div>
         <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-2">
-          Registration Closed
+          {paused ? 'Registration Paused' : 'Registration Closed'}
         </h3>
         <p className="text-sm sm:text-base text-gray-600 mb-4">
-          Registration for this event is closed. Check out our other events for
-          new opportunities!
+          {paused
+            ? 'Registration is temporarily paused. Please check back soon or WhatsApp us.'
+            : 'Registration for this event is closed. Check out our other events for new opportunities!'}
         </p>
         <Button asChild className="bg-indigo-500 hover:bg-indigo-600 text-white">
           <Link href="/events" prefetch={false}>
@@ -184,7 +186,8 @@ export default async function EventDetailPage({
 
   const eventDates = parseEventDates(event.date)
   const hasPassed = hasEventPassed(event.date)
-  const registrationOpen = isRegistrationOpen(event)
+  const registrationPaused = !(await isFeatureEnabled('registration.events'))
+  const registrationOpen = isRegistrationOpen(event) && !registrationPaused
   const tags = getEventTags(event)
   const isOnline = event.location.toLowerCase().includes('online') || event.venue?.toLowerCase().includes('online')
   const categoryFees =
@@ -511,7 +514,7 @@ export default async function EventDetailPage({
               {hasPassed ? (
                 <EventPassedMessage />
               ) : !registrationOpen ? (
-                <RegistrationClosedMessage />
+                <RegistrationClosedMessage paused={registrationPaused} />
               ) : (
                 <BookingForm event={event} schools={schools} />
               )}

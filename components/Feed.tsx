@@ -31,6 +31,9 @@ interface FeedProps {
   initialUpcomingEvents?: Event[]
   initialPartners?: HomepageOrg[]
   initialWorkshopSchools?: HomepageOrg[]
+  heroVideoEnabled?: boolean
+  /** `pages.courses` flag: when off, course links go to the contact page. */
+  coursesPageEnabled?: boolean
 }
 
 export default function Feed({
@@ -38,6 +41,8 @@ export default function Feed({
   initialUpcomingEvents = [],
   initialPartners = [],
   initialWorkshopSchools = [],
+  heroVideoEnabled = true,
+  coursesPageEnabled = true,
 }: FeedProps) {
   const courses = initialCourses
     .filter((course) => !course.isArchived)
@@ -46,7 +51,9 @@ export default function Feed({
       title: course.title,
       level: course.level,
       blurb: course.blurb,
-      href: resolveCourseHref(course.href),
+      href: coursesPageEnabled
+        ? resolveCourseHref(course.href)
+        : `/contact?interest=${encodeURIComponent(course.title)}`,
       img: course.image,
     }))
 
@@ -55,14 +62,18 @@ export default function Feed({
   return (
     <div className="w-full min-w-full">
       <JsonLdScript id="home-faq-schema" data={faqPageSchema(faqItems)} />
-      <Hero upcomingEvents={initialUpcomingEvents} />
+      <Hero
+        upcomingEvents={initialUpcomingEvents}
+        videoEnabled={heroVideoEnabled}
+        coursesPageEnabled={coursesPageEnabled}
+      />
 
       <HomeSection tone="wash" showOrbs>
         <FeatureBento />
       </HomeSection>
 
       <HomeSection tone="white">
-        <CourseShowcase courses={courses} />
+        <CourseShowcase courses={courses} showExploreAll={coursesPageEnabled} />
       </HomeSection>
 
       <FeedDeferredFromMission

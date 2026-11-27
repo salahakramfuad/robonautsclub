@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from 'react'
 import { ADSENSE_PUBLISHER_ID } from '@/lib/adsense'
+import { useAdsEnabled } from './AdsEnabledContext'
 
 declare global {
   interface Window {
@@ -30,18 +31,19 @@ export default function AdUnit({
   label = 'Advertisement',
 }: AdUnitProps) {
   const pushed = useRef(false)
+  const adsEnabled = useAdsEnabled()
 
   useEffect(() => {
-    if (!slot || pushed.current) return
+    if (!adsEnabled || !slot || pushed.current) return
     try {
       ;(window.adsbygoogle = window.adsbygoogle || []).push({})
       pushed.current = true
     } catch {
       // Ad blockers or incomplete script load — fail silently
     }
-  }, [slot])
+  }, [slot, adsEnabled])
 
-  if (!slot) return null
+  if (!adsEnabled || !slot) return null
 
   return (
     <aside

@@ -215,3 +215,13 @@ export const passwordResetTokens = sqliteTable(
   },
   (t) => [index('password_reset_tokens_hash_idx').on(t.tokenHash)],
 )
+
+/** Site-wide feature switches managed by Super Admins (see lib/feature-flags.ts). */
+export const featureFlags = sqliteTable('feature_flags', {
+  key: text('key').primaryKey(),
+  enabled: integer('enabled', { mode: 'boolean' }).notNull().default(false),
+  /** Optional text value, e.g. announcement banner message or link. */
+  value: text('value'),
+  updatedAt: text('updated_at'),
+  updatedBy: text('updated_by'),
+})

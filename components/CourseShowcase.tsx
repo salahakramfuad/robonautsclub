@@ -38,7 +38,13 @@ function pickFeaturedIndex(courses: ShowcaseCourse[]) {
   return 0
 }
 
-export default function CourseShowcase({ courses }: { courses: ShowcaseCourse[] }) {
+export default function CourseShowcase({
+  courses,
+  showExploreAll = true,
+}: {
+  courses: ShowcaseCourse[]
+  showExploreAll?: boolean
+}) {
   if (courses.length === 0) {
     return (
       <div id="programs">
@@ -59,7 +65,7 @@ export default function CourseShowcase({ courses }: { courses: ShowcaseCourse[] 
 
   return (
     <div id="programs">
-      <SectionHeader showExplore />
+      <SectionHeader showExplore={showExploreAll} />
 
       <Reveal>
         <CourseCard
