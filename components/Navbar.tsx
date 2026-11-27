@@ -7,11 +7,39 @@ import NavbarMobileMenu from '@/components/NavbarMobileMenu'
 import LanguageSwitcher from '@/components/LanguageSwitcher'
 import { getTranslations } from 'next-intl/server'
 
+type MenuItem = { title: string; href?: string; subLinks?: Array<{ title: string; href: string }> }
+
+/** Links shown together under one dropdown, placed where the first of them would be. */
+const NAV_GROUPS = [
+  { key: 'media', children: ['news', 'gallery'] },
+  { key: 'about', children: ['about', 'contact'] },
+] as const
+
 export default async function Nav({ hiddenHrefs = [] }: { hiddenHrefs?: string[] }) {
   const t = await getTranslations('common.nav')
-  const menuItems = SITE_CONFIG.navLinks
-    .filter((link) => !hiddenHrefs.includes(link.href))
-    .map((link) => ({ title: t(`links.${link.key}`), href: link.href }))
+  const visible = SITE_CONFIG.navLinks.filter((link) => !hiddenHrefs.includes(link.href))
+  // The About page reads "About us" inside the "About" dropdown.
+  const childTitle = (key: string) => (key === 'about' ? t('groups.aboutUs') : t(`links.${key}`))
+
+  const menuItems: MenuItem[] = []
+  for (const link of visible) {
+    const group = NAV_GROUPS.find((g) => (g.children as readonly string[]).includes(link.key))
+    if (!group) {
+      menuItems.push({ title: t(`links.${link.key}`), href: link.href })
+      continue
+    }
+    // Emit the group once, at its first visible child.
+    const children = visible.filter((l) => (group.children as readonly string[]).includes(l.key))
+    if (children[0] !== link) continue
+    menuItems.push(
+      children.length === 1
+        ? { title: t(`links.${link.key}`), href: link.href }
+        : {
+            title: t(`groups.${group.key}`),
+            subLinks: children.map((c) => ({ title: childTitle(c.key), href: c.href })),
+          },
+    )
+  }
 
   return (
     <NavbarScrollShell>
