@@ -45,7 +45,7 @@ export default function CourseShowcase({ courses }: { courses: ShowcaseCourse[] 
         <SectionHeader />
         <div className="py-12 text-center">
           <BookOpen className="mx-auto mb-3 size-12 text-slate-300" />
-          <p className="hidden text-gray-600 sm:block">
+          <p className="text-gray-600">
             No courses available at the moment. Check back soon!
           </p>
         </div>
@@ -59,7 +59,7 @@ export default function CourseShowcase({ courses }: { courses: ShowcaseCourse[] 
 
   return (
     <div id="programs">
-      <SectionHeader showExplore={others.length > 2} />
+      <SectionHeader showExplore />
 
       <Reveal>
         <CourseCard
@@ -110,10 +110,11 @@ function SectionHeader({ showExplore = false }: { showExplore?: boolean }) {
       </Reveal>
       {showExplore ? (
         <Link
-          href="#course-grid"
+          href="/courses"
+          prefetch={false}
           className="group inline-flex items-center gap-1.5 text-sm font-semibold text-indigo-600 transition-colors hover:text-indigo-800"
         >
-          Explore all
+          Explore all courses
           <ArrowRight className="size-4 transition-transform duration-300 group-hover:translate-x-0.5" />
         </Link>
       ) : null}

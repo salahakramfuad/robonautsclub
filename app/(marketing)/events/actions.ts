@@ -53,7 +53,13 @@ function getBaseUrl(): string {
  */
 export async function createBooking(
   formData: BookingInput
-): Promise<{ success: boolean; error?: string; warning?: string; bookingId?: string }> {
+): Promise<{
+  success: boolean
+  error?: string
+  warning?: string
+  bookingId?: string
+  registrationId?: string
+}> {
   try {
     const eventDoc = await collectionGet('events', formData.eventId)
     if (!eventDoc) {

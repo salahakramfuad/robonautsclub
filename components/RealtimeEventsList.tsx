@@ -7,21 +7,21 @@ import {
   getBangladeshNow,
   getEventDateInBangladesh,
   bdWallTimeToUtcDate,
+  isRegistrationOpen,
 } from '@/lib/dateUtils'
 import Link from 'next/link'
 import { Calendar, Clock, MapPin, ArrowRight } from 'lucide-react'
 import { Event } from '@/types/event'
 import { eventPublicHref } from '@/lib/event-ui'
-import { SITE_CONFIG } from '@/lib/site-config'
 import { differenceInDays, differenceInHours } from 'date-fns'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
 import {
   getRobofestEventsListCard,
   ROBOFEST_EVENTS_LIST_CARD_ID,
 } from '@/lib/robofest-events-card'
 import EventCardImage from '@/components/EventCardImage'
+import EventsExplorer, { type ExplorerEventItem } from '@/components/EventsExplorer'
 
 /**
  * Check if an event is currently going on
@@ -147,6 +147,8 @@ function EventCard({ event, priority = false }: { event: Event; priority?: boole
   const isUpcoming = isEventUpcoming(event.date)
   const status = isUpcoming ? 'Upcoming' : 'Completed'
   const timeDisplay = getTimeDisplay(event, isUpcoming)
+  // Robofest card links to its own landing page, which handles its own registration state.
+  const canRegister = isUpcoming && !event.href && isRegistrationOpen(event)
 
   return (
     <Link href={eventPublicHref(event)} prefetch={false} className="h-full">
@@ -217,44 +219,18 @@ function EventCard({ event, priority = false }: { event: Event; priority?: boole
           )}
 
           <div className="mt-auto pt-3 sm:pt-4 border-t border-gray-100">
-            <div className="flex items-center gap-2 text-indigo-500 font-semibold group-hover:text-indigo-700 transition-colors text-sm sm:text-base">
-              <span>View Details</span>
+            <div
+              className={`flex items-center gap-2 font-semibold transition-colors text-sm sm:text-base ${
+                canRegister ? 'text-[#d4163f] group-hover:text-[#e8335a]' : 'text-indigo-500 group-hover:text-indigo-700'
+              }`}
+            >
+              <span>{canRegister ? 'View & register' : 'View details'}</span>
               <ArrowRight className="w-3 h-3 sm:w-4 sm:h-4 group-hover:translate-x-1 transition-transform" />
             </div>
           </div>
         </CardContent>
       </Card>
     </Link>
-  )
-}
-
-function SectionHeader({
-  title,
-  subtitle,
-  count,
-}: {
-  title: string
-  subtitle?: string
-  count?: number
-}) {
-  return (
-    <div className="mb-6 sm:mb-8">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 mb-4">
-        <div className="flex-1">
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-2">{title}</h2>
-          {subtitle && <p className="text-sm sm:text-base md:text-lg text-gray-600">{subtitle}</p>}
-        </div>
-        {count !== undefined && (
-          <Badge
-            variant="secondary"
-            className="flex sm:hidden md:flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-indigo-100 hover:bg-indigo-100 self-start sm:self-auto"
-          >
-            <span className="text-base sm:text-lg font-bold text-indigo-700">{count}</span>
-            <span className="text-xs sm:text-sm text-indigo-700">Events</span>
-          </Badge>
-        )}
-      </div>
-    </div>
   )
 }
 
@@ -289,52 +265,22 @@ export default function RealtimeEventsList({ initialEvents = [] }: PublicEventsL
   const upcomingEvents = sortedEvents.filter((event) => isEventUpcoming(event.date))
   const pastEvents = sortedEvents.filter((event) => hasEventPassed(event.date))
 
-  return (
-    <>
-      {upcomingEvents.length > 0 ? (
-        <section className="mb-12 sm:mb-16 md:mb-20">
-          <SectionHeader
-            title="Upcoming Events"
-            subtitle="Browse the full list—tap an event for details and registration"
-            count={upcomingEvents.length}
-          />
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-            {upcomingEvents.map((event, index) => (
-              <EventCard key={event.id} event={event} priority={index === 0} />
-            ))}
-          </div>
-        </section>
-      ) : (
-        <section className="mb-12 sm:mb-16 md:mb-20">
-          <Card className="border-2 border-dashed border-gray-300">
-            <CardContent className="p-8 sm:p-12 text-center">
-              <Calendar className="w-12 h-12 sm:w-16 sm:h-16 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">No Upcoming Events</h3>
-              <p className="text-sm sm:text-base text-gray-600 mb-6">
-                Check back soon for new events and workshops!
-              </p>
-              <Button asChild className="bg-indigo-500 hover:bg-indigo-600 text-white text-sm sm:text-base">
-                <a href={`mailto:${SITE_CONFIG.email}`}>Contact Us</a>
-              </Button>
-            </CardContent>
-          </Card>
-        </section>
-      )}
+  const toItem = (event: Event, upcoming: boolean, index: number): ExplorerEventItem => ({
+    key: event.id,
+    upcoming,
+    free: !event.isPaid,
+    tags: (event.tags ?? []).map((t) => t.trim()).filter(Boolean),
+    searchText: [event.title, event.description, event.location, event.venue, ...(event.tags ?? [])]
+      .filter(Boolean)
+      .join(' ')
+      .toLowerCase(),
+    card: <EventCard event={event} priority={upcoming && index === 0} />,
+  })
 
-      {pastEvents.length > 0 && (
-        <section>
-          <SectionHeader
-            title="Past Events"
-            subtitle="Browse our previous events and workshops"
-            count={pastEvents.length}
-          />
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-            {pastEvents.map((event) => (
-              <EventCard key={event.id} event={event} />
-            ))}
-          </div>
-        </section>
-      )}
-    </>
-  )
+  const items = [
+    ...upcomingEvents.map((e, i) => toItem(e, true, i)),
+    ...pastEvents.map((e, i) => toItem(e, false, i)),
+  ]
+
+  return <EventsExplorer items={items} />
 }

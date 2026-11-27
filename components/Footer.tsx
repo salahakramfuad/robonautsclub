@@ -1,4 +1,4 @@
-import { Mail, Phone } from "lucide-react";
+import { Mail, MapPin, Phone } from "lucide-react";
 import {
   FaFacebookF,
   FaInstagram,
@@ -19,20 +19,24 @@ const SOCIAL_LINKS = [
   { icon: FaWhatsapp, href: SITE_CONFIG.social.whatsapp, label: "WhatsApp" },
 ];
 
-const SERVICE_LINKS = [
-  { title: "Robotics Workshops", href: "/#programs" },
-  { title: "Hands-on Training", href: "/#programs" },
-  { title: "Robo Fair", href: "/robofest" },
-  { title: "Competitions and Simulations", href: "/events" },
+const STUDENT_LINKS = [
+  { title: "Courses & programs", href: "/courses" },
+  { title: "Upcoming events", href: "/events" },
+  { title: "Robofest", href: "/robofest" },
+  { title: "Find my registration", href: "/verify-booking" },
+  { title: "Contact us", href: "/contact" },
 ] as const;
+
+const linkClass =
+  "rounded transition hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400";
 
 export default function Footer() {
   return (
-    <footer className="bg-brand-light text-brand-dar bg-sky-100">
-      {/* Top accent strip */}
-      <div className="h-2 w-full bg-linear-to-r from-blue-200 via-gray-200 to-red-200" />
+    <footer className="bg-[#14264a] text-slate-300">
+      {/* Top accent strip — logo colours */}
+      <div className="h-1 w-full bg-linear-to-r from-[#1f3a6f] via-[#d4163f] to-[#4a4c50]" />
 
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 py-8 sm:py-12">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 py-10 sm:py-14">
         {/* Top Section */}
         <div className="flex flex-col gap-6 sm:gap-8 md:flex-row md:items-center md:justify-between">
           {/* Brand */}
@@ -40,16 +44,15 @@ export default function Footer() {
             <Image
               src={SITE_CONFIG.assets.logo}
               alt={`${SITE_CONFIG.name} Logo`}
-              width={72}
-              height={72}
-              className="object-contain w-12 h-12 sm:w-14 sm:h-14"
-              priority
+              width={56}
+              height={56}
+              className="object-contain w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-white p-1"
             />
             <div>
-              <h2 className="text-lg sm:text-xl font-semibold text-brand-blue">
+              <h2 className="text-lg sm:text-xl font-semibold text-white">
                 {SITE_CONFIG.name}
               </h2>
-              <p className="mt-1 max-w-sm text-xs sm:text-sm text-brand-dark/70">
+              <p className="mt-1 max-w-sm text-xs sm:text-sm text-slate-400">
                 {SITE_CONFIG.tagline}
               </p>
             </div>
@@ -61,17 +64,10 @@ export default function Footer() {
               <a
                 key={label}
                 href={href}
-                aria-label={label}
+                aria-label={`${label} (opens in a new tab)`}
                 target="_blank"
                 rel="noreferrer"
-                className="
-                  flex h-10 w-10 items-center justify-center rounded-full
-                  border border-brand-blue/20
-                  bg-white text-brand-blue
-                  shadow-sm transition
-                  hover:bg-blue-300 hover:text-white hover:border-brand-blue
-                  focus:outline-none focus:ring-2 focus:ring-brand-blue/30
-                "
+                className="flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/5 text-slate-200 transition hover:bg-indigo-500 hover:text-white hover:border-indigo-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400"
               >
                 <Icon className="text-lg" />
               </a>
@@ -79,99 +75,77 @@ export default function Footer() {
           </div>
         </div>
 
-        {/* Divider */}
-        <div
-          className="mt-8 mb-6 h-px w-full"
-          style={{
-            background:
-              "linear-gradient(to right, transparent, rgba(17,24,39,0.12), transparent)",
-          }}
-        />
+        <div className="mt-8 mb-8 h-px w-full bg-white/10" />
 
         {/* Main Content */}
         <div className="grid gap-8 sm:gap-10 sm:grid-cols-2 md:grid-cols-4">
-          {/* Navigation */}
           <nav aria-label="Footer">
-            <h3 className="mb-3 sm:mb-4 text-xs sm:text-sm font-semibold uppercase tracking-wide text-brand-blue">
-              Quick Links
+            <h3 className="mb-3 sm:mb-4 text-xs sm:text-sm font-semibold uppercase tracking-wide text-indigo-300">
+              Explore
             </h3>
-            <ul className="space-y-2 sm:space-y-3 text-xs sm:text-sm">
+            <ul className="space-y-2 sm:space-y-3 text-sm">
               {SITE_CONFIG.navLinks.map((link) => (
                 <li key={link.href}>
-                  <Link
-                    href={link.href}
-                    prefetch={false}
-                    className="transition hover:text-brand-blue"
-                  >
+                  <Link href={link.href} prefetch={false} className={linkClass}>
                     {link.title}
                   </Link>
                 </li>
               ))}
-              <li>
-                <Link
-                  href="/about#contact"
-                  prefetch={false}
-                  className="transition hover:text-brand-blue"
-                >
-                  Contact
-                </Link>
-              </li>
             </ul>
           </nav>
 
-          {/* Services */}
-          <div>
-            <h3 className="mb-3 sm:mb-4 text-xs sm:text-sm font-semibold uppercase tracking-wide text-brand-blue">
-              Our Services
+          <nav aria-label="For students and parents">
+            <h3 className="mb-3 sm:mb-4 text-xs sm:text-sm font-semibold uppercase tracking-wide text-indigo-300">
+              Students & parents
             </h3>
-            <ul className="space-y-2 sm:space-y-3 text-xs sm:text-sm">
-              {SERVICE_LINKS.map((service) => (
-                <li key={service.title}>
-                  <Link
-                    href={service.href}
-                    prefetch={false}
-                    className="transition hover:text-brand-blue"
-                  >
-                    {service.title}
+            <ul className="space-y-2 sm:space-y-3 text-sm">
+              {STUDENT_LINKS.map((item) => (
+                <li key={item.href}>
+                  <Link href={item.href} prefetch={false} className={linkClass}>
+                    {item.title}
                   </Link>
                 </li>
               ))}
             </ul>
-          </div>
+          </nav>
 
           {/* Contact */}
           <div>
-            <h3 className="mb-3 sm:mb-4 text-xs sm:text-sm font-semibold uppercase tracking-wide text-brand-blue">
+            <h3 className="mb-3 sm:mb-4 text-xs sm:text-sm font-semibold uppercase tracking-wide text-indigo-300">
               Contact
             </h3>
-            <div className="space-y-2 sm:space-y-3 text-xs sm:text-sm">
+            <div className="space-y-3 text-sm">
               <a
-                href={`mailto:${SITE_CONFIG.email}`}
-                className="flex items-center gap-2 transition hover:text-brand-blue"
+                href={SITE_CONFIG.social.whatsapp}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center gap-2 rounded-full bg-emerald-500 px-4 py-2 font-semibold text-white transition hover:bg-emerald-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300"
               >
-                <Mail size={16} />
-                {SITE_CONFIG.email}
+                <FaWhatsapp className="text-base" aria-hidden />
+                Chat on WhatsApp
               </a>
-
-              <a
-                href={`tel:${SITE_CONFIG.phone}`}
-                className="flex items-center gap-2 transition hover:text-brand-blue"
-              >
-                <Phone size={16} />
+              <a href={`tel:${SITE_CONFIG.phone}`} className={`flex items-center gap-2 ${linkClass}`}>
+                <Phone size={16} aria-hidden />
                 {SITE_CONFIG.phone}
               </a>
-
-              <p className="text-brand-dark/70">{SITE_CONFIG.location}</p>
+              <a href={`mailto:${SITE_CONFIG.email}`} className={`flex items-center gap-2 break-all ${linkClass}`}>
+                <Mail size={16} aria-hidden />
+                {SITE_CONFIG.email}
+              </a>
+              <p className="flex items-start gap-2 text-slate-400">
+                <MapPin size={16} className="mt-0.5 shrink-0" aria-hidden />
+                {SITE_CONFIG.location}
+              </p>
             </div>
           </div>
 
           {/* Payment */}
           <div>
-            <h3 className="mb-3 sm:mb-4 text-xs sm:text-sm font-semibold uppercase tracking-wide text-brand-blue">
+            <h3 className="mb-3 sm:mb-4 text-xs sm:text-sm font-semibold uppercase tracking-wide text-indigo-300">
               Payment method
             </h3>
             <div
-              className="inline-flex items-center gap-2.5 rounded-xl border border-[#E2136E]/20 bg-white px-3 py-2.5 shadow-sm"
+              className="inline-flex items-center gap-2.5 rounded-xl bg-white px-3 py-2.5 shadow-sm"
               title="bKash"
             >
               <Image
@@ -183,27 +157,18 @@ export default function Footer() {
               />
               <div className="leading-tight">
                 <p className="text-sm font-semibold text-[#E2136E]">bKash</p>
-                <p className="text-[11px] text-brand-dark/60">
-                  Secure online payments
-                </p>
+                <p className="text-[11px] text-slate-500">Secure online payments</p>
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Bottom linear bar */}
-      <div
-        className="mt-4 h-px w-full"
-        style={{
-          background:
-            "linear-gradient(to right, transparent, rgba(17,24,39,0.12), transparent)",
-        }}
-      />
+      <div className="h-px w-full bg-white/10" />
 
       {/* Bottom text row */}
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 py-3 sm:py-4">
-        <div className="flex flex-col gap-2 text-xs sm:text-sm text-brand-dark/80 md:flex-row md:items-center md:justify-between text-center md:text-left">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 py-4 pb-24 md:pb-4">
+        <div className="flex flex-col gap-2 text-xs sm:text-sm text-slate-400 md:flex-row md:items-center md:justify-between text-center md:text-left">
           <span>
             © {new Date().getFullYear()} {SITE_CONFIG.name}. All rights reserved.
           </span>
@@ -211,11 +176,7 @@ export default function Footer() {
           <div className="flex flex-col items-center gap-2 md:flex-row md:gap-4">
             <nav aria-label="Legal" className="flex flex-wrap justify-center gap-x-4 gap-y-1">
               {LEGAL_PAGES.map((page) => (
-                <Link
-                  key={page.href}
-                  href={page.href}
-                  className="transition hover:text-brand-blue"
-                >
+                <Link key={page.href} href={page.href} className={linkClass}>
                   {page.title}
                 </Link>
               ))}
@@ -224,7 +185,7 @@ export default function Footer() {
               href={SITE_CONFIG.developer.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="transition hover:text-brand-blue"
+              className={linkClass}
             >
               Developed by{" "}
               <span className="font-semibold">{SITE_CONFIG.developer.name}</span>

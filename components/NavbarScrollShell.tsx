@@ -46,7 +46,7 @@ export default function NavbarScrollShell({ children }: { children: ReactNode })
   return (
     <header
       className={cn(
-        'sticky top-0 z-70 bg-blue-100 backdrop-blur border-b border-black/10',
+        'sticky top-0 z-70 bg-white/90 backdrop-blur-md border-b border-slate-200/80 shadow-[0_1px_12px_-6px_rgba(15,23,42,0.15)]',
         'transition-transform duration-300 ease-in-out',
         isVisible ? 'translate-y-0' : '-translate-y-full',
       )}

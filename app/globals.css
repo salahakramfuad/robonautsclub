@@ -74,6 +74,12 @@
   --sidebar-ring: oklch(0.551 0.027 264.364);
 }
 
+/*
+ * Brand palette sampled from the Robonauts logo. Used as Tailwind arbitrary values
+ * (e.g. bg-[#d4163f]) so the colours never depend on a theme block being reloaded:
+ *   navy #1f3a6f · navy-dark #14264a · crimson #d4163f · crimson-light #e8335a · charcoal #4a4c50
+ */
+
 @theme inline {
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
@@ -189,7 +195,9 @@
 }
 
 .marquee-root:hover .animate-scroll-left,
-.marquee-root:hover .animate-scroll-right {
+.marquee-root:hover .animate-scroll-right,
+.marquee-root:focus-within .animate-scroll-left,
+.marquee-root:focus-within .animate-scroll-right {
   animation-play-state: paused;
 }
 

@@ -20,7 +20,10 @@ import {
 import { SITE_CONFIG } from "@/lib/site-config";
 import RobofestRegistrationCountdown from "@/components/RobofestRegistrationCountdown";
 import RobofestIcon from "@/components/RobofestIcon";
-import { resolveRobofestDivisionClosingDate } from "@/lib/robofest-deadlines";
+import {
+  areAllRobofestDivisionsClosed,
+  resolveRobofestDivisionClosingDate,
+} from "@/lib/robofest-deadlines";
 
 function CircuitBackdrop({ className = "" }: { className?: string }) {
   return (
@@ -70,6 +73,7 @@ function SectionHeading({
 export default async function RobofestLocalRoundPage() {
   const content = await getRobofestContent();
   const categories = getActiveRobofestCategories(content);
+  const registrationClosed = areAllRobofestDivisionsClosed(content);
   const howItWorks = content.howItWorks?.length ? content.howItWorks : [];
   const dateLines = content.dateLines?.length
     ? content.dateLines
@@ -521,12 +525,31 @@ export default async function RobofestLocalRoundPage() {
                     </ul>
                   ) : null}
                   <div className="mt-7 flex flex-col sm:flex-row gap-3">
-                    <Button
-                      asChild
-                      className="bg-cyan-600 text-white hover:bg-cyan-700 font-semibold"
-                    >
-                      <a href="#categories">Register Now</a>
-                    </Button>
+                    {registrationClosed ? (
+                      <>
+                        <p
+                          role="status"
+                          className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-2.5 text-sm font-semibold text-amber-900"
+                        >
+                          Registration for this round has closed.
+                        </p>
+                        <Button
+                          asChild
+                          className="bg-cyan-600 text-white hover:bg-cyan-700 font-semibold"
+                        >
+                          <Link href="/gallery" prefetch={false}>
+                            See event photos
+                          </Link>
+                        </Button>
+                      </>
+                    ) : (
+                      <Button
+                        asChild
+                        className="bg-cyan-600 text-white hover:bg-cyan-700 font-semibold"
+                      >
+                        <a href="#categories">Register Now</a>
+                      </Button>
+                    )}
                     {instagramUrl ? (
                       <Button asChild variant="outline">
                         <a

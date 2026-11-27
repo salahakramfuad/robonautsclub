@@ -1,5 +1,6 @@
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
+import MobileActionBar from '@/components/MobileActionBar'
 import AdSenseScript from '@/components/ads/AdSenseScript'
 
 export default function MarketingLayout({
@@ -13,6 +14,7 @@ export default function MarketingLayout({
       <Navbar />
       {children}
       <Footer />
+      <MobileActionBar />
     </>
   )
 }

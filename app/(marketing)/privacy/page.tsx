@@ -208,7 +208,7 @@ export default function PrivacyPolicyPage() {
         <p>
           For questions about this policy, email{' '}
           <LegalLink href={`mailto:${email}`}>{email}</LegalLink> or visit our{' '}
-          <LegalLink href="/about#contact">About &amp; contact</LegalLink> page.
+          <LegalLink href="/contact">Contact</LegalLink> page.
         </p>
       </LegalSection>
     </LegalPage>

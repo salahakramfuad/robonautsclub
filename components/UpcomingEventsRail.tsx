@@ -1,11 +1,12 @@
 'use client'
 
 import Link from 'next/link'
-import { ArrowRight } from 'lucide-react'
+import { ArrowRight, Pause, Play } from 'lucide-react'
 import type { Event } from '@/types/event'
 import { eventPublicHref } from '@/lib/event-ui'
 import { parseEventDates } from '@/lib/dateUtils'
 import {
+  type CarouselApi,
   Carousel,
   CarouselContent,
   CarouselItem,
@@ -13,7 +14,7 @@ import {
   CarouselPrevious,
 } from '@/components/ui/carousel'
 import Autoplay from 'embla-carousel-autoplay'
-import { useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 function eventDateParts(date: Event['date']) {
   const dates = parseEventDates(date)
@@ -36,8 +37,32 @@ function categoryLabel(event: Event) {
 
 export default function UpcomingEventsRail({ events }: { events: Event[] }) {
   const autoplay = useRef(
-    Autoplay({ delay: 5200, stopOnInteraction: false, stopOnMouseEnter: true }),
+    Autoplay({ delay: 5200, stopOnInteraction: true, stopOnMouseEnter: true }),
   )
+  const canAutoplay = events.length > 2
+  const [api, setApi] = useState<CarouselApi>()
+  const [playing, setPlaying] = useState(false)
+
+  // Mirror the plugin's real state (hover, swipes and arrows all stop it), and
+  // honour reduced motion once Embla has initialised the plugin.
+  useEffect(() => {
+    if (!api || !canAutoplay) return
+    const sync = () => setPlaying(autoplay.current.isPlaying())
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) autoplay.current.stop()
+    api.on('autoplay:play', sync)
+    api.on('autoplay:stop', sync)
+    const frame = requestAnimationFrame(sync)
+    return () => {
+      cancelAnimationFrame(frame)
+      api.off('autoplay:play', sync)
+      api.off('autoplay:stop', sync)
+    }
+  }, [api, canAutoplay])
+
+  const togglePlay = () => {
+    if (autoplay.current.isPlaying()) autoplay.current.stop()
+    else autoplay.current.play()
+  }
 
   if (events.length === 0) return null
 
@@ -47,25 +72,42 @@ export default function UpcomingEventsRail({ events }: { events: Event[] }) {
         <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-sky-200/90">
           Upcoming opportunities
         </p>
-        <Link
-          href="/events"
-          prefetch={false}
-          className="group inline-flex items-center gap-1 text-xs font-medium text-white/70 transition-colors hover:text-white"
-        >
-          Robotics &amp; STEM Events
-          <ArrowRight className="size-3.5 transition-transform duration-300 group-hover:translate-x-0.5" />
-        </Link>
+        <div className="flex items-center gap-3">
+          {canAutoplay ? (
+            <button
+              type="button"
+              onClick={togglePlay}
+              className="inline-flex size-7 items-center justify-center rounded-full border border-white/20 bg-black/30 text-white/80 transition hover:bg-black/50 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-300"
+              aria-label={playing ? 'Pause event slideshow' : 'Play event slideshow'}
+            >
+              {playing ? <Pause className="size-3.5" /> : <Play className="size-3.5" />}
+            </button>
+          ) : null}
+          <Link
+            href="/events"
+            prefetch={false}
+            className="group inline-flex items-center gap-1 text-xs font-medium text-white/70 transition-colors hover:text-white"
+          >
+            All events
+            <ArrowRight className="size-3.5 transition-transform duration-300 group-hover:translate-x-0.5" />
+          </Link>
+        </div>
       </div>
 
       <Carousel
-        opts={{ align: 'start', loop: events.length > 2 }}
-        plugins={events.length > 2 ? [autoplay.current] : []}
+        opts={{ align: 'start', loop: canAutoplay }}
+        plugins={canAutoplay ? [autoplay.current] : []}
+        setApi={setApi}
         className="relative"
       >
         {events.length > 1 ? (
           <>
-            <CarouselPrevious className="left-0 hidden size-8 border-white/20 bg-black/40 text-white hover:bg-black/60 hover:text-white disabled:hidden sm:flex sm:-left-3" />
-            <CarouselNext className="right-0 hidden size-8 border-white/20 bg-black/40 text-white hover:bg-black/60 hover:text-white disabled:hidden sm:flex sm:-right-3" />
+            <CarouselPrevious
+              className="-left-2 size-8 border-white/20 bg-black/50 text-white hover:bg-black/70 hover:text-white disabled:hidden sm:-left-3"
+            />
+            <CarouselNext
+              className="-right-2 size-8 border-white/20 bg-black/50 text-white hover:bg-black/70 hover:text-white disabled:hidden sm:-right-3"
+            />
           </>
         ) : null}
 

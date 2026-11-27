@@ -32,13 +32,22 @@ export default function Nav() {
               priority
               className="rounded-full object-contain ring-1 ring-gray-200 group-hover:ring-indigo-200 transition"
             />
-            <span className="hidden md:block text-2xl font-semibold leading-tight text-gray-900 tracking-tight">
+            <span className="hidden md:block text-2xl font-bold leading-tight text-[#1f3a6f] tracking-tight">
               Robonauts
             </span>
           </Link>
 
           <NavbarDesktopMenu menuItems={menuItems} />
-          <NavbarMobileMenu menuItems={menuItems} />
+          <div className="flex items-center gap-2">
+            <Link
+              href="/events"
+              prefetch={false}
+              className="inline-flex items-center gap-1.5 rounded-full bg-[#d4163f] px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-[#e8335a] no-underline hover:no-underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1f3a6f] focus-visible:ring-offset-2"
+            >
+              Join an event
+            </Link>
+            <NavbarMobileMenu menuItems={menuItems} />
+          </div>
         </div>
       </nav>
     </NavbarScrollShell>

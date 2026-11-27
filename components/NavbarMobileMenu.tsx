@@ -51,7 +51,7 @@ export default function NavbarMobileMenu({ menuItems }: { menuItems: readonly Me
         <Button
           variant="ghost"
           size="icon"
-          className="lg:hidden size-11 text-gray-700 hover:bg-indigo-50 hover:text-indigo-700"
+          className="xl:hidden size-11 text-gray-700 hover:bg-indigo-50 hover:text-indigo-700"
           aria-label="Open main menu"
         >
           <Menu className="size-5" />
@@ -59,9 +59,9 @@ export default function NavbarMobileMenu({ menuItems }: { menuItems: readonly Me
       </SheetTrigger>
       <SheetContent
         side="right"
-        className="w-4/5 max-w-sm bg-blue-50 p-0 flex flex-col gap-0"
+        className="w-4/5 max-w-sm bg-white p-0 flex flex-col gap-0"
       >
-        <SheetHeader className="px-4 py-3 sticky top-0 bg-blue-100/95 backdrop-blur border-b border-blue-200/60 z-10">
+        <SheetHeader className="px-4 py-3 sticky top-0 bg-white/95 backdrop-blur border-b border-slate-200 z-10">
           <SheetTitle className="text-gray-900">Menu</SheetTitle>
         </SheetHeader>
 
@@ -130,7 +130,7 @@ export default function NavbarMobileMenu({ menuItems }: { menuItems: readonly Me
                     {item.title}
                   </Link>
                 )}
-                <Separator className="mt-2 bg-blue-200/40 last:hidden" />
+                <Separator className="mt-2 bg-slate-100 last:hidden" />
               </div>
             ))}
           </nav>

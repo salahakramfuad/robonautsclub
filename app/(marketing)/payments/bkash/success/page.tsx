@@ -1,5 +1,6 @@
 import Link from 'next/link'
-import { AlertTriangle, CheckCircle } from 'lucide-react'
+import { AlertTriangle, CheckCircle, Ticket } from 'lucide-react'
+import CopyButton from '../../../verify-booking/CopyButton'
 import { Card, CardContent } from '@/components/ui/card'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
@@ -81,20 +82,39 @@ export default async function BkashSuccessPage({ searchParams }: SuccessPageProp
             </Alert>
           ) : null}
           {registrationId ? (
-            <p className="text-sm text-gray-500 mb-2">
-              Registration ID: <span className="font-mono font-semibold">{registrationId}</span>
-            </p>
+            <div className="mb-4 rounded-xl border border-dashed border-[#1f3a6f]/30 bg-slate-50 px-4 py-3">
+              <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+                Your registration ID — save this
+              </p>
+              <div className="mt-1 flex items-center">
+                <span className="font-mono text-lg font-bold text-slate-900 break-all">{registrationId}</span>
+                <CopyButton text={registrationId} label="Registration ID" />
+              </div>
+            </div>
           ) : null}
           {bookingId && !isRobofest ? (
-            <p className="text-sm text-gray-500 mb-6">Booking ID: {bookingId}</p>
+            <p className="text-xs text-gray-500 mb-6">Booking reference: {bookingId}</p>
           ) : (
             <div className="mb-6" />
           )}
-          <Button asChild className="bg-indigo-600 hover:bg-indigo-700 text-white">
-            <Link href={isRobofest ? '/robofest' : '/events'} prefetch={false}>
-              {isRobofest ? 'Back to Robofest' : 'Back to Events'}
-            </Link>
-          </Button>
+          <div className="flex flex-col gap-3 sm:flex-row">
+            {registrationId ? (
+              <Button asChild className="bg-[#1f3a6f] hover:bg-[#14264a] text-white">
+                <Link
+                  href={`/verify-booking?registrationId=${encodeURIComponent(registrationId)}`}
+                  prefetch={false}
+                >
+                  <Ticket className="size-4" aria-hidden />
+                  View my pass
+                </Link>
+              </Button>
+            ) : null}
+            <Button asChild variant="outline">
+              <Link href={isRobofest ? '/robofest' : '/events'} prefetch={false}>
+                {isRobofest ? 'Back to Robofest' : 'Back to Events'}
+              </Link>
+            </Button>
+          </div>
         </CardContent>
       </Card>
     </main>

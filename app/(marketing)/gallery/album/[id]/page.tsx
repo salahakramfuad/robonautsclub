@@ -135,6 +135,7 @@ export default async function GalleryAlbumPage({ params }: Props) {
           ) : (
             <ImageLightboxGallery
               images={urls}
+              title={group.title}
               aspect="square"
               className="[&_button]:rounded-2xl [&_button]:border-slate-200/80 [&_button]:shadow-sm [&_button]:ring-1 [&_button]:ring-slate-900/5 hover:[&_button]:ring-cyan-400/30"
             />
