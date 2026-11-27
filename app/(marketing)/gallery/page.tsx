@@ -19,7 +19,9 @@ export const metadata: Metadata = buildPageMetadata({
   },
 })
 
-export const revalidate = 1800
+// Rendered per request: the build has no D1 access, so a build-time prerender
+// would bake in an empty list and serve it until the next revalidation.
+export const dynamic = 'force-dynamic'
 
 function formatDisplayDate(iso: string | Date | null) {
   if (iso == null) return ''
